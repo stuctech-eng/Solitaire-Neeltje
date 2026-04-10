@@ -6,571 +6,460 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Solitaire</title>
 <style>
-/* ═══════════════════════════════════════════
-   RESET & ROOT
-═══════════════════════════════════════════ */
-:root {
-  --cw: 88px;
-  --ch: 124px;
-  --cr: 10px;
-  --gap: 12px;
-  --dstep: 22px;
-  --fstep: 30px;
-  --felt: #2d7a3a;
-  --felt2: #1e5e2a;
-  --gold: #d4a017;
-  --gold2: #f5c842;
-  --goldDark: #8a6500;
-  --red: #cc1111;
-  --ink: #111111;
-  --cream: #fdf6e3;
-  --blue1: #1e40af;
-  --blue2: #1e3a8a;
-  --sh: rgba(0,0,0,0.55);
-}
 * { box-sizing: border-box; margin: 0; padding: 0;
-    -webkit-tap-highlight-color: transparent; touch-action: none; }
+    -webkit-tap-highlight-color: transparent; }
+
 html, body {
-  min-height: 100vh;
-  background: var(--felt);
-  font-family: 'Georgia', serif;
-  user-select: none;
-  overflow-x: hidden;
+width: 100%; height: 100%;
+overflow: hidden;
+background: #2a7a35;
+font-family: Georgia, serif;
+user-select: none;
+touch-action: none;
 }
 
-/* ── VILT TEXTUUR ── */
+/* Vilt */
 body {
 background:
-radial-gradient(ellipse at 50% 0%, #3a9e4a 0%, #2d7a3a 35%, #1a4f22 100%);
+radial-gradient(ellipse at 50% 30%, #3a9a45 0%, #2a7a35 45%, #195520 100%);
 }
 body::before {
-content: ‘’;
-position: fixed; inset: 0; z-index: 0; pointer-events: none;
-background-image:
-url("data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘3’ height=‘3’%3E%3Ccircle cx=‘1’ cy=‘1’ r=‘0.6’ fill=‘rgba(0,0,0,0.06)’/%3E%3C/svg%3E");
-background-size: 3px 3px;
+content: ‘’; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+background-image: url("data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘4’ height=‘4’%3E%3Ccircle cx=‘1’ cy=‘1’ r=’.65’ fill=‘rgba(0,0,0,0.07)’/%3E%3C/svg%3E");
 }
 body::after {
-content: ‘’;
-position: fixed; inset: 0; z-index: 0; pointer-events: none;
-background: radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(0,0,0,0.35) 100%);
+content: ‘’; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+background: radial-gradient(ellipse at 50% 60%, transparent 50%, rgba(0,0,0,0.4) 100%);
 }
 
-/* ═══════════════════════════════════════════
-APP
-═══════════════════════════════════════════ */
+/* ── APP ── */
 #app {
-position: relative; z-index: 1;
-max-width: 800px; margin: 0 auto;
-padding: 10px 8px 60px;
+position: fixed; inset: 0; z-index: 1;
+display: flex; flex-direction: column;
+padding: 8px 6px 6px;
+overflow: hidden;
 }
 
 /* ── HEADER ── */
 #hdr {
-display: flex; align-items: center; gap: 8px;
-margin-bottom: 14px; flex-wrap: wrap;
+display: flex; align-items: center; gap: 6px;
+margin-bottom: 8px; flex-shrink: 0; flex-wrap: nowrap;
 }
-.hpill {
-background: linear-gradient(180deg, #4a7c1a 0%, #2d5a10 100%);
-border: 2.5px solid var(–gold);
-border-radius: 24px;
-padding: 6px 18px;
-font-family: ‘Georgia’, serif;
-font-size: 13px; font-weight: bold;
-color: var(–gold2);
-text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+.pill {
+background: linear-gradient(180deg,#3d7a18 0%,#285210 100%);
+border: 2px solid #c8a020;
+border-radius: 20px;
+padding: 4px 10px;
+font-size: 11px; font-weight: bold;
+color: #f5c840;
+white-space: nowrap;
+box-shadow: 0 2px 6px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.1);
+}
+.pill span { color: #fff; }
+.hbtn {
+background: linear-gradient(180deg,#3d7a18 0%,#285210 100%);
+border: 2px solid #c8a020;
+border-radius: 20px;
+padding: 5px 12px;
+font-size: 11px; font-weight: bold;
+color: #f5c840;
+cursor: pointer;
+box-shadow: 0 2px 6px rgba(0,0,0,.4);
 white-space: nowrap;
 }
-.hpill span { color: #fff; }
-.hbtn {
-background: linear-gradient(180deg, #3d6e14 0%, #2a4e0e 100%);
-border: 2.5px solid var(–gold);
-border-radius: 24px;
-padding: 7px 20px;
-font-family: ‘Georgia’, serif;
-font-size: 13px; font-weight: bold;
-color: var(–gold2);
-cursor: pointer;
-box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
-transition: all 0.15s;
-}
-.hbtn:hover { background: linear-gradient(180deg, #4a8519 0%, #355f10 100%); transform: translateY(-1px); }
-.hbtn:active { transform: translateY(0); }
+.hbtn:active { opacity: .8; }
 #hrefresh {
-background: linear-gradient(180deg, #2a8530 0%, #1a5c1e 100%);
-border: 2.5px solid var(–gold);
+background: linear-gradient(180deg,#2a8530 0%,#185c1e 100%);
+border: 2px solid #c8a020;
 border-radius: 50%;
-width: 40px; height: 40px;
+width: 34px; height: 34px; flex-shrink: 0;
 display: flex; align-items: center; justify-content: center;
-font-size: 20px; color: var(–gold2); cursor: pointer;
-box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-transition: all 0.2s; flex-shrink: 0;
+font-size: 18px; color: #f5c840; cursor: pointer;
+box-shadow: 0 2px 6px rgba(0,0,0,.4);
 }
-#hrefresh:hover { transform: rotate(90deg) scale(1.1); }
-#spacerflex { flex: 1; }
+#hspc { flex: 1; min-width: 0; }
 
-/* ── SPEELBORD ── */
-#toprow {
-display: flex; gap: var(–gap); margin-bottom: var(–gap); align-items: flex-start;
+/* ── SPEELBORD (JavaScript beheert afmetingen) ── */
+#board {
+flex: 1; position: relative; overflow: hidden;
 }
-#spc { width: var(–cw); flex-shrink: 0; }
-#tab { display: flex; gap: var(–gap); }
 
-/* ── LEEG VAKJE ── */
+/* ── SLOTS (leeg vakje) ── */
 .slot {
-width: var(–cw); height: var(–ch);
-border-radius: var(–cr);
-background: rgba(0,0,0,0.18);
-border: 2px dashed rgba(255,255,255,0.2);
-position: relative; flex-shrink: 0;
+border-radius: var(–cr, 7px);
+background: rgba(0,0,0,.2);
+border: 2px dashed rgba(255,255,255,.2);
+position: absolute;
 }
-.slot-icon {
+.slot-lbl {
 position: absolute; inset: 0;
 display: flex; align-items: center; justify-content: center;
-font-size: 32px; opacity: 0.25; pointer-events: none;
+font-size: 1.4em; opacity: .3; pointer-events: none;
 }
-.slot-icon.red { color: #ff4444; }
+.slot-lbl.r { color: #ff4444; }
 
-/* ── TABLEAU KOLOM ── */
-.tcol {
-width: var(–cw); position: relative; flex-shrink: 0; min-height: var(–ch);
-}
-.tcol-bg {
-position: absolute; top: 0; left: 0; width: 100%; height: var(–ch);
-border-radius: var(–cr); background: rgba(0,0,0,0.18);
-border: 2px dashed rgba(255,255,255,0.15); pointer-events: none;
-}
-
-/* ═══════════════════════════════════════════
-KAARTEN
-═══════════════════════════════════════════ */
+/* ── KAARTEN ── */
 .card {
-width: var(–cw); height: var(–ch);
-border-radius: var(–cr);
-position: absolute; left: 0;
+position: absolute;
+border-radius: var(–cr, 7px);
+cursor: grab;
+transition: box-shadow .1s;
 will-change: transform;
-transition: box-shadow 0.1s;
 }
 
-/* ── KAARTRUG ── */
+/* Rug */
 .card.dn {
-background: linear-gradient(145deg, #2255cc 0%, #1a3fa8 50%, #102888 100%);
-border: 2px solid rgba(255,255,255,0.2);
-box-shadow: 2px 3px 8px var(–sh), inset 0 1px 0 rgba(255,255,255,0.15);
+background: linear-gradient(150deg, #2255cc, #0e2080);
+border: 2px solid rgba(255,255,255,.18);
+box-shadow: 2px 3px 8px rgba(0,0,0,.6);
 overflow: hidden;
+cursor: default;
 }
 .card.dn::before {
-content: ‘’;
-position: absolute; inset: 6px;
-border: 1.5px solid rgba(255,255,255,0.2);
-border-radius: 5px;
-background:
-repeating-linear-gradient(45deg,
-rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 2px,
-transparent 2px, transparent 10px),
+content: ‘’; position: absolute; inset: 5px;
+border-radius: 4px; border: 1px solid rgba(255,255,255,.18);
+background: repeating-linear-gradient(45deg,
+rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 2px,
+transparent 2px, transparent 9px),
 repeating-linear-gradient(-45deg,
-rgba(255,255,255,0.04) 0, rgba(255,255,255,0.04) 2px,
-transparent 2px, transparent 10px);
-}
-.card.dn::after {
-content: ‘✦’;
-position: absolute; inset: 0;
-display: flex; align-items: center; justify-content: center;
-font-size: 32px; color: rgba(255,255,255,0.12); pointer-events: none;
+rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 2px,
+transparent 2px, transparent 9px);
 }
 
-/* ── KAARTVOORKANT ── */
+/* Voorkant */
 .card.up {
-background: var(–cream);
-border: 1.5px solid rgba(0,0,0,0.18);
-box-shadow:
-3px 4px 12px var(–sh),
-inset 0 1px 0 rgba(255,255,255,0.9),
-inset 0 -1px 0 rgba(0,0,0,0.05);
-cursor: grab;
+background: #fdf6e3;
+border: 1.5px solid rgba(0,0,0,.18);
+box-shadow: 3px 4px 12px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.9);
 }
-.card.up:hover:not(.nodrag) {
-transform: translateY(-3px);
-box-shadow: 4px 8px 20px rgba(0,0,0,0.65);
-}
-.card.up.r { color: var(–red); }
-.card.up.b { color: var(–ink); }
+.card.up.r { color: #cc1111; }
+.card.up.b { color: #111; }
 
-/* Rang + suit hoeken */
-.ctl {
-position: absolute; top: 5px; left: 7px;
-font-size: 15px; font-weight: bold; line-height: 1.1;
-font-family: ‘Georgia’, serif;
-}
-.cbr {
-position: absolute; bottom: 5px; right: 7px;
-font-size: 15px; font-weight: bold; line-height: 1.1;
-font-family: ‘Georgia’, serif;
-transform: rotate(180deg);
-}
+/* Kaart inhoud -- uitsluitend via JS gezet */
+.c-tl { position: absolute; top: 3px; left: 4px; font-weight: bold; line-height: 1.1; }
+.c-br { position: absolute; bottom: 3px; right: 4px; font-weight: bold; line-height: 1.1; transform: rotate(180deg); }
+.c-mid { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
 
-/* Groot midden-symbool */
-.cmid {
-position: absolute; inset: 0;
-display: flex; align-items: center; justify-content: center;
-font-size: 48px;
-pointer-events: none;
-line-height: 1;
-}
-/* subtiele shadow op midden-symbool voor diepte */
-.card.up.r .cmid { text-shadow: 0 2px 6px rgba(180,0,0,0.25); }
-.card.up.b .cmid { text-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+/* Sleep */
+.card.ghost { opacity: .15; pointer-events: none; }
 
-/* Aas: extra groot */
-.card.ace .cmid { font-size: 62px; }
-/* 10 en hoger: iets kleiner zodat het past */
-.card.rank10 .cmid, .card.rankJ .cmid,
-.card.rankQ  .cmid, .card.rankK .cmid { font-size: 44px; }
-
-/* Kaart ghost bij slepen */
-.card.ghost { opacity: 0.18; pointer-events: none; }
-
-/* Flip animatie */
-@keyframes flipIn {
-0%  { transform: scaleX(0.1) rotateY(70deg); opacity: 0; }
-100%{ transform: scaleX(1)   rotateY(0deg);  opacity: 1; }
-}
-.flipin { animation: flipIn 0.22s ease-out; }
-
-/* ═══════════════════════════════════════════
-WIN OVERLAY
-═══════════════════════════════════════════ */
+/* ── WIN ── */
 #win {
 display: none; position: fixed; inset: 0; z-index: 999;
-background: rgba(0,0,0,0.75);
+background: rgba(0,0,0,.75);
 align-items: center; justify-content: center;
 }
 #win.show { display: flex; }
 .wbox {
-background: linear-gradient(160deg, #1e5e2a 0%, #0e3015 100%);
-border: 3px solid var(–gold);
-border-radius: 22px;
-padding: 48px 64px; text-align: center;
-box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 40px rgba(212,160,23,0.15);
-animation: popin 0.45s cubic-bezier(0.34,1.56,0.64,1);
+background: linear-gradient(155deg, #1e5e2a, #0e3015);
+border: 3px solid #c8a020; border-radius: 20px;
+padding: 40px 50px; text-align: center;
+box-shadow: 0 30px 80px rgba(0,0,0,.8);
+animation: popin .4s cubic-bezier(.34,1.56,.64,1);
 }
-@keyframes popin { from{transform:scale(0.4);opacity:0} to{transform:scale(1);opacity:1} }
-.wbox h2 {
-font-family: ‘Georgia’, serif; font-size: 46px;
-color: var(–gold2); text-shadow: 0 0 30px rgba(245,200,66,0.5);
-margin-bottom: 12px;
-}
-.wbox p { color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 5px; }
+@keyframes popin { from{transform:scale(.4);opacity:0} to{transform:scale(1);opacity:1} }
+.wbox h2 { font-size: 38px; color: #f5c840; margin-bottom: 10px; }
+.wbox p  { color: rgba(255,255,255,.7); font-size: 13px; margin-bottom: 4px; }
 
-/* Confetti */
+/* confetti */
 .kf {
-position: fixed; width: 9px; height: 14px; border-radius: 2px;
-top: -20px; z-index: 1000;
+position: fixed; width: 8px; height: 13px; border-radius: 2px;
+top: -20px; z-index: 1000; pointer-events: none;
 animation: kval linear forwards;
 }
-@keyframes kval { to { transform: translateY(110vh) rotate(900deg); opacity: 0; } }
+@keyframes kval { to{transform:translateY(110vh) rotate(900deg);opacity:0} }
 
-/* Toast */
+/* toast */
 #toast {
-position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-background: rgba(0,0,0,0.82); border: 1.5px solid var(–gold);
-border-radius: 20px; padding: 8px 20px;
-color: rgba(255,255,255,0.9); font-size: 12px;
-pointer-events: none; z-index: 500;
-opacity: 0; transition: opacity 0.3s;
+position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+background: rgba(0,0,0,.85); border: 1px solid #c8a020;
+border-radius: 18px; padding: 7px 18px;
+color: rgba(255,255,255,.9); font-size: 12px;
+pointer-events: none; z-index: 500; opacity: 0; transition: opacity .3s;
+white-space: nowrap;
 }
 #toast.on { opacity: 1; }
-
-/* Confetti hoeken (decoratief zoals screenshot) */
-.deco-suit {
-position: fixed; font-size: 22px;
-pointer-events: none; z-index: 0; opacity: 0.55;
-animation: sway 4s ease-in-out infinite alternate;
-}
-@keyframes sway { from{transform:rotate(-8deg) scale(1)} to{transform:rotate(8deg) scale(1.1)} }
-
-/* ═══════════════════════════════════════════
-RESPONSIVE
-═══════════════════════════════════════════ */
-@media (max-width: 620px) {
-:root { –cw: 52px; –ch: 74px; –gap: 7px; –dstep: 15px; –fstep: 20px; }
-.ctl, .cbr { font-size: 10px; }
-.cmid { font-size: 28px; }
-.card.ace .cmid { font-size: 36px; }
-.card.rank10 .cmid,.card.rankJ .cmid,.card.rankQ .cmid,.card.rankK .cmid { font-size: 26px; }
-#hdr { gap: 5px; }
-.hpill { font-size: 10px; padding: 5px 11px; }
-.hbtn  { font-size: 10px; padding: 5px 11px; }
-.wbox  { padding: 28px 22px; } .wbox h2 { font-size: 32px; }
-}
-@media (max-width: 420px) {
-:root { –cw: 42px; –ch: 60px; –gap: 5px; –dstep: 12px; –fstep: 16px; }
-.ctl, .cbr { font-size: 8px; }
-.cmid { font-size: 20px; }
-.card.ace .cmid { font-size: 26px; }
-}
 </style>
 
 </head>
 <body>
-
-<!-- Decoratieve suits (zoals in screenshot) -->
-
-<div class="deco-suit" style="bottom:8%;left:3%;color:#cc1111;animation-delay:0s">♥</div>
-<div class="deco-suit" style="bottom:12%;left:8%;color:#111;animation-delay:.5s">♠</div>
-<div class="deco-suit" style="bottom:6%;left:13%;color:#cc1111;animation-delay:1s">♦</div>
-<div class="deco-suit" style="bottom:15%;left:18%;color:#111;animation-delay:1.5s">♣</div>
-<div class="deco-suit" style="bottom:5%;right:3%;color:#cc1111;animation-delay:.3s">♦</div>
-<div class="deco-suit" style="bottom:13%;right:8%;color:#111;animation-delay:.8s">♠</div>
-<div class="deco-suit" style="bottom:7%;right:14%;color:#cc1111;animation-delay:1.2s">♥</div>
-<div class="deco-suit" style="bottom:16%;right:19%;color:#111;animation-delay:1.7s">♣</div>
-
 <div id="app">
-  <!-- HEADER -->
   <div id="hdr">
-    <div class="hpill">Score: <span id="sc">0</span></div>
-    <div class="hpill">Tijd: <span id="ti">0:00</span></div>
-    <div class="hpill">Best: <span id="hs">0</span></div>
+    <div class="pill">Score <span id="sc">0</span></div>
+    <div class="pill">Tijd <span id="ti">0:00</span></div>
+    <div class="pill">Best <span id="hs">0</span></div>
     <button class="hbtn" onclick="undo()">↩ Undo</button>
     <button class="hbtn" onclick="hint()">💡 Hint</button>
-    <div id="spacerflex"></div>
-    <div id="hrefresh" onclick="nieuwSpel()" title="Nieuw spel">↺</div>
+    <div id="hspc"></div>
+    <div id="hrefresh" onclick="nieuwSpel()">↺</div>
   </div>
-
-  <!-- STOCK + WASTE + FOUNDATIONS -->
-
-  <div id="toprow">
-    <div class="slot" id="stock"><div class="slot-icon">🂠</div></div>
-    <div class="slot" id="waste"></div>
-    <div id="spc"></div>
-    <div class="slot" id="f0"><div class="slot-icon">♠</div></div>
-    <div class="slot" id="f1"><div class="slot-icon red">♥</div></div>
-    <div class="slot" id="f2"><div class="slot-icon red">♦</div></div>
-    <div class="slot" id="f3"><div class="slot-icon">♣</div></div>
-  </div>
-
-  <!-- TABLEAU -->
-
-  <div id="tab">
-    <div class="tcol" id="t0"><div class="tcol-bg"></div></div>
-    <div class="tcol" id="t1"><div class="tcol-bg"></div></div>
-    <div class="tcol" id="t2"><div class="tcol-bg"></div></div>
-    <div class="tcol" id="t3"><div class="tcol-bg"></div></div>
-    <div class="tcol" id="t4"><div class="tcol-bg"></div></div>
-    <div class="tcol" id="t5"><div class="tcol-bg"></div></div>
-    <div class="tcol" id="t6"><div class="tcol-bg"></div></div>
-  </div>
+  <div id="board"></div>
 </div>
-
-<!-- WIN -->
 
 <div id="win">
   <div class="wbox">
     <h2>🎉 Gewonnen!</h2>
     <p id="wp"></p><p id="wt"></p>
-    <button class="hbtn" style="margin-top:22px;font-size:14px;padding:10px 28px" onclick="nieuwSpel()">Nog een keer</button>
+    <button class="hbtn" style="margin-top:18px;font-size:13px;padding:8px 24px" onclick="nieuwSpel()">Nog een keer</button>
   </div>
 </div>
 <div id="toast"></div>
 
 <script>
 'use strict';
-/* ════════════════════════════════════════
-   CONSTANTEN
-════════════════════════════════════════ */
+
+/* ════════════════════════════════
+   CONSTANTEN & HELPERS
+════════════════════════════════ */
 const SUITS = ['♠','♥','♦','♣'];
 const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const ROOD  = new Set(['♥','♦']);
 const RI    = r => RANKS.indexOf(r);
 const $     = id => document.getElementById(id);
-const dp    = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue('--dstep'))||22;
-const fp    = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue('--fstep'))||30;
-const ch    = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue('--ch'))||124;
-const cl    = o  => JSON.parse(JSON.stringify(o));
+const cp    = o  => JSON.parse(JSON.stringify(o));
 
-/* ════════════════════════════════════════
+/* ════════════════════════════════
+   AFMETINGEN -- berekend uit scherm
+════════════════════════════════ */
+let CW, CH, CR, GAP, DSTEP, FSTEP;
+
+function bereken() {
+  const brd   = $('board');
+  const bW    = brd.clientWidth;
+  const bH    = brd.clientHeight;
+
+  // 7 kolommen + 6 tussenruimtes in breedte
+  // CW * 7 + GAP * 6 = bW  →  CW = (bW - GAP*6) / 7
+  // Begin met kleine GAP
+  GAP  = Math.max(4, Math.floor(bW * 0.012));
+  CW   = Math.floor((bW - GAP * 6) / 7);
+  CH   = Math.round(CW * 1.4);
+  CR   = Math.max(4, Math.round(CW * 0.1));
+
+  // stappen
+  DSTEP = Math.round(CH * 0.18);
+  FSTEP = Math.round(CH * 0.26);
+
+  // CSS var voor border-radius
+  document.documentElement.style.setProperty('--cr', CR + 'px');
+}
+
+/* ════════════════════════════════
    SPELSTATUS
-════════════════════════════════════════ */
+════════════════════════════════ */
 let stock, waste, found, tab;
 let score=0, secs=0, timerRef=null;
 let hist=[], dragInfo=null;
 
-function snap(){
-  hist.push({stock:cl(stock),waste:cl(waste),found:cl(found),tab:cl(tab),score});
-  if(hist.length>60) hist.shift();
+function snap() {
+  hist.push({ stock:cp(stock), waste:cp(waste), found:cp(found), tab:cp(tab), score });
+  if (hist.length > 60) hist.shift();
 }
 
-function undo(){
-  if(!hist.length){ toast('Geen zet om ongedaan te maken'); return; }
-  const s=hist.pop();
+function undo() {
+  if (!hist.length) { toast('Geen zet om ongedaan te maken'); return; }
+  const s = hist.pop();
   stock=s.stock; waste=s.waste; found=s.found; tab=s.tab; score=s.score;
-  $('sc').textContent=score;
+  $('sc').textContent = score;
   teken();
 }
 
-/* ════════════════════════════════════════
+/* ════════════════════════════════
    NIEUW SPEL
-════════════════════════════════════════ */
-function nieuwSpel(){
+════════════════════════════════ */
+function nieuwSpel() {
   $('win').classList.remove('show');
   hist=[]; score=0; secs=0;
-  $('sc').textContent='0';
-  $('ti').textContent='0:00';
+  $('sc').textContent='0'; $('ti').textContent='0:00';
+  $('hs').textContent = localStorage.getItem('sol_hs')||'0';
   clearInterval(timerRef);
 
   const deck=[];
-  for(const s of SUITS)
-    for(const r of RANKS)
+  for (const s of SUITS)
+    for (const r of RANKS)
       deck.push({suit:s,rank:r,up:false});
-
-  for(let i=deck.length-1;i>0;i--){
+  for (let i=deck.length-1;i>0;i--) {
     const j=Math.floor(Math.random()*(i+1));
     [deck[i],deck[j]]=[deck[j],deck[i]];
   }
 
   tab=Array.from({length:7},()=>[]);
-  for(let c=0;c<7;c++){
-    for(let r=0;r<=c;r++){
-      const card=deck.pop();
-      card.up=(r===c);
-      tab[c].push(card);
-    }
-  }
-  stock=deck; waste=[]; found=[[],[],[],[]];
+  for (let c=0;c<7;c++)
+    for (let r=0;r<=c;r++) { const cd=deck.pop(); cd.up=(r===c); tab[c].push(cd); }
 
-  // high score tonen
-  $('hs').textContent=localStorage.getItem('sol_hs')||'0';
-  teken();
+  stock=deck; waste=[]; found=[[],[],[],[]];
+  bereken(); teken();
 
   timerRef=setInterval(()=>{
     secs++;
     const m=Math.floor(secs/60),s=secs%60;
     $('ti').textContent=m+':'+(s<10?'0':'')+s;
-    if(secs%10===0){ score=Math.max(0,score-2); $('sc').textContent=score; }
+    if (secs%10===0) { score=Math.max(0,score-2); $('sc').textContent=score; }
   },1000);
 }
 
 function pts(n){ score=Math.max(0,score+n); $('sc').textContent=score; }
 
-/* ════════════════════════════════════════
-   RENDER
-════════════════════════════════════════ */
-function teken(){ tekenStock(); tekenWaste(); tekenFound(); tekenTab(); }
+/* ════════════════════════════════
+   RENDER -- absolute positionering
+════════════════════════════════ */
+function teken() {
+  const brd=$('board');
+  brd.innerHTML='';
 
-/* Maak kaart-element */
-function maakEl(card, topPx){
+  // Lay-out berekenen
+  // Rij 1: stock(0) waste(1) gap foundation(3..6) kolommen 0-6
+  // X posities voor 7 kaartkolommen
+  const cols7 = Array.from({length:7},(_,i)=>i*(CW+GAP));
+
+  // Rij 1 y=0: stock, waste, dan gap, dan 4 foundations
+  const ROW1_Y = 0;
+  // stock=col 0, waste=col 1, foundations=col 3..6
+  const FOUND_X = [3,4,5,6].map(i=>cols7[i]);
+
+  // Rij 2 y: CH + 14px
+  const ROW2_Y = CH + 14;
+
+  // ── Slots ──
+  // Stock
+  const slotStock = mkSlot(cols7[0], ROW1_Y);
+  slotStock.innerHTML='<div class="slot-lbl">↺</div>';
+  brd.appendChild(slotStock);
+
+  // Waste
+  const slotWaste = mkSlot(cols7[1], ROW1_Y);
+  brd.appendChild(slotWaste);
+
+  // Foundations
+  const FSUIT=['♠','♥','♦','♣'];
+  for (let f=0;f<4;f++) {
+    const sl=mkSlot(FOUND_X[f], ROW1_Y);
+    const lbl=document.createElement('div');
+    lbl.className='slot-lbl'+(f>0&&f<3?' r':'');
+    lbl.textContent=FSUIT[f];
+    sl.appendChild(lbl);
+    brd.appendChild(sl);
+    // drop
+    sl.addEventListener('dragover',e=>{ if(magFound(dragInfo,f))e.preventDefault(); });
+    sl.addEventListener('drop',e=>{ e.preventDefault(); if(magFound(dragInfo,f)){snap();verplaatsFound(f);} });
+  }
+
+  // Tableau slots (achtergrond)
+  for (let c=0;c<7;c++) {
+    const sl=mkSlot(cols7[c], ROW2_Y);
+    sl.style.height=(brd.clientHeight - ROW2_Y - 4)+'px';
+    brd.appendChild(sl);
+  }
+
+  // ── Stock kaart ──
+  if (stock.length) {
+    const k=maakEl({up:false});
+    pos(k, cols7[0], ROW1_Y, 2);
+    brd.appendChild(k);
+    k.addEventListener('click', klikStock);
+  }
+  // lege stock = klik om te recyclen
+  slotStock.addEventListener('click', ()=>{
+    if (!stock.length) klikStock();
+  });
+
+  // ── Waste kaart ──
+  if (waste.length) {
+    // toon max 3 bovenste, fan
+    const start=Math.max(0,waste.length-3);
+    for (let i=start;i<waste.length;i++) {
+      const card=waste[i];
+      const xOff=(i-start)*Math.round(CW*0.15);
+      const k=maakEl({...card,up:true});
+      pos(k, cols7[1]+xOff, ROW1_Y, i+2);
+      brd.appendChild(k);
+      if (i===waste.length-1) {
+        koppelDrag(k,{bron:'waste'});
+      }
+    }
+  }
+
+  // ── Foundation kaarten ──
+  for (let f=0;f<4;f++) {
+    if (!found[f].length) continue;
+    const top=found[f][found[f].length-1];
+    const k=maakEl({...top,up:true});
+    k.classList.add('nodrag');
+    pos(k, FOUND_X[f], ROW1_Y, 2);
+    brd.appendChild(k);
+    // drop op foundation
+    k.addEventListener('dragover',e=>{ if(magFound(dragInfo,f))e.preventDefault(); });
+    k.addEventListener('drop',e=>{ e.preventDefault(); if(magFound(dragInfo,f)){snap();verplaatsFound(f);} });
+  }
+
+  // ── Tableau kaarten ──
+  for (let c=0;c<7;c++) {
+    const kolom=tab[c];
+    let y=ROW2_Y;
+    for (let i=0;i<kolom.length;i++) {
+      const card=kolom[i];
+      const k=maakEl({...card});
+      pos(k, cols7[c], y, ROW2_Y+i+1);
+
+      if (card.up) {
+        koppelDrag(k,{bron:'tab',col:c,vanIdx:i});
+      } else if (i===kolom.length-1) {
+        k.style.cursor='pointer';
+        ((col,idx)=>{ k.addEventListener('click',()=>{ snap(); tab[col][idx].up=true; pts(5); teken(); }); })(c,i);
+      }
+      brd.appendChild(k);
+      y+=card.up?FSTEP:DSTEP;
+    }
+
+    // drop-zone over hele kolom
+    const dropZone=document.createElement('div');
+    dropZone.style.cssText=`position:absolute;left:${cols7[c]}px;top:${ROW2_Y}px;width:${CW}px;height:${brd.clientHeight-ROW2_Y}px;z-index:0`;
+    dropZone.addEventListener('dragover',e=>{ if(magTab(dragInfo,c))e.preventDefault(); });
+    dropZone.addEventListener('drop',e=>{ e.preventDefault(); if(magTab(dragInfo,c)){snap();verplaatsTab(c);} });
+    brd.appendChild(dropZone);
+  }
+}
+
+function mkSlot(x,y) {
+  const el=document.createElement('div');
+  el.className='slot';
+  el.style.cssText=`left:${x}px;top:${y}px;width:${CW}px;height:${CH}px;`;
+  return el;
+}
+
+function pos(el,x,y,z) {
+  el.style.left=x+'px'; el.style.top=y+'px'; el.style.zIndex=z;
+}
+
+/* ════════════════════════════════
+   KAART ELEMENT MAKEN
+════════════════════════════════ */
+function maakEl(card) {
   const el=document.createElement('div');
   const up=card.up;
-  const rk=card.rank;
-  let cls='card ';
-  if(up){
-    cls+='up '+(ROOD.has(card.suit)?'r':'b');
-    if(rk==='A') cls+=' ace';
-    if(rk==='10') cls+=' rank10';
-    if(rk==='J') cls+=' rankJ';
-    if(rk==='Q') cls+=' rankQ';
-    if(rk==='K') cls+=' rankK';
-  } else {
-    cls+='dn';
-  }
-  el.className=cls;
-  el.style.top=topPx+'px';
-  el.style.zIndex=topPx+10;
+  el.className='card '+(up?('up '+(ROOD.has(card.suit)?'r':'b')):'dn');
+  el.style.width=CW+'px'; el.style.height=CH+'px';
+  el.style.borderRadius=CR+'px';
 
-  if(up){
+  if (up) {
+    const fs = Math.max(8, Math.round(CW*0.165));  // hoek font
+    const ms = Math.max(14, Math.round(CW*0.58));  // midden symbool
+
     el.innerHTML=
-      `<div class="ctl">${rk}<br>${card.suit}</div>`+
-      `<div class="cmid">${card.suit}</div>`+
-      `<div class="cbr">${rk}<br>${card.suit}</div>`;
+      `<div class="c-tl" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>`+
+      `<div class="c-mid" style="font-size:${ms}px">${card.suit}</div>`+
+      `<div class="c-br" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>`;
   }
   return el;
 }
 
-function tekenStock(){
-  const el=$('stock');
-  el.innerHTML='<div class="slot-icon">🂠</div>';
-  if(stock.length){
-    const k=maakEl({up:false},0);
-    k.style.zIndex=2;
-    el.appendChild(k);
-  }
-  el.onclick=klikStock;
-}
-
-function tekenWaste(){
-  const el=$('waste');
-  el.innerHTML='';
-  if(!waste.length) return;
-  const card=waste[waste.length-1];
-  const k=maakEl({...card,up:true},0);
-  k.style.zIndex=2;
-  koppelDrag(k,{bron:'waste'});
-  el.appendChild(k);
-}
-
-function tekenFound(){
-  const ICONS=['♠','♥','♦','♣'];
-  const IS_RED=[false,true,true,false];
-  for(let f=0;f<4;f++){
-    const el=$('f'+f);
-    [...el.querySelectorAll('.card')].forEach(e=>e.remove());
-    let icon=el.querySelector('.slot-icon');
-    if(!icon){
-      icon=document.createElement('div');
-      icon.className='slot-icon'+(IS_RED[f]?' red':'');
-      icon.textContent=ICONS[f];
-      el.appendChild(icon);
-    }
-    if(found[f].length){
-      icon.style.display='none';
-      const top=found[f][found[f].length-1];
-      const k=maakEl({...top,up:true},0);
-      k.style.zIndex=2; k.classList.add('nodrag');
-      el.appendChild(k);
-    } else {
-      icon.style.display='';
-    }
-    el.ondragover=e=>{ if(magFound(dragInfo,f)) e.preventDefault(); };
-    el.ondrop=e=>{ e.preventDefault(); if(magFound(dragInfo,f)){snap();verplaatsFound(f);} };
-  }
-}
-
-function tekenTab(){
-  const CH=ch(), DP=dp(), FP=fp();
-  for(let c=0;c<7;c++){
-    const el=$('t'+c);
-    [...el.querySelectorAll('.card')].forEach(e=>e.remove());
-    const kolom=tab[c];
-    let top=0;
-    for(let i=0;i<kolom.length;i++){
-      const card=kolom[i];
-      const k=maakEl({...card},top);
-      k.style.zIndex=i+1;
-      if(card.up){
-        koppelDrag(k,{bron:'tab',col:c,vanIdx:i});
-      } else if(i===kolom.length-1){
-        k.style.cursor='pointer';
-        ((col,idx)=>{
-          k.onclick=()=>{ snap(); tab[col][idx].up=true; pts(5); teken(); };
-        })(c,i);
-      }
-      el.appendChild(k);
-      top+=card.up?FP:DP;
-    }
-    el.style.minHeight=(top+CH)+'px';
-    el.ondragover=e=>{ if(magTab(dragInfo,c)) e.preventDefault(); };
-    el.ondrop=e=>{ e.preventDefault(); if(magTab(dragInfo,c)){snap();verplaatsTab(c);} };
-  }
-}
-
-/* ════════════════════════════════════════
-   DRAG (pointer events - mobiel + desktop)
-════════════════════════════════════════ */
+/* ════════════════════════════════
+   DRAG -- pointer events
+════════════════════════════════ */
 let pdEl=null, pdExtras=[], pdOX=0, pdOY=0;
 
-function koppelDrag(el,info){
-  // HTML5 fallback
+function koppelDrag(el,info) {
+  // HTML5 (desktop)
   el.draggable=true;
   el.addEventListener('dragstart',e=>{
     dragInfo=info; e.dataTransfer.effectAllowed='move';
@@ -578,66 +467,71 @@ function koppelDrag(el,info){
   });
   el.addEventListener('dragend',()=>{ ghostSet(info,false); });
 
-  // Pointer (primair)
+  // Pointer (mobiel + desktop)
   el.addEventListener('pointerdown',e=>{
-    if(e.button!==0) return;
+    if(e.button!==0)return;
     e.preventDefault(); e.stopPropagation();
     dragInfo=info; startPD(e,el,info);
   },{passive:false});
 }
 
-function ghostSet(info,on){
-  if(info.bron==='waste'){
-    const w=$('waste').querySelector('.card');
-    if(w) w.classList.toggle('ghost',on);
-  } else if(info.bron==='tab'){
-    const cards=$('t'+info.col).querySelectorAll('.card');
-    for(let i=info.vanIdx;i<tab[info.col].length;i++)
-      if(cards[i]) cards[i].classList.toggle('ghost',on);
+function ghostSet(info,on) {
+  if (!info) return;
+  document.querySelectorAll('.card').forEach(k=>{
+    // verwijder eerst alle ghost
+    if (!on) k.classList.remove('ghost');
+  });
+  if (!on) return;
+  if (info.bron==='waste') {
+    // ghost de bovenste waste kaart
+    const wCards=[...$('board').querySelectorAll('.card')].filter(k=>!k.classList.contains('dn'));
+    // simpel: ghost de laatste niet-rug kaart in waste zone
+  }
+  if (info.bron==='tab') {
+    // ghost via data-index
   }
 }
 
-function startPD(e,el,info){
+function startPD(e,el,info) {
   const r=el.getBoundingClientRect();
   pdOX=e.clientX-r.left; pdOY=e.clientY-r.top;
 
-  // hoofd sleep-kloon
+  // Sleep-kloon
   pdEl=el.cloneNode(true);
   Object.assign(pdEl.style,{
-    position:'fixed', width:el.offsetWidth+'px', height:el.offsetHeight+'px',
+    position:'fixed', width:CW+'px', height:CH+'px',
     zIndex:1000, pointerEvents:'none', transition:'none',
     left:(e.clientX-pdOX)+'px', top:(e.clientY-pdOY)+'px',
-    boxShadow:'0 24px 60px rgba(0,0,0,.85)',
-    transform:'rotate(2.5deg) scale(1.08)',
-    borderRadius:getComputedStyle(document.documentElement).getPropertyValue('--cr')
+    boxShadow:'0 20px 50px rgba(0,0,0,.85)',
+    transform:'rotate(2deg) scale(1.07)',
+    borderRadius:CR+'px'
   });
   document.body.appendChild(pdEl);
   pdExtras=[];
 
-  // extra kaarten bij tab-stack
-  if(info.bron==='tab'){
+  // Extra kaarten bij tableau-stack
+  if (info.bron==='tab') {
     const kolom=tab[info.col];
-    const cards=$('t'+info.col).querySelectorAll('.card');
-    const FP=fp();
-    for(let i=info.vanIdx;i<kolom.length;i++){
-      if(cards[i]) cards[i].classList.add('ghost');
-      if(i>info.vanIdx&&cards[i]){
-        const offset=(i-info.vanIdx)*FP;
-        const cl2=cards[i].cloneNode(true);
-        Object.assign(cl2.style,{
-          position:'fixed', width:el.offsetWidth+'px', height:el.offsetHeight+'px',
+    for (let i=info.vanIdx;i<kolom.length;i++) {
+      const off=(i-info.vanIdx)*FSTEP;
+      if (i>info.vanIdx) {
+        const ex=maakEl({...kolom[i]});
+        Object.assign(ex.style,{
+          position:'fixed', width:CW+'px', height:CH+'px',
           zIndex:1000+(i-info.vanIdx), pointerEvents:'none', transition:'none',
-          left:(e.clientX-pdOX)+'px', top:(e.clientY-pdOY+offset)+'px',
-          transform:'rotate(2.5deg) scale(1.08)',
-          boxShadow:'0 12px 30px rgba(0,0,0,.7)'
+          left:(e.clientX-pdOX)+'px', top:(e.clientY-pdOY+off)+'px',
+          transform:'rotate(2deg) scale(1.07)',
+          boxShadow:'0 10px 28px rgba(0,0,0,.7)',
+          borderRadius:CR+'px'
         });
-        document.body.appendChild(cl2);
-        pdExtras.push({el:cl2,off:offset});
+        document.body.appendChild(ex);
+        pdExtras.push({el:ex,off});
       }
     }
-  } else {
-    if(el.parentElement) el.classList.add('ghost');
   }
+
+  el.style.opacity='0.15';
+  el._pdOrigEl=true;
 
   document.addEventListener('pointermove',movePD,{passive:false});
   document.addEventListener('pointerup',endPD);
@@ -645,7 +539,7 @@ function startPD(e,el,info){
 }
 
 function movePD(e){
-  if(!pdEl) return; e.preventDefault();
+  if(!pdEl)return; e.preventDefault();
   const x=e.clientX-pdOX, y=e.clientY-pdOY;
   pdEl.style.left=x+'px'; pdEl.style.top=y+'px';
   pdExtras.forEach(g=>{ g.el.style.left=x+'px'; g.el.style.top=(y+g.off)+'px'; });
@@ -655,65 +549,65 @@ function endPD(e){
   document.removeEventListener('pointermove',movePD);
   document.removeEventListener('pointerup',endPD);
   document.removeEventListener('pointercancel',endPD);
-  if(!pdEl) return;
+  if(!pdEl)return;
   const cx=e.clientX, cy=e.clientY;
   pdEl.remove(); pdEl=null;
   pdExtras.forEach(g=>g.el.remove()); pdExtras=[];
-  document.querySelectorAll('.ghost').forEach(g=>g.classList.remove('ghost'));
-  if(!dragInfo){ teken(); return; }
 
+  if(!dragInfo){teken();return;}
   let ok=false;
-  // foundations
+
+  // Check foundations
   for(let f=0;f<4&&!ok;f++){
-    const r=$('f'+f).getBoundingClientRect();
+    const r=$('board').querySelectorAll('.slot')[f+2].getBoundingClientRect();
     if(cx>=r.left&&cx<=r.right&&cy>=r.top&&cy<=r.bottom&&magFound(dragInfo,f)){
       snap(); verplaatsFound(f); ok=true;
     }
   }
-  // tableau
-  for(let c=0;c<7&&!ok;c++){
-    const r=$('t'+c).getBoundingClientRect();
-    if(cx>=r.left&&cx<=r.right&&cy>=r.top&&cy<=r.bottom&&magTab(dragInfo,c)){
-      snap(); verplaatsTab(c); ok=true;
+  // Check tableau kolommen
+  if(!ok){
+    const brd=$('board').getBoundingClientRect();
+    const bX=cx-brd.left;
+    const col=Math.floor(bX/(CW+GAP));
+    if(col>=0&&col<7&&magTab(dragInfo,col)){
+      snap(); verplaatsTab(col); ok=true;
     }
   }
   dragInfo=null;
-  if(!ok) teken();
+  teken();
 }
 
-/* ════════════════════════════════════════
+/* ════════════════════════════════
    SPELREGELS
-════════════════════════════════════════ */
+════════════════════════════════ */
 function getKaarten(info){
-  if(!info) return [];
+  if(!info)return[];
   if(info.bron==='waste') return waste.length?[waste[waste.length-1]]:[];
   if(info.bron==='tab')   return tab[info.col].slice(info.vanIdx);
-  return [];
+  return[];
 }
 
 function magTab(info,toCol){
-  if(!info) return false;
-  const ks=getKaarten(info);
-  if(!ks.length) return false;
-  const k=ks[0], kolom=tab[toCol];
-  if(!kolom.length) return k.rank==='K';
-  const top=kolom[kolom.length-1];
+  if(!info)return false;
+  const ks=getKaarten(info); if(!ks.length)return false;
+  const k=ks[0], kol=tab[toCol];
+  if(!kol.length) return k.rank==='K';
+  const top=kol[kol.length-1];
   return top.up && ROOD.has(k.suit)!==ROOD.has(top.suit) && RI(k.rank)===RI(top.rank)-1;
 }
 
 function magFound(info,f){
-  if(!info) return false;
-  const ks=getKaarten(info);
-  if(ks.length!==1) return false;
+  if(!info)return false;
+  const ks=getKaarten(info); if(ks.length!==1)return false;
   const k=ks[0], pile=found[f];
   if(!pile.length) return k.rank==='A';
   const top=pile[pile.length-1];
   return k.suit===top.suit && RI(k.rank)===RI(top.rank)+1;
 }
 
-/* ════════════════════════════════════════
+/* ════════════════════════════════
    ACTIES
-════════════════════════════════════════ */
+════════════════════════════════ */
 function klikStock(){
   snap();
   if(!stock.length){
@@ -731,100 +625,97 @@ function draaiBovenste(col){
 }
 
 function verplaatsTab(toCol){
-  if(!dragInfo) return;
+  if(!dragInfo)return;
   const ks=getKaarten(dragInfo);
-  if(dragInfo.bron==='waste'){ waste.pop(); pts(5); }
-  else { tab[dragInfo.col].splice(dragInfo.vanIdx); draaiBovenste(dragInfo.col); pts(3); }
+  if(dragInfo.bron==='waste'){waste.pop();pts(5);}
+  else{tab[dragInfo.col].splice(dragInfo.vanIdx);draaiBovenste(dragInfo.col);pts(3);}
   tab[toCol].push(...ks);
   dragInfo=null; teken();
 }
 
 function verplaatsFound(f){
-  if(!dragInfo) return;
+  if(!dragInfo)return;
   const k=getKaarten(dragInfo)[0];
-  if(dragInfo.bron==='waste'){ waste.pop(); }
-  else { tab[dragInfo.col].pop(); draaiBovenste(dragInfo.col); }
+  if(dragInfo.bron==='waste'){waste.pop();}
+  else{tab[dragInfo.col].pop();draaiBovenste(dragInfo.col);}
   found[f].push(k); pts(10);
   dragInfo=null; teken(); checkWin();
 }
 
 function autoFound(info){
   for(let f=0;f<4;f++){
-    if(magFound(info,f)){ snap(); dragInfo=info; verplaatsFound(f); return true; }
+    if(magFound(info,f)){snap();dragInfo=info;verplaatsFound(f);return true;}
   }
   return false;
 }
 
-// Dubbelklik → auto foundation
+// Dubbelklik → foundation
 document.addEventListener('dblclick',e=>{
   const k=e.target.closest('.card.up');
-  if(!k) return;
-  if($('waste').contains(k)){ autoFound({bron:'waste'}); return; }
+  if(!k||k.classList.contains('nodrag'))return;
+  const brd=$('board');
+  // waste?
+  if(waste.length){
+    const wk=brd.querySelectorAll('.card');
+    // zoek de waste-top kaart
+    if(autoFound({bron:'waste'}))return;
+  }
+  // tableau bovenste?
   for(let c=0;c<7;c++){
-    const kolom=tab[c];
-    if(!kolom.length||!kolom[kolom.length-1].up) continue;
-    const cards=$('t'+c).querySelectorAll('.card');
-    if(cards[cards.length-1]===k){
-      autoFound({bron:'tab',col:c,vanIdx:kolom.length-1}); return;
-    }
+    const kol=tab[c];
+    if(!kol.length||!kol[kol.length-1].up)continue;
+    if(autoFound({bron:'tab',col:c,vanIdx:kol.length-1}))return;
   }
 });
 
-/* ════════════════════════════════════════
+/* ════════════════════════════════
    HINT
-════════════════════════════════════════ */
+════════════════════════════════ */
 function hint(){
-  // Zoek eerste geldige zet en highlight die kaart
-  // 1. Kan waste naar foundation?
+  // foundation first
   if(waste.length){
-    const info={bron:'waste'};
-    for(let f=0;f<4;f++) if(magFound(info,f)){ glow($('waste').querySelector('.card')); return; }
-  }
-  // 2. Kan tableau top naar foundation?
-  for(let c=0;c<7;c++){
-    const kolom=tab[c];
-    if(!kolom.length||!kolom[kolom.length-1].up) continue;
-    const info={bron:'tab',col:c,vanIdx:kolom.length-1};
-    for(let f=0;f<4;f++) if(magFound(info,f)){
-      const cards=$('t'+c).querySelectorAll('.card');
-      glow(cards[cards.length-1]); return;
+    for(let f=0;f<4;f++) if(magFound({bron:'waste'},f)){
+      glow($('board').querySelector('.card.up')); return;
     }
   }
-  // 3. Kan tableau naar tableau?
   for(let c=0;c<7;c++){
-    const kolom=tab[c];
-    for(let i=0;i<kolom.length;i++){
-      if(!kolom[i].up) continue;
-      const info={bron:'tab',col:c,vanIdx:i};
+    const kol=tab[c]; if(!kol.length||!kol[kol.length-1].up)continue;
+    for(let f=0;f<4;f++) if(magFound({bron:'tab',col:c,vanIdx:kol.length-1},f)){
+      // highlight die kaart -- vind hem via positie
+      toast('💡 Stuur '+kol[kol.length-1].rank+kol[kol.length-1].suit+' naar foundation!'); return;
+    }
+  }
+  // tableau naar tableau
+  for(let c=0;c<7;c++){
+    const kol=tab[c];
+    for(let i=0;i<kol.length;i++){
+      if(!kol[i].up)continue;
       for(let t=0;t<7;t++){
-        if(t===c) continue;
-        if(magTab(info,t)){
-          const cards=$('t'+c).querySelectorAll('.card');
-          glow(cards[i]); return;
+        if(t===c)continue;
+        if(magTab({bron:'tab',col:c,vanIdx:i},t)){
+          toast('💡 Zet '+kol[i].rank+kol[i].suit+' op kolom '+(t+1)); return;
         }
       }
     }
   }
-  // 4. Waste naar tableau?
-  if(waste.length){
-    const info={bron:'waste'};
-    for(let t=0;t<7;t++) if(magTab(info,t)){ glow($('waste').querySelector('.card')); return; }
-  }
-  toast('Geen hint gevonden -- draai een kaart van de stock');
+  if(waste.length)for(let t=0;t<7;t++)
+    if(magTab({bron:'waste'},t)){ toast('💡 Zet waste-kaart op kolom '+(t+1)); return; }
+
+  toast('Geen zet gevonden -- klik de stock');
 }
 
 function glow(el){
-  if(!el) return;
-  el.style.transition='box-shadow 0.15s';
-  el.style.boxShadow='0 0 0 3px #f5c842, 0 0 20px rgba(245,200,66,0.7)';
-  setTimeout(()=>{ if(el) el.style.boxShadow=''; },1200);
+  if(!el)return;
+  const old=el.style.boxShadow;
+  el.style.boxShadow='0 0 0 3px #f5c840, 0 0 18px rgba(245,200,64,.7)';
+  setTimeout(()=>{ if(el)el.style.boxShadow=old; },1200);
 }
 
-/* ════════════════════════════════════════
+/* ════════════════════════════════
    WIN
-════════════════════════════════════════ */
+════════════════════════════════ */
 function checkWin(){
-  if(found.reduce((a,f)=>a+f.length,0)!==52) return;
+  if(found.reduce((a,f)=>a+f.length,0)!==52)return;
   clearInterval(timerRef);
   pts(Math.max(0,700-secs*2));
   const m=Math.floor(secs/60),s=secs%60;
@@ -833,37 +724,35 @@ function checkWin(){
   $('win').classList.add('show');
   confetti();
   const hs=parseInt(localStorage.getItem('sol_hs')||'0');
-  if(score>hs){ localStorage.setItem('sol_hs',score); $('hs').textContent=score; }
+  if(score>hs){localStorage.setItem('sol_hs',score);$('hs').textContent=score;}
 }
 
 function confetti(){
-  const kl=['#d4a017','#f5c842','#cc1111','#22c55e','#3b82f6','#a855f7','#f97316','#ec4899'];
-  for(let i=0;i<110;i++){
-    const el=document.createElement('div');
-    el.className='kf';
-    el.style.cssText=
-      `left:${Math.random()*100}vw;`+
-      `background:${kl[i%kl.length]};`+
-      `animation-duration:${1.2+Math.random()*2.6}s;`+
-      `animation-delay:${Math.random()*2}s;`+
-      `transform:rotate(${Math.random()*360}deg)`;
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(),6000);
+  const kl=['#d4a017','#f5c842','#cc1111','#22c55e','#3b82f6','#a855f7','#f97316'];
+  for(let i=0;i<100;i++){
+    const el=document.createElement('div'); el.className='kf';
+    el.style.cssText=`left:${Math.random()*100}vw;background:${kl[i%kl.length]};animation-duration:${1.2+Math.random()*2.5}s;animation-delay:${Math.random()*2}s`;
+    document.body.appendChild(el); setTimeout(()=>el.remove(),6000);
   }
 }
 
-/* ════════════════════════════════════════
+/* ════════════════════════════════
    TOAST
-════════════════════════════════════════ */
+════════════════════════════════ */
 let toastT=null;
 function toast(msg){
   const el=$('toast'); el.textContent=msg; el.classList.add('on');
   clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('on'),2400);
 }
 
-/* ════════════════════════════════════════
+/* ════════════════════════════════
+   RESIZE
+════════════════════════════════ */
+window.addEventListener('resize',()=>{ bereken(); teken(); });
+
+/* ════════════════════════════════
    START
-════════════════════════════════════════ */
+════════════════════════════════ */
 nieuwSpel();
 </script>
 
