@@ -67,14 +67,13 @@ display:flex; align-items:center; gap:14px;
 #app { position:fixed; inset:0; z-index:1; display:none; flex-direction:column; padding:8px 6px 4px; overflow:hidden; }
 
 /* HEADER */
-#hdr { display:flex; flex-direction:column; gap:5px; margin-bottom:7px; flex-shrink:0; }
-#hdr-r1 { display:flex; align-items:center; gap:5px; flex-wrap:nowrap; }
-#hdr-r2 { display:flex; align-items:center; gap:5px; }
-.pill { background:linear-gradient(180deg,#3d7a18,#285210); border:2px solid #c8a020; border-radius:20px; padding:5px 12px; font-size:12px; font-weight:bold; color:#f5c840; white-space:nowrap; box-shadow:0 2px 6px rgba(0,0,0,.4); }
-.pill span { color:#fff; font-size:13px; }
-.hbtn { background:linear-gradient(180deg,#3a6e15,#235010); border:2px solid #c8a020; border-radius:20px; padding:6px 13px; font-size:12px; font-weight:bold; color:#f5c840; cursor:pointer; white-space:nowrap; font-family:Georgia,serif; box-shadow:0 2px 6px rgba(0,0,0,.4); -webkit-appearance:none; }
+#hdr { display:flex; align-items:center; gap:5px; margin-bottom:8px; flex-shrink:0; flex-wrap:nowrap; overflow:visible; }
+.pill { background:linear-gradient(180deg,#3d7a18,#285210); border:2px solid #c8a020; border-radius:20px; padding:5px 10px; font-size:11px; font-weight:bold; color:#f5c840; white-space:nowrap; box-shadow:0 2px 6px rgba(0,0,0,.4); }
+.pill span { color:#fff; font-size:12px; }
+.hbtn { background:linear-gradient(180deg,#3a6e15,#235010); border:2px solid #c8a020; border-radius:20px; padding:5px 9px; font-size:11px; font-weight:bold; color:#f5c840; cursor:pointer; white-space:nowrap; font-family:Georgia,serif; box-shadow:0 2px 6px rgba(0,0,0,.4); -webkit-appearance:none; }
 .hbtn:active { opacity:.8; }
-#btn-nieuw { background:linear-gradient(180deg,#c8a020,#886800); border:2px solid #f5d060; border-radius:20px; padding:6px 18px; font-size:13px; font-weight:bold; color:#1a0e00; cursor:pointer; white-space:nowrap; font-family:Georgia,serif; box-shadow:0 2px 8px rgba(200,160,32,.5); -webkit-appearance:none; }
+#hsp { flex:1; }
+#btn-nieuw { background:linear-gradient(180deg,#c8a020,#886800); border:2px solid #f5d060; border-radius:20px; padding:6px 12px; font-size:11px; font-weight:bold; color:#1a0e00; cursor:pointer; white-space:nowrap; font-family:Georgia,serif; box-shadow:0 2px 8px rgba(200,160,32,.5); flex-shrink:0; -webkit-appearance:none; }
 #btn-nieuw:active { opacity:.85; }
 
 /* BORD */
@@ -156,16 +155,13 @@ border:1px solid rgba(200,160,32,.25); pointer-events:none; z-index:0;
 
 <div id="app">
   <div id="hdr">
-    <div id="hdr-r1">
-      <div class="pill">🏆 <span id="sc">0</span></div>
-      <div class="pill">⭐ <span id="hs">0</span></div>
-      <button class="hbtn" id="btn-undo" onclick="undo()">↩ Undo</button>
-      <button class="hbtn" id="btn-hint" onclick="hint()">💡 Hint</button>
-      <button class="hbtn" id="btn-niv" onclick="naarDiff()">☰ Niveau</button>
-    </div>
-    <div id="hdr-r2">
-      <button id="btn-nieuw" onclick="nieuwSpel()">↺ Nieuw Spel</button>
-    </div>
+    <div class="pill">🏆 <span id="sc">0</span></div>
+    <div class="pill">⭐ <span id="hs">0</span></div>
+    <button class="hbtn" onclick="undo()">↩</button>
+    <button class="hbtn" onclick="hint()">💡</button>
+    <button class="hbtn" onclick="naarDiff()">☰</button>
+    <div id="hsp"></div>
+    <button id="btn-nieuw" onclick="nieuwSpel()">↺ Nieuw Spel</button>
   </div>
   <div id="board"></div>
 </div>
