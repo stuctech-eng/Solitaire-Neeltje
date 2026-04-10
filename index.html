@@ -4,756 +4,969 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Solitaire</title>
+<title>Solitaire – Neeltje</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0;
-    -webkit-tap-highlight-color: transparent; }
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
 
 html, body {
-width: 100%; height: 100%;
-overflow: hidden;
-background: #2a7a35;
-font-family: Georgia, serif;
-user-select: none;
-touch-action: none;
+width:100%; height:100%; overflow:hidden;
+font-family: Georgia, ‘Times New Roman’, serif;
+user-select:none; touch-action:none;
 }
 
-/* Vilt */
 body {
-background:
-radial-gradient(ellipse at 50% 30%, #3a9a45 0%, #2a7a35 45%, #195520 100%);
-}
-body::before {
-content: ‘’; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-background-image: url("data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘4’ height=‘4’%3E%3Ccircle cx=‘1’ cy=‘1’ r=’.65’ fill=‘rgba(0,0,0,0.07)’/%3E%3C/svg%3E");
-}
-body::after {
-content: ‘’; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-background: radial-gradient(ellipse at 50% 60%, transparent 50%, rgba(0,0,0,0.4) 100%);
+background: radial-gradient(ellipse at 50% 30%, #3fa84a 0%, #2a7a35 50%, #184d20 100%);
 }
 
-/* ── APP ── */
+/* vilt textuur */
+body::before {
+content:’’; position:fixed; inset:0; pointer-events:none; z-index:0;
+background-image: url("data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘4’ height=‘4’%3E%3Ccircle cx=‘1’ cy=‘1’ r=’.6’ fill=‘rgba(0,0,0,0.08)’/%3E%3C/svg%3E");
+}
+
+/* vignette */
+body::after {
+content:’’; position:fixed; inset:0; pointer-events:none; z-index:0;
+background: radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0,0,0,0.45) 100%);
+}
+
+/* ── NEELTJE ACHTERGROND ── */
+#neeltje {
+position:fixed; inset:0; z-index:0; pointer-events:none;
+display:flex; align-items:center; justify-content:center;
+}
+#neeltje span {
+font-family: Georgia, ‘Palatino Linotype’, serif;
+font-size: min(22vw, 130px);
+font-weight:bold; font-style:italic;
+color: rgba(255,255,255,0.06);
+letter-spacing:8px;
+white-space:nowrap;
+}
+
+/* ════════════════════════════════
+MOEILIJKHEID SCHERM
+════════════════════════════════ */
+#diff-screen {
+position:fixed; inset:0; z-index:100;
+display:flex; flex-direction:column;
+align-items:center; justify-content:center;
+gap:16px; padding:28px 20px;
+}
+
+.ds-kaart { font-size:52px; margin-bottom:4px; }
+
+.ds-titel {
+font-size:clamp(24px,7vw,34px); font-weight:bold;
+color:#f5c840; letter-spacing:3px;
+text-shadow: 0 0 24px rgba(245,200,64,.5), 0 2px 4px rgba(0,0,0,.5);
+}
+
+.ds-sub {
+font-size:14px; color:rgba(255,255,255,.55);
+margin-bottom:4px;
+}
+
+.diff-btn {
+width:100%; max-width:320px;
+background:linear-gradient(160deg, #3a6e16, #1e4010);
+border:2.5px solid #c8a020; border-radius:18px;
+padding:18px 22px; cursor:pointer; text-align:left;
+box-shadow:0 5px 18px rgba(0,0,0,.45);
+transition:transform .15s, box-shadow .15s;
+display:flex; align-items:center; gap:16px;
+}
+.diff-btn:active { transform:scale(.97); }
+
+.diff-nr {
+font-size:30px; color:#f5c840; font-weight:bold;
+min-width:36px; text-align:center;
+}
+.diff-name  { font-size:17px; color:#fff; font-weight:bold; margin-bottom:3px; }
+.diff-desc  { font-size:12px; color:rgba(255,255,255,.55); }
+.diff-stars { font-size:14px; color:#f5c840; margin-top:4px; }
+
+/* ════════════════════════════════
+GAME
+════════════════════════════════ */
 #app {
-position: fixed; inset: 0; z-index: 1;
-display: flex; flex-direction: column;
-padding: 8px 6px 6px;
-overflow: hidden;
+position:fixed; inset:0; z-index:1;
+display:none; flex-direction:column;
+padding:8px 6px 4px; overflow:hidden;
 }
 
 /* ── HEADER ── */
 #hdr {
-display: flex; align-items: center; gap: 6px;
-margin-bottom: 8px; flex-shrink: 0; flex-wrap: nowrap;
+display:flex; align-items:center; gap:5px;
+margin-bottom:8px; flex-shrink:0;
 }
+
 .pill {
-background: linear-gradient(180deg,#3d7a18 0%,#285210 100%);
-border: 2px solid #c8a020;
-border-radius: 20px;
-padding: 4px 10px;
-font-size: 11px; font-weight: bold;
-color: #f5c840;
-white-space: nowrap;
-box-shadow: 0 2px 6px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.1);
+background:linear-gradient(180deg,#3d7a18,#285210);
+border:2.5px solid #c8a020; border-radius:22px;
+padding:6px 12px; font-size:12px; font-weight:bold;
+color:#f5c840; white-space:nowrap;
+box-shadow:0 3px 8px rgba(0,0,0,.4);
 }
-.pill span { color: #fff; }
+.pill span { color:#fff; font-size:14px; }
+
 .hbtn {
-background: linear-gradient(180deg,#3d7a18 0%,#285210 100%);
-border: 2px solid #c8a020;
-border-radius: 20px;
-padding: 5px 12px;
-font-size: 11px; font-weight: bold;
-color: #f5c840;
-cursor: pointer;
-box-shadow: 0 2px 6px rgba(0,0,0,.4);
-white-space: nowrap;
+background:linear-gradient(180deg,#3a6e15,#235010);
+border:2.5px solid #c8a020; border-radius:22px;
+padding:6px 12px; font-size:12px; font-weight:bold;
+color:#f5c840; cursor:pointer; white-space:nowrap;
+font-family:Georgia, serif;
+box-shadow:0 3px 8px rgba(0,0,0,.4);
 }
-.hbtn:active { opacity: .8; }
-#hrefresh {
-background: linear-gradient(180deg,#2a8530 0%,#185c1e 100%);
-border: 2px solid #c8a020;
-border-radius: 50%;
-width: 34px; height: 34px; flex-shrink: 0;
-display: flex; align-items: center; justify-content: center;
-font-size: 18px; color: #f5c840; cursor: pointer;
-box-shadow: 0 2px 6px rgba(0,0,0,.4);
-}
-#hspc { flex: 1; min-width: 0; }
+.hbtn:active { opacity:.8; }
 
-/* ── SPEELBORD (JavaScript beheert afmetingen) ── */
-#board {
-flex: 1; position: relative; overflow: hidden;
+#btn-nieuw {
+background:linear-gradient(180deg,#c8a020,#886800);
+border:2.5px solid #f5d060; border-radius:22px;
+padding:7px 14px; font-size:12px; font-weight:bold;
+color:#1a0e00; cursor:pointer; white-space:nowrap;
+font-family:Georgia, serif;
+box-shadow:0 3px 10px rgba(200,160,32,.5);
+flex-shrink:0;
 }
+#btn-nieuw:active { opacity:.85; }
 
-/* ── SLOTS (leeg vakje) ── */
+#hspc { flex:1; min-width:0; }
+
+/* ── BORD ── */
+#board { flex:1; position:relative; overflow:hidden; }
+
+/* ── SLOTS ── */
 .slot {
-border-radius: var(–cr, 7px);
-background: rgba(0,0,0,.2);
-border: 2px dashed rgba(255,255,255,.2);
-position: absolute;
+border-radius:8px; background:rgba(0,0,0,.2);
+border:2px dashed rgba(255,255,255,.2);
+position:absolute;
 }
 .slot-lbl {
-position: absolute; inset: 0;
-display: flex; align-items: center; justify-content: center;
-font-size: 1.4em; opacity: .3; pointer-events: none;
+position:absolute; inset:0;
+display:flex; align-items:center; justify-content:center;
+font-size:1.5em; opacity:.28; pointer-events:none;
 }
-.slot-lbl.r { color: #ff4444; }
+.slot-lbl.r { color:#ff5555; }
 
 /* ── KAARTEN ── */
 .card {
-position: absolute;
-border-radius: var(–cr, 7px);
-cursor: grab;
-transition: box-shadow .1s;
-will-change: transform;
+position:absolute; border-radius:8px;
+will-change:transform; overflow:hidden;
+transition:box-shadow .1s;
 }
-
-/* Rug */
+/* rug */
 .card.dn {
-background: linear-gradient(150deg, #2255cc, #0e2080);
-border: 2px solid rgba(255,255,255,.18);
-box-shadow: 2px 3px 8px rgba(0,0,0,.6);
-overflow: hidden;
-cursor: default;
+background:linear-gradient(150deg,#2255cc,#0e2080);
+border:2px solid rgba(255,255,255,.18);
+box-shadow:2px 3px 8px rgba(0,0,0,.6);
+cursor:default;
 }
 .card.dn::before {
-content: ‘’; position: absolute; inset: 5px;
-border-radius: 4px; border: 1px solid rgba(255,255,255,.18);
-background: repeating-linear-gradient(45deg,
-rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 2px,
-transparent 2px, transparent 9px),
-repeating-linear-gradient(-45deg,
-rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 2px,
-transparent 2px, transparent 9px);
+content:’’; position:absolute; inset:5px; border-radius:4px;
+border:1px solid rgba(255,255,255,.18);
+background:
+repeating-linear-gradient(45deg,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 2px,transparent 2px,transparent 9px),
+repeating-linear-gradient(-45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 2px,transparent 2px,transparent 9px);
 }
-
-/* Voorkant */
+/* voorkant */
 .card.up {
-background: #fdf6e3;
-border: 1.5px solid rgba(0,0,0,.18);
-box-shadow: 3px 4px 12px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.9);
+background:#fdf6e3;
+border:1.5px solid rgba(0,0,0,.15);
+box-shadow:3px 4px 12px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.9);
+cursor:grab;
 }
-.card.up.r { color: #cc1111; }
-.card.up.b { color: #111; }
+.card.up.r { color:#cc1111; }
+.card.up.b { color:#111; }
+.card.ghost { opacity:.15; pointer-events:none; }
 
-/* Kaart inhoud -- uitsluitend via JS gezet */
-.c-tl { position: absolute; top: 3px; left: 4px; font-weight: bold; line-height: 1.1; }
-.c-br { position: absolute; bottom: 3px; right: 4px; font-weight: bold; line-height: 1.1; transform: rotate(180deg); }
-.c-mid { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-
-/* Sleep */
-.card.ghost { opacity: .15; pointer-events: none; }
+.c-tl { position:absolute; top:3px; left:4px; font-weight:bold; line-height:1.1; }
+.c-br { position:absolute; bottom:3px; right:4px; font-weight:bold; line-height:1.1; transform:rotate(180deg); }
+.c-fig { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+.c-mid { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; opacity:.88; }
 
 /* ── WIN ── */
 #win {
-display: none; position: fixed; inset: 0; z-index: 999;
-background: rgba(0,0,0,.75);
-align-items: center; justify-content: center;
+display:none; position:fixed; inset:0; z-index:999;
+background:rgba(0,0,0,.78);
+align-items:center; justify-content:center;
 }
-#win.show { display: flex; }
+#win.show { display:flex; }
 .wbox {
-background: linear-gradient(155deg, #1e5e2a, #0e3015);
-border: 3px solid #c8a020; border-radius: 20px;
-padding: 40px 50px; text-align: center;
-box-shadow: 0 30px 80px rgba(0,0,0,.8);
-animation: popin .4s cubic-bezier(.34,1.56,.64,1);
+background:linear-gradient(155deg,#1e5e2a,#0e3015);
+border:3px solid #c8a020; border-radius:22px;
+padding:38px 48px; text-align:center;
+box-shadow:0 30px 80px rgba(0,0,0,.8);
+animation:popin .4s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes popin { from{transform:scale(.4);opacity:0} to{transform:scale(1);opacity:1} }
-.wbox h2 { font-size: 38px; color: #f5c840; margin-bottom: 10px; }
-.wbox p  { color: rgba(255,255,255,.7); font-size: 13px; margin-bottom: 4px; }
+.wbox h2 { font-size:36px; color:#f5c840; margin-bottom:10px; }
+.wbox p  { color:rgba(255,255,255,.7); font-size:14px; margin-bottom:4px; }
 
 /* confetti */
-.kf {
-position: fixed; width: 8px; height: 13px; border-radius: 2px;
-top: -20px; z-index: 1000; pointer-events: none;
-animation: kval linear forwards;
-}
+.kf { position:fixed; width:8px; height:13px; border-radius:2px; top:-20px; z-index:1000; pointer-events:none; animation:kval linear forwards; }
 @keyframes kval { to{transform:translateY(110vh) rotate(900deg);opacity:0} }
 
 /* toast */
 #toast {
-position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
-background: rgba(0,0,0,.85); border: 1px solid #c8a020;
-border-radius: 18px; padding: 7px 18px;
-color: rgba(255,255,255,.9); font-size: 12px;
-pointer-events: none; z-index: 500; opacity: 0; transition: opacity .3s;
-white-space: nowrap;
+position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+background:rgba(0,0,0,.88); border:1px solid #c8a020;
+border-radius:18px; padding:8px 20px;
+color:rgba(255,255,255,.92); font-size:13px;
+pointer-events:none; z-index:500; opacity:0; transition:opacity .3s; white-space:nowrap;
 }
-#toast.on { opacity: 1; }
+#toast.on { opacity:1; }
 </style>
 
 </head>
 <body>
+
+<div id="neeltje"><span>Neeltje</span></div>
+
+<!-- ════ MOEILIJKHEID ════ -->
+
+<div id="diff-screen">
+  <div class="ds-kaart">🃏</div>
+  <div class="ds-titel">♠ SOLITAIRE</div>
+  <div class="ds-sub">Kies je moeilijkheidsgraad</div>
+
+  <button class="diff-btn" onclick="startSpel(1)">
+    <div class="diff-nr">1</div>
+    <div>
+      <div class="diff-name">Makkelijk</div>
+      <div class="diff-desc">1 kaart per keer · Onbeperkt recyclen</div>
+      <div class="diff-stars">★☆☆</div>
+    </div>
+  </button>
+
+  <button class="diff-btn" onclick="startSpel(2)">
+    <div class="diff-nr">2</div>
+    <div>
+      <div class="diff-name">Normaal</div>
+      <div class="diff-desc">1 kaart per keer · Max 3x recyclen</div>
+      <div class="diff-stars">★★☆</div>
+    </div>
+  </button>
+
+  <button class="diff-btn" onclick="startSpel(3)">
+    <div class="diff-nr">3</div>
+    <div>
+      <div class="diff-name">Moeilijk</div>
+      <div class="diff-desc">3 kaarten per keer · Max 1x recyclen</div>
+      <div class="diff-stars">★★★</div>
+    </div>
+  </button>
+</div>
+
+<!-- ════ GAME ════ -->
+
 <div id="app">
   <div id="hdr">
-    <div class="pill">Score <span id="sc">0</span></div>
-    <div class="pill">Tijd <span id="ti">0:00</span></div>
-    <div class="pill">Best <span id="hs">0</span></div>
+    <div class="pill">🏆 <span id="sc">0</span></div>
+    <div class="pill">⏱ <span id="ti">0:00</span></div>
+    <div class="pill">⭐ <span id="hs">0</span></div>
     <button class="hbtn" onclick="undo()">↩ Undo</button>
     <button class="hbtn" onclick="hint()">💡 Hint</button>
+    <button class="hbtn" onclick="naarDiff()">☰</button>
     <div id="hspc"></div>
-    <div id="hrefresh" onclick="nieuwSpel()">↺</div>
+    <button id="btn-nieuw" onclick="nieuwSpel()">↺ Nieuw Spel</button>
   </div>
   <div id="board"></div>
 </div>
 
+<!-- ════ WIN ════ -->
+
 <div id="win">
   <div class="wbox">
     <h2>🎉 Gewonnen!</h2>
-    <p id="wp"></p><p id="wt"></p>
-    <button class="hbtn" style="margin-top:18px;font-size:13px;padding:8px 24px" onclick="nieuwSpel()">Nog een keer</button>
+    <p id="wp"></p><p id="wt"></p><p id="wd"></p>
+    <button class="hbtn" style="margin-top:18px;font-size:14px;padding:9px 24px" onclick="nieuwSpel()">Nog een keer</button>
+    <br>
+    <button class="hbtn" style="margin-top:10px;font-size:13px;padding:7px 18px" onclick="naarDiff()">Ander niveau</button>
   </div>
 </div>
 <div id="toast"></div>
 
 <script>
+(function() {
 'use strict';
 
-/* ════════════════════════════════
-   CONSTANTEN & HELPERS
-════════════════════════════════ */
-const SUITS = ['♠','♥','♦','♣'];
-const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-const ROOD  = new Set(['♥','♦']);
-const RI    = r => RANKS.indexOf(r);
-const $     = id => document.getElementById(id);
-const cp    = o  => JSON.parse(JSON.stringify(o));
-
-/* ════════════════════════════════
-   AFMETINGEN -- berekend uit scherm
-════════════════════════════════ */
-let CW, CH, CR, GAP, DSTEP, FSTEP;
-
-function bereken() {
-  const brd   = $('board');
-  const bW    = brd.clientWidth;
-  const bH    = brd.clientHeight;
-
-  // 7 kolommen + 6 tussenruimtes in breedte
-  // CW * 7 + GAP * 6 = bW  →  CW = (bW - GAP*6) / 7
-  // Begin met kleine GAP
-  GAP  = Math.max(4, Math.floor(bW * 0.012));
-  CW   = Math.floor((bW - GAP * 6) / 7);
-  CH   = Math.round(CW * 1.4);
-  CR   = Math.max(4, Math.round(CW * 0.1));
-
-  // stappen
-  DSTEP = Math.round(CH * 0.18);
-  FSTEP = Math.round(CH * 0.26);
-
-  // CSS var voor border-radius
-  document.documentElement.style.setProperty('--cr', CR + 'px');
+/* ══════════════════════════════════
+   SVG FIGUREN
+══════════════════════════════════ */
+function svgBoer(suit, rood) {
+  var kl = rood ? '#b01010' : '#1a3590';
+  var bg = rood ? 'rgba(255,220,220,0.3)' : 'rgba(200,220,255,0.3)';
+  return '<svg viewBox="0 0 76 96" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">'
+    + '<rect width="76" height="96" rx="4" fill="' + bg + '"/>'
+    // mantel
+    + '<ellipse cx="38" cy="76" rx="26" ry="22" fill="' + kl + '"/>'
+    + '<rect x="20" y="56" width="36" height="24" rx="4" fill="' + kl + '"/>'
+    + '<path d="M26 56 Q38 64 50 56 L48 70 Q38 76 28 70Z" fill="white" opacity=".75"/>'
+    // hoofd
+    + '<circle cx="38" cy="36" r="14" fill="#f5d5a0"/>'
+    // haar
+    + '<path d="M24 36 Q24 20 38 18 Q52 20 52 36" fill="#5a2d0c"/>'
+    // kroon
+    + '<path d="M26 22 L29 14 L35 20 L38 12 L41 20 L47 14 L50 22Z" fill="#c8a020" stroke="#7a5800" stroke-width=".8"/>'
+    + '<circle cx="38" cy="13" r="2.5" fill="' + (rood ? '#3498db' : '#e74c3c') + '"/>'
+    + '<circle cx="29" cy="15" r="1.8" fill="#9b59b6"/>'
+    + '<circle cx="47" cy="15" r="1.8" fill="#2ecc71"/>'
+    // gezicht
+    + '<circle cx="33" cy="37" r="1.8" fill="#2c1800"/>'
+    + '<circle cx="43" cy="37" r="1.8" fill="#2c1800"/>'
+    + '<path d="M33 43 Q38 47 43 43" stroke="#5a2d0c" stroke-width="1.3" fill="none"/>'
+    + '<path d="M31 40 Q38 42 45 40" stroke="#5a2d0c" stroke-width="1" fill="none"/>'
+    // zwaard
+    + '<line x1="38" y1="60" x2="38" y2="82" stroke="#999" stroke-width="2.5"/>'
+    + '<path d="M33 65 Q38 60 43 65" fill="#bbb"/>'
+    // suit onderaan
+    + '<text x="38" y="94" text-anchor="middle" font-size="12" fill="' + (rood ? '#cc1111' : '#111') + '" font-family="Georgia,serif">' + suit + '</text>'
+    + '</svg>';
 }
 
-/* ════════════════════════════════
+function svgVrouw(suit, rood) {
+  var kl = rood ? '#aa0044' : '#1a5c1a';
+  var bg = rood ? 'rgba(255,200,220,0.3)' : 'rgba(200,255,210,0.3)';
+  return '<svg viewBox="0 0 76 96" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">'
+    + '<rect width="76" height="96" rx="4" fill="' + bg + '"/>'
+    // jurk
+    + '<path d="M12 96 Q20 68 38 62 Q56 68 64 96Z" fill="' + kl + '"/>'
+    + '<rect x="22" y="56" width="32" height="20" rx="4" fill="' + kl + '"/>'
+    + '<path d="M26 56 Q38 63 50 56" stroke="white" stroke-width="2" fill="none" opacity=".7"/>'
+    // hoofd
+    + '<circle cx="38" cy="34" r="14" fill="#f5d5a0"/>'
+    // haar lang
+    + '<path d="M24 34 Q24 17 38 15 Q52 17 52 34 L51 39 Q44 46 38 46 Q32 46 25 39Z" fill="#7b3f00"/>'
+    // kroon
+    + '<path d="M25 20 L29 12 L34 18 L38 10 L42 18 L47 12 L51 20Z" fill="#c8a020" stroke="#7a5800" stroke-width=".8"/>'
+    + '<circle cx="38" cy="11" r="2.5" fill="#e74c3c"/>'
+    + '<circle cx="29" cy="13" r="1.8" fill="#9b59b6"/>'
+    + '<circle cx="47" cy="13" r="1.8" fill="#9b59b6"/>'
+    // gezicht
+    + '<circle cx="33" cy="33" r="1.6" fill="#2c1800"/>'
+    + '<circle cx="43" cy="33" r="1.6" fill="#2c1800"/>'
+    + '<path d="M33 40 Q38 44 43 40" stroke="' + (rood ? '#cc1111' : '#1a5c1a') + '" stroke-width="1.3" fill="none"/>'
+    // wangen
+    + '<circle cx="28" cy="37" r="4" fill="#ff9999" opacity=".35"/>'
+    + '<circle cx="48" cy="37" r="4" fill="#ff9999" opacity=".35"/>'
+    // scepter
+    + '<line x1="38" y1="58" x2="38" y2="78" stroke="#c8a020" stroke-width="2"/>'
+    + '<circle cx="38" cy="56" r="3.5" fill="#e74c3c"/>'
+    + '<text x="38" y="94" text-anchor="middle" font-size="12" fill="' + (rood ? '#cc1111' : '#111') + '" font-family="Georgia,serif">' + suit + '</text>'
+    + '</svg>';
+}
+
+function svgHeer(suit, rood) {
+  var kl = rood ? '#8b0000' : '#1a1a6e';
+  var bg = rood ? 'rgba(255,235,210,0.3)' : 'rgba(215,215,255,0.3)';
+  return '<svg viewBox="0 0 76 96" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">'
+    + '<rect width="76" height="96" rx="4" fill="' + bg + '"/>'
+    // mantel
+    + '<path d="M8 96 Q18 66 38 60 Q58 66 68 96Z" fill="' + kl + '"/>'
+    + '<rect x="20" y="54" width="36" height="24" rx="4" fill="' + kl + '"/>'
+    + '<path d="M20 54 L20 72 Q38 80 56 72 L56 54" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="2.5"/>'
+    // borstplaat
+    + '<rect x="27" y="57" width="22" height="14" rx="3" fill="#c8a020" opacity=".85"/>'
+    + '<text x="38" y="68" text-anchor="middle" font-size="10" fill="' + kl + '" font-family="Georgia,serif">✦</text>'
+    // hoofd
+    + '<circle cx="38" cy="33" r="14" fill="#f0c898"/>'
+    // haar + baard
+    + '<path d="M24 33 Q24 17 38 15 Q52 17 52 33" fill="#3d2000"/>'
+    + '<path d="M25 39 Q21 48 23 54 Q27 51 29 46" fill="#3d2000"/>'
+    + '<path d="M51 39 Q55 48 53 54 Q49 51 47 46" fill="#3d2000"/>'
+    // kroon groot
+    + '<path d="M25 21 L28 13 L33 19 L38 11 L43 19 L48 13 L51 21Z" fill="#c8a020" stroke="#7a5800" stroke-width=".8"/>'
+    + '<circle cx="38" cy="12" r="2.8" fill="' + (rood ? '#3498db' : '#e74c3c') + '"/>'
+    + '<circle cx="28" cy="14" r="1.8" fill="#f39c12"/>'
+    + '<circle cx="48" cy="14" r="1.8" fill="#f39c12"/>'
+    // gezicht
+    + '<circle cx="33" cy="32" r="1.8" fill="#1a0a00"/>'
+    + '<circle cx="43" cy="32" r="1.8" fill="#1a0a00"/>'
+    + '<path d="M33 40 Q38 43 43 40" stroke="#3d2000" stroke-width="1.5" fill="none"/>'
+    + '<path d="M30 37 Q38 40 46 37" stroke="#3d2000" stroke-width="1.2" fill="none"/>'
+    + '<text x="38" y="94" text-anchor="middle" font-size="12" fill="' + (rood ? '#cc1111' : '#111') + '" font-family="Georgia,serif">' + suit + '</text>'
+    + '</svg>';
+}
+
+function svgAas(suit, rood) {
+  var kl = rood ? '#cc1111' : '#111';
+  return '<svg viewBox="0 0 76 96" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">'
+    + '<text x="38" y="62" text-anchor="middle" font-size="50" fill="' + kl + '" font-family="Georgia,serif">' + suit + '</text>'
+    + '</svg>';
+}
+
+/* ══════════════════════════════════
+   CONSTANTEN
+══════════════════════════════════ */
+var SUITS  = ['♠','♥','♦','♣'];
+var RANKS  = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+var ROOD   = {'♥':true,'♦':true};
+
+function ri(r) { return RANKS.indexOf(r); }
+function $(id) { return document.getElementById(id); }
+function cp(o)  { return JSON.parse(JSON.stringify(o)); }
+
+/* ══════════════════════════════════
+   MOEILIJKHEID
+══════════════════════════════════ */
+var diff = 1;
+var DIFF = {
+  1: { draw:1, recycleMax:999, label:'Makkelijk ★☆☆' },
+  2: { draw:1, recycleMax:3,   label:'Normaal ★★☆' },
+  3: { draw:3, recycleMax:1,   label:'Moeilijk ★★★' }
+};
+
+function startSpel(n) {
+  diff = n;
+  $('diff-screen').style.display = 'none';
+  $('app').style.display = 'flex';
+  nieuwSpel();
+}
+
+function naarDiff() {
+  clearInterval(timerRef);
+  $('diff-screen').style.display = 'flex';
+  $('app').style.display = 'none';
+  $('win').classList.remove('show');
+}
+
+/* ══════════════════════════════════
+   AFMETINGEN -- dynamisch
+══════════════════════════════════ */
+var CW, CH, CR, GAP, DSTEP, FSTEP;
+
+function bereken() {
+  var brd = $('board');
+  var bW  = brd.clientWidth;
+  GAP   = Math.max(4, Math.floor(bW * 0.012));
+  CW    = Math.floor((bW - GAP * 6) / 7);
+  CH    = Math.round(CW * 1.4);
+  CR    = Math.max(4, Math.round(CW * 0.1));
+  DSTEP = Math.round(CH * 0.18);
+  FSTEP = Math.round(CH * 0.27);
+}
+
+/* ══════════════════════════════════
    SPELSTATUS
-════════════════════════════════ */
-let stock, waste, found, tab;
-let score=0, secs=0, timerRef=null;
-let hist=[], dragInfo=null;
+══════════════════════════════════ */
+var stock, waste, found, tab;
+var score = 0, secs = 0, timerRef = null;
+var hist = [], dragInfo = null, recycleCount = 0;
 
 function snap() {
-  hist.push({ stock:cp(stock), waste:cp(waste), found:cp(found), tab:cp(tab), score });
+  hist.push({ stock:cp(stock), waste:cp(waste), found:cp(found), tab:cp(tab), score:score, rc:recycleCount });
   if (hist.length > 60) hist.shift();
 }
 
 function undo() {
   if (!hist.length) { toast('Geen zet om ongedaan te maken'); return; }
-  const s = hist.pop();
-  stock=s.stock; waste=s.waste; found=s.found; tab=s.tab; score=s.score;
+  var s = hist.pop();
+  stock=s.stock; waste=s.waste; found=s.found; tab=s.tab; score=s.score; recycleCount=s.rc;
   $('sc').textContent = score;
   teken();
 }
 
-/* ════════════════════════════════
+/* ══════════════════════════════════
    NIEUW SPEL
-════════════════════════════════ */
+══════════════════════════════════ */
 function nieuwSpel() {
   $('win').classList.remove('show');
-  hist=[]; score=0; secs=0;
-  $('sc').textContent='0'; $('ti').textContent='0:00';
-  $('hs').textContent = localStorage.getItem('sol_hs')||'0';
+  hist=[]; score=0; secs=0; recycleCount=0;
+  $('sc').textContent='0';
+  $('ti').textContent='0:00';
+  $('hs').textContent = localStorage.getItem('sol_hs') || '0';
   clearInterval(timerRef);
 
-  const deck=[];
-  for (const s of SUITS)
-    for (const r of RANKS)
-      deck.push({suit:s,rank:r,up:false});
-  for (let i=deck.length-1;i>0;i--) {
-    const j=Math.floor(Math.random()*(i+1));
-    [deck[i],deck[j]]=[deck[j],deck[i]];
+  var deck = [];
+  var i, j, s, r, c, cd;
+  for (i=0;i<SUITS.length;i++)
+    for (j=0;j<RANKS.length;j++)
+      deck.push({ suit:SUITS[i], rank:RANKS[j], up:false });
+
+  // Fisher-Yates
+  for (i=deck.length-1;i>0;i--) {
+    j = Math.floor(Math.random()*(i+1));
+    var tmp=deck[i]; deck[i]=deck[j]; deck[j]=tmp;
   }
 
-  tab=Array.from({length:7},()=>[]);
-  for (let c=0;c<7;c++)
-    for (let r=0;r<=c;r++) { const cd=deck.pop(); cd.up=(r===c); tab[c].push(cd); }
+  tab = [[],[],[],[],[],[],[]];
+  for (c=0;c<7;c++)
+    for (r=0;r<=c;r++) {
+      cd = deck.pop(); cd.up = (r===c); tab[c].push(cd);
+    }
 
   stock=deck; waste=[]; found=[[],[],[],[]];
   bereken(); teken();
 
-  timerRef=setInterval(()=>{
+  timerRef = setInterval(function() {
     secs++;
-    const m=Math.floor(secs/60),s=secs%60;
-    $('ti').textContent=m+':'+(s<10?'0':'')+s;
+    var m=Math.floor(secs/60), s=secs%60;
+    $('ti').textContent = m + ':' + (s<10?'0':'') + s;
     if (secs%10===0) { score=Math.max(0,score-2); $('sc').textContent=score; }
-  },1000);
+  }, 1000);
 }
 
-function pts(n){ score=Math.max(0,score+n); $('sc').textContent=score; }
+function pts(n) { score=Math.max(0,score+n); $('sc').textContent=score; }
 
-/* ════════════════════════════════
-   RENDER -- absolute positionering
-════════════════════════════════ */
-function teken() {
-  const brd=$('board');
-  brd.innerHTML='';
-
-  // Lay-out berekenen
-  // Rij 1: stock(0) waste(1) gap foundation(3..6) kolommen 0-6
-  // X posities voor 7 kaartkolommen
-  const cols7 = Array.from({length:7},(_,i)=>i*(CW+GAP));
-
-  // Rij 1 y=0: stock, waste, dan gap, dan 4 foundations
-  const ROW1_Y = 0;
-  // stock=col 0, waste=col 1, foundations=col 3..6
-  const FOUND_X = [3,4,5,6].map(i=>cols7[i]);
-
-  // Rij 2 y: CH + 14px
-  const ROW2_Y = CH + 14;
-
-  // ── Slots ──
-  // Stock
-  const slotStock = mkSlot(cols7[0], ROW1_Y);
-  slotStock.innerHTML='<div class="slot-lbl">↺</div>';
-  brd.appendChild(slotStock);
-
-  // Waste
-  const slotWaste = mkSlot(cols7[1], ROW1_Y);
-  brd.appendChild(slotWaste);
-
-  // Foundations
-  const FSUIT=['♠','♥','♦','♣'];
-  for (let f=0;f<4;f++) {
-    const sl=mkSlot(FOUND_X[f], ROW1_Y);
-    const lbl=document.createElement('div');
-    lbl.className='slot-lbl'+(f>0&&f<3?' r':'');
-    lbl.textContent=FSUIT[f];
-    sl.appendChild(lbl);
-    brd.appendChild(sl);
-    // drop
-    sl.addEventListener('dragover',e=>{ if(magFound(dragInfo,f))e.preventDefault(); });
-    sl.addEventListener('drop',e=>{ e.preventDefault(); if(magFound(dragInfo,f)){snap();verplaatsFound(f);} });
-  }
-
-  // Tableau slots (achtergrond)
-  for (let c=0;c<7;c++) {
-    const sl=mkSlot(cols7[c], ROW2_Y);
-    sl.style.height=(brd.clientHeight - ROW2_Y - 4)+'px';
-    brd.appendChild(sl);
-  }
-
-  // ── Stock kaart ──
-  if (stock.length) {
-    const k=maakEl({up:false});
-    pos(k, cols7[0], ROW1_Y, 2);
-    brd.appendChild(k);
-    k.addEventListener('click', klikStock);
-  }
-  // lege stock = klik om te recyclen
-  slotStock.addEventListener('click', ()=>{
-    if (!stock.length) klikStock();
-  });
-
-  // ── Waste kaart ──
-  if (waste.length) {
-    // toon max 3 bovenste, fan
-    const start=Math.max(0,waste.length-3);
-    for (let i=start;i<waste.length;i++) {
-      const card=waste[i];
-      const xOff=(i-start)*Math.round(CW*0.15);
-      const k=maakEl({...card,up:true});
-      pos(k, cols7[1]+xOff, ROW1_Y, i+2);
-      brd.appendChild(k);
-      if (i===waste.length-1) {
-        koppelDrag(k,{bron:'waste'});
-      }
-    }
-  }
-
-  // ── Foundation kaarten ──
-  for (let f=0;f<4;f++) {
-    if (!found[f].length) continue;
-    const top=found[f][found[f].length-1];
-    const k=maakEl({...top,up:true});
-    k.classList.add('nodrag');
-    pos(k, FOUND_X[f], ROW1_Y, 2);
-    brd.appendChild(k);
-    // drop op foundation
-    k.addEventListener('dragover',e=>{ if(magFound(dragInfo,f))e.preventDefault(); });
-    k.addEventListener('drop',e=>{ e.preventDefault(); if(magFound(dragInfo,f)){snap();verplaatsFound(f);} });
-  }
-
-  // ── Tableau kaarten ──
-  for (let c=0;c<7;c++) {
-    const kolom=tab[c];
-    let y=ROW2_Y;
-    for (let i=0;i<kolom.length;i++) {
-      const card=kolom[i];
-      const k=maakEl({...card});
-      pos(k, cols7[c], y, ROW2_Y+i+1);
-
-      if (card.up) {
-        koppelDrag(k,{bron:'tab',col:c,vanIdx:i});
-      } else if (i===kolom.length-1) {
-        k.style.cursor='pointer';
-        ((col,idx)=>{ k.addEventListener('click',()=>{ snap(); tab[col][idx].up=true; pts(5); teken(); }); })(c,i);
-      }
-      brd.appendChild(k);
-      y+=card.up?FSTEP:DSTEP;
-    }
-
-    // drop-zone over hele kolom
-    const dropZone=document.createElement('div');
-    dropZone.style.cssText=`position:absolute;left:${cols7[c]}px;top:${ROW2_Y}px;width:${CW}px;height:${brd.clientHeight-ROW2_Y}px;z-index:0`;
-    dropZone.addEventListener('dragover',e=>{ if(magTab(dragInfo,c))e.preventDefault(); });
-    dropZone.addEventListener('drop',e=>{ e.preventDefault(); if(magTab(dragInfo,c)){snap();verplaatsTab(c);} });
-    brd.appendChild(dropZone);
-  }
-}
-
-function mkSlot(x,y) {
-  const el=document.createElement('div');
-  el.className='slot';
-  el.style.cssText=`left:${x}px;top:${y}px;width:${CW}px;height:${CH}px;`;
-  return el;
-}
-
-function pos(el,x,y,z) {
-  el.style.left=x+'px'; el.style.top=y+'px'; el.style.zIndex=z;
-}
-
-/* ════════════════════════════════
-   KAART ELEMENT MAKEN
-════════════════════════════════ */
+/* ══════════════════════════════════
+   KAART ELEMENT
+══════════════════════════════════ */
 function maakEl(card) {
-  const el=document.createElement('div');
-  const up=card.up;
-  el.className='card '+(up?('up '+(ROOD.has(card.suit)?'r':'b')):'dn');
-  el.style.width=CW+'px'; el.style.height=CH+'px';
-  el.style.borderRadius=CR+'px';
+  var el = document.createElement('div');
+  var up = card.up;
+  var rood = !!ROOD[card.suit];
+
+  el.className = 'card ' + (up ? ('up ' + (rood ? 'r' : 'b')) : 'dn');
+  el.style.width  = CW + 'px';
+  el.style.height = CH + 'px';
+  el.style.borderRadius = CR + 'px';
 
   if (up) {
-    const fs = Math.max(8, Math.round(CW*0.165));  // hoek font
-    const ms = Math.max(14, Math.round(CW*0.58));  // midden symbool
+    var fs = Math.max(7, Math.round(CW * 0.15));
 
-    el.innerHTML=
-      `<div class="c-tl" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>`+
-      `<div class="c-mid" style="font-size:${ms}px">${card.suit}</div>`+
-      `<div class="c-br" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>`;
+    var tl = document.createElement('div');
+    tl.className = 'c-tl';
+    tl.style.fontSize = fs + 'px';
+    tl.innerHTML = card.rank + '<br>' + card.suit;
+    el.appendChild(tl);
+
+    var br = document.createElement('div');
+    br.className = 'c-br';
+    br.style.fontSize = fs + 'px';
+    br.innerHTML = card.rank + '<br>' + card.suit;
+    el.appendChild(br);
+
+    // figuur of symbool midden
+    var fig = document.createElement('div');
+    var pad = Math.round(CW * 0.06);
+    var topPad = Math.round(CH * 0.14);
+
+    if (card.rank === 'J' || card.rank === 'Q' || card.rank === 'K' || card.rank === 'A') {
+      fig.className = 'c-fig';
+      fig.style.cssText = 'inset:' + topPad + 'px ' + pad + 'px ' + topPad + 'px ' + pad + 'px;position:absolute;';
+      if (card.rank === 'J')      fig.innerHTML = svgBoer(card.suit, rood);
+      else if (card.rank === 'Q') fig.innerHTML = svgVrouw(card.suit, rood);
+      else if (card.rank === 'K') fig.innerHTML = svgHeer(card.suit, rood);
+      else                        fig.innerHTML = svgAas(card.suit, rood);
+    } else {
+      fig.className = 'c-mid';
+      fig.style.fontSize = Math.max(14, Math.round(CW * 0.54)) + 'px';
+      fig.textContent = card.suit;
+    }
+    el.appendChild(fig);
   }
   return el;
 }
 
-/* ════════════════════════════════
-   DRAG -- pointer events
-════════════════════════════════ */
-let pdEl=null, pdExtras=[], pdOX=0, pdOY=0;
-
-function koppelDrag(el,info) {
-  // HTML5 (desktop)
-  el.draggable=true;
-  el.addEventListener('dragstart',e=>{
-    dragInfo=info; e.dataTransfer.effectAllowed='move';
-    setTimeout(()=>ghostSet(info,true),0);
-  });
-  el.addEventListener('dragend',()=>{ ghostSet(info,false); });
-
-  // Pointer (mobiel + desktop)
-  el.addEventListener('pointerdown',e=>{
-    if(e.button!==0)return;
-    e.preventDefault(); e.stopPropagation();
-    dragInfo=info; startPD(e,el,info);
-  },{passive:false});
+function posEl(el, x, y, z) {
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  el.style.zIndex = z;
 }
 
-function ghostSet(info,on) {
-  if (!info) return;
-  document.querySelectorAll('.card').forEach(k=>{
-    // verwijder eerst alle ghost
-    if (!on) k.classList.remove('ghost');
-  });
-  if (!on) return;
-  if (info.bron==='waste') {
-    // ghost de bovenste waste kaart
-    const wCards=[...$('board').querySelectorAll('.card')].filter(k=>!k.classList.contains('dn'));
-    // simpel: ghost de laatste niet-rug kaart in waste zone
-  }
-  if (info.bron==='tab') {
-    // ghost via data-index
-  }
+function mkSlot(x, y, w, h) {
+  var el = document.createElement('div');
+  el.className = 'slot';
+  el.style.cssText = 'left:'+x+'px;top:'+y+'px;width:'+(w||CW)+'px;height:'+(h||CH)+'px;';
+  return el;
 }
 
-function startPD(e,el,info) {
-  const r=el.getBoundingClientRect();
-  pdOX=e.clientX-r.left; pdOY=e.clientY-r.top;
+/* ══════════════════════════════════
+   RENDER
+══════════════════════════════════ */
+function teken() {
+  var brd = $('board');
+  brd.innerHTML = '';
 
-  // Sleep-kloon
-  pdEl=el.cloneNode(true);
-  Object.assign(pdEl.style,{
-    position:'fixed', width:CW+'px', height:CH+'px',
-    zIndex:1000, pointerEvents:'none', transition:'none',
-    left:(e.clientX-pdOX)+'px', top:(e.clientY-pdOY)+'px',
-    boxShadow:'0 20px 50px rgba(0,0,0,.85)',
-    transform:'rotate(2deg) scale(1.07)',
-    borderRadius:CR+'px'
-  });
-  document.body.appendChild(pdEl);
-  pdExtras=[];
+  var c, f, i, k, sl, lbl, dz;
+  var ROW1 = 0;
+  var ROW2 = CH + 12;
+  var colX = [];
+  for (c=0;c<7;c++) colX.push(c*(CW+GAP));
+  var fX = [colX[3], colX[4], colX[5], colX[6]];
+  var FSUIT = ['♠','♥','♦','♣'];
+  var bH = brd.clientHeight;
 
-  // Extra kaarten bij tableau-stack
-  if (info.bron==='tab') {
-    const kolom=tab[info.col];
-    for (let i=info.vanIdx;i<kolom.length;i++) {
-      const off=(i-info.vanIdx)*FSTEP;
-      if (i>info.vanIdx) {
-        const ex=maakEl({...kolom[i]});
-        Object.assign(ex.style,{
-          position:'fixed', width:CW+'px', height:CH+'px',
-          zIndex:1000+(i-info.vanIdx), pointerEvents:'none', transition:'none',
-          left:(e.clientX-pdOX)+'px', top:(e.clientY-pdOY+off)+'px',
-          transform:'rotate(2deg) scale(1.07)',
-          boxShadow:'0 10px 28px rgba(0,0,0,.7)',
-          borderRadius:CR+'px'
-        });
-        document.body.appendChild(ex);
-        pdExtras.push({el:ex,off});
-      }
+  // -- Stock slot
+  sl = mkSlot(colX[0], ROW1);
+  sl.innerHTML = '<div class="slot-lbl">↺</div>';
+  sl.addEventListener('click', function() { if (!stock.length) klikStock(); });
+  brd.appendChild(sl);
+
+  // -- Waste slot
+  brd.appendChild(mkSlot(colX[1], ROW1));
+
+  // -- Foundation slots
+  for (f=0;f<4;f++) {
+    sl = mkSlot(fX[f], ROW1);
+    lbl = document.createElement('div');
+    lbl.className = 'slot-lbl' + (f===1||f===2?' r':'');
+    lbl.textContent = FSUIT[f];
+    sl.appendChild(lbl);
+    brd.appendChild(sl);
+    (function(ff){ 
+      sl.addEventListener('dragover', function(e){ if(magFound(dragInfo,ff)) e.preventDefault(); });
+      sl.addEventListener('drop',     function(e){ e.preventDefault(); if(magFound(dragInfo,ff)){snap();verplaatsFound(ff);} });
+    })(f);
+  }
+
+  // -- Tableau slots (achtergrond)
+  for (c=0;c<7;c++) {
+    sl = mkSlot(colX[c], ROW2, CW, bH-ROW2-4);
+    brd.appendChild(sl);
+  }
+
+  // -- Stock kaart
+  if (stock.length) {
+    k = maakEl({up:false});
+    posEl(k, colX[0], ROW1, 2);
+    k.addEventListener('click', klikStock);
+    brd.appendChild(k);
+  }
+
+  // recycle indicator
+  if (DIFF[diff].recycleMax < 999) {
+    var ri2 = document.createElement('div');
+    var over = Math.max(0, DIFF[diff].recycleMax - recycleCount);
+    ri2.style.cssText = 'position:absolute;left:'+colX[0]+'px;top:'+(ROW1+CH+2)+'px;width:'+CW+'px;text-align:center;font-size:9px;color:rgba(255,255,255,.45);z-index:3;pointer-events:none';
+    ri2.textContent = over > 0 ? '↺ ' + over + 'x' : 'Klaar';
+    brd.appendChild(ri2);
+  }
+
+  // -- Waste kaarten
+  if (waste.length) {
+    var show = diff===3 ? Math.min(3,waste.length) : 1;
+    var start = waste.length - show;
+    var fan = Math.round(CW * 0.22);
+    for (i=start;i<waste.length;i++) {
+      k = maakEl(Object.assign({},waste[i],{up:true}));
+      posEl(k, colX[1]+(i-start)*fan, ROW1, i+2);
+      brd.appendChild(k);
+      if (i===waste.length-1) koppelDrag(k, {bron:'waste'});
     }
   }
 
-  el.style.opacity='0.15';
-  el._pdOrigEl=true;
+  // -- Foundation kaarten
+  for (f=0;f<4;f++) {
+    if (!found[f].length) continue;
+    var top = found[f][found[f].length-1];
+    k = maakEl(Object.assign({},top,{up:true}));
+    k.classList.add('nodrag');
+    posEl(k, fX[f], ROW1, 2);
+    brd.appendChild(k);
+    (function(ff){
+      k.addEventListener('dragover', function(e){ if(magFound(dragInfo,ff)) e.preventDefault(); });
+      k.addEventListener('drop',     function(e){ e.preventDefault(); if(magFound(dragInfo,ff)){snap();verplaatsFound(ff);} });
+    })(f);
+  }
 
-  document.addEventListener('pointermove',movePD,{passive:false});
-  document.addEventListener('pointerup',endPD);
-  document.addEventListener('pointercancel',endPD);
+  // -- Tableau kaarten
+  for (c=0;c<7;c++) {
+    var kolom = tab[c];
+    var y = ROW2;
+    for (i=0;i<kolom.length;i++) {
+      k = maakEl(Object.assign({},kolom[i]));
+      posEl(k, colX[c], y, ROW2+i+1);
+
+      if (kolom[i].up) {
+        koppelDrag(k, {bron:'tab', col:c, vanIdx:i});
+      } else if (i===kolom.length-1) {
+        k.style.cursor = 'pointer';
+        (function(col,idx){
+          k.addEventListener('click', function(){
+            snap(); tab[col][idx].up=true; pts(5); teken();
+          });
+        })(c,i);
+      }
+      brd.appendChild(k);
+      y += kolom[i].up ? FSTEP : DSTEP;
+    }
+
+    // drop zone
+    dz = document.createElement('div');
+    dz.style.cssText = 'position:absolute;left:'+colX[c]+'px;top:'+ROW2+'px;width:'+CW+'px;height:'+(bH-ROW2)+'px;z-index:0';
+    (function(cc){
+      dz.addEventListener('dragover', function(e){ if(magTab(dragInfo,cc)) e.preventDefault(); });
+      dz.addEventListener('drop',     function(e){ e.preventDefault(); if(magTab(dragInfo,cc)){snap();verplaatsTab(cc);} });
+    })(c);
+    brd.appendChild(dz);
+  }
 }
 
-function movePD(e){
-  if(!pdEl)return; e.preventDefault();
-  const x=e.clientX-pdOX, y=e.clientY-pdOY;
+/* ══════════════════════════════════
+   DRAG (pointer events)
+══════════════════════════════════ */
+var pdEl=null, pdExtras=[], pdOX=0, pdOY=0;
+
+function koppelDrag(el, info) {
+  // HTML5
+  el.draggable = true;
+  el.addEventListener('dragstart', function(e){
+    dragInfo = info; e.dataTransfer.effectAllowed='move';
+    setTimeout(function(){ el.style.opacity='0.15'; },0);
+  });
+  el.addEventListener('dragend', function(){ el.style.opacity=''; });
+
+  // Pointer
+  el.addEventListener('pointerdown', function(e){
+    if (e.button!==0) return;
+    e.preventDefault(); e.stopPropagation();
+    dragInfo = info; startPD(e, el, info);
+  }, {passive:false});
+}
+
+function startPD(e, el, info) {
+  var r = el.getBoundingClientRect();
+  pdOX = e.clientX-r.left; pdOY = e.clientY-r.top;
+
+  pdEl = el.cloneNode(true);
+  pdEl.style.cssText += ';position:fixed;width:'+CW+'px;height:'+CH+'px;z-index:1000;pointer-events:none;transition:none;'
+    +'left:'+(e.clientX-pdOX)+'px;top:'+(e.clientY-pdOY)+'px;'
+    +'box-shadow:0 20px 50px rgba(0,0,0,.85);transform:rotate(2deg) scale(1.07);border-radius:'+CR+'px';
+  document.body.appendChild(pdEl);
+  pdExtras = [];
+  el.style.opacity = '0.15';
+
+  if (info.bron==='tab') {
+    var kolom = tab[info.col];
+    for (var i=info.vanIdx+1;i<kolom.length;i++) {
+      var off = (i-info.vanIdx)*FSTEP;
+      var ex = maakEl(Object.assign({},kolom[i]));
+      ex.style.cssText += ';position:fixed;width:'+CW+'px;height:'+CH+'px;z-index:'+(1000+i-info.vanIdx)+';pointer-events:none;transition:none;'
+        +'left:'+(e.clientX-pdOX)+'px;top:'+(e.clientY-pdOY+off)+'px;'
+        +'transform:rotate(2deg) scale(1.07);box-shadow:0 10px 28px rgba(0,0,0,.7);border-radius:'+CR+'px';
+      document.body.appendChild(ex);
+      pdExtras.push({el:ex, off:off});
+    }
+  }
+
+  document.addEventListener('pointermove', movePD, {passive:false});
+  document.addEventListener('pointerup',   endPD);
+  document.addEventListener('pointercancel', endPD);
+}
+
+function movePD(e) {
+  if (!pdEl) return; e.preventDefault();
+  var x=e.clientX-pdOX, y=e.clientY-pdOY;
   pdEl.style.left=x+'px'; pdEl.style.top=y+'px';
-  pdExtras.forEach(g=>{ g.el.style.left=x+'px'; g.el.style.top=(y+g.off)+'px'; });
+  for (var i=0;i<pdExtras.length;i++) {
+    pdExtras[i].el.style.left=x+'px';
+    pdExtras[i].el.style.top=(y+pdExtras[i].off)+'px';
+  }
 }
 
-function endPD(e){
-  document.removeEventListener('pointermove',movePD);
-  document.removeEventListener('pointerup',endPD);
-  document.removeEventListener('pointercancel',endPD);
-  if(!pdEl)return;
-  const cx=e.clientX, cy=e.clientY;
+function endPD(e) {
+  document.removeEventListener('pointermove', movePD);
+  document.removeEventListener('pointerup',   endPD);
+  document.removeEventListener('pointercancel', endPD);
+  if (!pdEl) return;
+  var cx=e.clientX, cy=e.clientY;
   pdEl.remove(); pdEl=null;
-  pdExtras.forEach(g=>g.el.remove()); pdExtras=[];
+  for (var i=0;i<pdExtras.length;i++) pdExtras[i].el.remove();
+  pdExtras=[];
 
-  if(!dragInfo){teken();return;}
-  let ok=false;
+  if (!dragInfo) { teken(); return; }
+  var ok=false, brd=$('board'), br;
 
-  // Check foundations
-  for(let f=0;f<4&&!ok;f++){
-    const r=$('board').querySelectorAll('.slot')[f+2].getBoundingClientRect();
-    if(cx>=r.left&&cx<=r.right&&cy>=r.top&&cy<=r.bottom&&magFound(dragInfo,f)){
+  // foundations
+  var slots = brd.querySelectorAll('.slot');
+  for (var f=0;f<4&&!ok;f++) {
+    br = slots[f+2].getBoundingClientRect();
+    if (cx>=br.left&&cx<=br.right&&cy>=br.top&&cy<=br.bottom&&magFound(dragInfo,f)) {
       snap(); verplaatsFound(f); ok=true;
     }
   }
-  // Check tableau kolommen
-  if(!ok){
-    const brd=$('board').getBoundingClientRect();
-    const bX=cx-brd.left;
-    const col=Math.floor(bX/(CW+GAP));
-    if(col>=0&&col<7&&magTab(dragInfo,col)){
-      snap(); verplaatsTab(col); ok=true;
+  // tableau
+  if (!ok) {
+    var brdR = brd.getBoundingClientRect();
+    var bX = cx - brdR.left;
+    var col = Math.floor(bX / (CW+GAP));
+    if (col>=0&&col<7&&magTab(dragInfo,col)) { snap(); verplaatsTab(col); ok=true; }
+    // probeer ook naburige kolom
+    if (!ok) {
+      col = Math.round(bX/(CW+GAP));
+      if (col>=0&&col<7&&magTab(dragInfo,col)) { snap(); verplaatsTab(col); ok=true; }
     }
   }
   dragInfo=null;
   teken();
 }
 
-/* ════════════════════════════════
-   SPELREGELS
-════════════════════════════════ */
-function getKaarten(info){
-  if(!info)return[];
-  if(info.bron==='waste') return waste.length?[waste[waste.length-1]]:[];
-  if(info.bron==='tab')   return tab[info.col].slice(info.vanIdx);
-  return[];
+/* ══════════════════════════════════
+   REGELS
+══════════════════════════════════ */
+function getKaarten(info) {
+  if (!info) return [];
+  if (info.bron==='waste') return waste.length ? [waste[waste.length-1]] : [];
+  if (info.bron==='tab')   return tab[info.col].slice(info.vanIdx);
+  return [];
 }
 
-function magTab(info,toCol){
-  if(!info)return false;
-  const ks=getKaarten(info); if(!ks.length)return false;
-  const k=ks[0], kol=tab[toCol];
-  if(!kol.length) return k.rank==='K';
-  const top=kol[kol.length-1];
-  return top.up && ROOD.has(k.suit)!==ROOD.has(top.suit) && RI(k.rank)===RI(top.rank)-1;
+function magTab(info, toCol) {
+  if (!info) return false;
+  var ks=getKaarten(info); if(!ks.length) return false;
+  var k=ks[0], kol=tab[toCol];
+  if (!kol.length) return k.rank==='K';
+  var top=kol[kol.length-1];
+  return top.up && (!!ROOD[k.suit])!==(!!ROOD[top.suit]) && ri(k.rank)===ri(top.rank)-1;
 }
 
-function magFound(info,f){
-  if(!info)return false;
-  const ks=getKaarten(info); if(ks.length!==1)return false;
-  const k=ks[0], pile=found[f];
-  if(!pile.length) return k.rank==='A';
-  const top=pile[pile.length-1];
-  return k.suit===top.suit && RI(k.rank)===RI(top.rank)+1;
+function magFound(info, f) {
+  if (!info) return false;
+  var ks=getKaarten(info); if(ks.length!==1) return false;
+  var k=ks[0], pile=found[f];
+  if (!pile.length) return k.rank==='A';
+  var top=pile[pile.length-1];
+  return k.suit===top.suit && ri(k.rank)===ri(top.rank)+1;
 }
 
-/* ════════════════════════════════
+/* ══════════════════════════════════
    ACTIES
-════════════════════════════════ */
-function klikStock(){
-  snap();
-  if(!stock.length){
-    stock=waste.slice().reverse().map(c=>({...c,up:false}));
-    waste=[]; pts(-100);
+══════════════════════════════════ */
+function klikStock() {
+  var d = DIFF[diff];
+  if (!stock.length) {
+    if (recycleCount >= d.recycleMax) { toast('Geen recycles meer!'); return; }
+    snap();
+    for (var i=waste.length-1;i>=0;i--) {
+      var cd=Object.assign({},waste[i],{up:false});
+      stock.push(cd);
+    }
+    waste=[]; recycleCount++;
+    pts(-Math.round(50*diff));
   } else {
-    const c=stock.pop(); c.up=true; waste.push(c);
+    snap();
+    var n=Math.min(d.draw, stock.length);
+    for (var j=0;j<n;j++) { var c2=stock.pop(); c2.up=true; waste.push(c2); }
   }
   teken();
 }
 
-function draaiBovenste(col){
-  const k=tab[col];
-  if(k.length&&!k[k.length-1].up){ k[k.length-1].up=true; pts(5); }
+function draaiBovenste(col) {
+  var k=tab[col];
+  if (k.length&&!k[k.length-1].up) { k[k.length-1].up=true; pts(5); }
 }
 
-function verplaatsTab(toCol){
-  if(!dragInfo)return;
-  const ks=getKaarten(dragInfo);
-  if(dragInfo.bron==='waste'){waste.pop();pts(5);}
-  else{tab[dragInfo.col].splice(dragInfo.vanIdx);draaiBovenste(dragInfo.col);pts(3);}
-  tab[toCol].push(...ks);
+function verplaatsTab(toCol) {
+  if (!dragInfo) return;
+  var ks=getKaarten(dragInfo);
+  if (dragInfo.bron==='waste') { waste.pop(); pts(5); }
+  else { tab[dragInfo.col].splice(dragInfo.vanIdx); draaiBovenste(dragInfo.col); pts(3); }
+  for (var i=0;i<ks.length;i++) tab[toCol].push(ks[i]);
   dragInfo=null; teken();
 }
 
-function verplaatsFound(f){
-  if(!dragInfo)return;
-  const k=getKaarten(dragInfo)[0];
-  if(dragInfo.bron==='waste'){waste.pop();}
-  else{tab[dragInfo.col].pop();draaiBovenste(dragInfo.col);}
+function verplaatsFound(f) {
+  if (!dragInfo) return;
+  var k=getKaarten(dragInfo)[0];
+  if (dragInfo.bron==='waste') { waste.pop(); }
+  else { tab[dragInfo.col].pop(); draaiBovenste(dragInfo.col); }
   found[f].push(k); pts(10);
   dragInfo=null; teken(); checkWin();
 }
 
-function autoFound(info){
-  for(let f=0;f<4;f++){
-    if(magFound(info,f)){snap();dragInfo=info;verplaatsFound(f);return true;}
+function autoFound(info) {
+  for (var f=0;f<4;f++) {
+    if (magFound(info,f)) { snap(); dragInfo=info; verplaatsFound(f); return true; }
   }
   return false;
 }
 
 // Dubbelklik → foundation
-document.addEventListener('dblclick',e=>{
-  const k=e.target.closest('.card.up');
-  if(!k||k.classList.contains('nodrag'))return;
-  const brd=$('board');
-  // waste?
-  if(waste.length){
-    const wk=brd.querySelectorAll('.card');
-    // zoek de waste-top kaart
-    if(autoFound({bron:'waste'}))return;
-  }
-  // tableau bovenste?
-  for(let c=0;c<7;c++){
-    const kol=tab[c];
-    if(!kol.length||!kol[kol.length-1].up)continue;
-    if(autoFound({bron:'tab',col:c,vanIdx:kol.length-1}))return;
+document.addEventListener('dblclick', function(e) {
+  var k=e.target; while(k&&!k.classList.contains('card')) k=k.parentElement;
+  if (!k||!k.classList.contains('up')||k.classList.contains('nodrag')) return;
+  if (waste.length && autoFound({bron:'waste'})) return;
+  for (var c=0;c<7;c++) {
+    var kol=tab[c]; if(!kol.length||!kol[kol.length-1].up) continue;
+    if (autoFound({bron:'tab',col:c,vanIdx:kol.length-1})) return;
   }
 });
 
-/* ════════════════════════════════
+/* ══════════════════════════════════
    HINT
-════════════════════════════════ */
-function hint(){
-  // foundation first
-  if(waste.length){
-    for(let f=0;f<4;f++) if(magFound({bron:'waste'},f)){
-      glow($('board').querySelector('.card.up')); return;
+══════════════════════════════════ */
+function hint() {
+  var c, f, i, kol, top;
+  // waste → foundation
+  if (waste.length) {
+    for (f=0;f<4;f++) if(magFound({bron:'waste'},f)){
+      toast('💡 Stuur '+waste[waste.length-1].rank+waste[waste.length-1].suit+' naar foundation'); return;
     }
   }
-  for(let c=0;c<7;c++){
-    const kol=tab[c]; if(!kol.length||!kol[kol.length-1].up)continue;
-    for(let f=0;f<4;f++) if(magFound({bron:'tab',col:c,vanIdx:kol.length-1},f)){
-      // highlight die kaart -- vind hem via positie
-      toast('💡 Stuur '+kol[kol.length-1].rank+kol[kol.length-1].suit+' naar foundation!'); return;
+  // tableau → foundation
+  for (c=0;c<7;c++) {
+    kol=tab[c]; if(!kol.length||!kol[kol.length-1].up) continue;
+    top=kol[kol.length-1];
+    for (f=0;f<4;f++) if(magFound({bron:'tab',col:c,vanIdx:kol.length-1},f)){
+      toast('💡 Stuur '+top.rank+top.suit+' naar foundation'); return;
     }
   }
-  // tableau naar tableau
-  for(let c=0;c<7;c++){
-    const kol=tab[c];
-    for(let i=0;i<kol.length;i++){
-      if(!kol[i].up)continue;
-      for(let t=0;t<7;t++){
-        if(t===c)continue;
-        if(magTab({bron:'tab',col:c,vanIdx:i},t)){
+  // tableau → tableau
+  for (c=0;c<7;c++) {
+    kol=tab[c];
+    for (i=0;i<kol.length;i++) {
+      if (!kol[i].up) continue;
+      for (var t=0;t<7;t++) {
+        if (t===c) continue;
+        if (magTab({bron:'tab',col:c,vanIdx:i},t)){
           toast('💡 Zet '+kol[i].rank+kol[i].suit+' op kolom '+(t+1)); return;
         }
       }
     }
   }
-  if(waste.length)for(let t=0;t<7;t++)
-    if(magTab({bron:'waste'},t)){ toast('💡 Zet waste-kaart op kolom '+(t+1)); return; }
-
+  // waste → tableau
+  if (waste.length) {
+    for (var t2=0;t2<7;t2++) if(magTab({bron:'waste'},t2)){
+      toast('💡 Zet '+waste[waste.length-1].rank+waste[waste.length-1].suit+' op kolom '+(t2+1)); return;
+    }
+  }
   toast('Geen zet gevonden -- klik de stock');
 }
 
-function glow(el){
-  if(!el)return;
-  const old=el.style.boxShadow;
-  el.style.boxShadow='0 0 0 3px #f5c840, 0 0 18px rgba(245,200,64,.7)';
-  setTimeout(()=>{ if(el)el.style.boxShadow=old; },1200);
-}
-
-/* ════════════════════════════════
+/* ══════════════════════════════════
    WIN
-════════════════════════════════ */
-function checkWin(){
-  if(found.reduce((a,f)=>a+f.length,0)!==52)return;
+══════════════════════════════════ */
+function checkWin() {
+  var totaal = 0;
+  for (var f=0;f<4;f++) totaal+=found[f].length;
+  if (totaal!==52) return;
   clearInterval(timerRef);
-  pts(Math.max(0,700-secs*2));
-  const m=Math.floor(secs/60),s=secs%60;
+  pts(Math.max(0,(700-secs*2)*diff));
+  var m=Math.floor(secs/60), s=secs%60;
   $('wp').textContent='Score: '+score;
   $('wt').textContent='Tijd: '+m+':'+(s<10?'0':'')+s;
+  $('wd').textContent='Niveau: '+DIFF[diff].label;
   $('win').classList.add('show');
   confetti();
-  const hs=parseInt(localStorage.getItem('sol_hs')||'0');
+  var hs=parseInt(localStorage.getItem('sol_hs')||'0');
   if(score>hs){localStorage.setItem('sol_hs',score);$('hs').textContent=score;}
 }
 
 function confetti(){
-  const kl=['#d4a017','#f5c842','#cc1111','#22c55e','#3b82f6','#a855f7','#f97316'];
-  for(let i=0;i<100;i++){
-    const el=document.createElement('div'); el.className='kf';
-    el.style.cssText=`left:${Math.random()*100}vw;background:${kl[i%kl.length]};animation-duration:${1.2+Math.random()*2.5}s;animation-delay:${Math.random()*2}s`;
-    document.body.appendChild(el); setTimeout(()=>el.remove(),6000);
+  var kl=['#d4a017','#f5c842','#cc1111','#22c55e','#3b82f6','#a855f7','#f97316'];
+  for(var i=0;i<100;i++){
+    var el=document.createElement('div'); el.className='kf';
+    el.style.cssText='left:'+Math.random()*100+'vw;background:'+kl[i%kl.length]
+      +';animation-duration:'+(1.2+Math.random()*2.5)+'s;animation-delay:'+Math.random()*2+'s';
+    document.body.appendChild(el);
+    setTimeout(function(e){return function(){e.remove()};}(el),6000);
   }
 }
 
-/* ════════════════════════════════
+/* ══════════════════════════════════
    TOAST
-════════════════════════════════ */
-let toastT=null;
+══════════════════════════════════ */
+var toastT=null;
 function toast(msg){
-  const el=$('toast'); el.textContent=msg; el.classList.add('on');
-  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('on'),2400);
+  var el=$('toast'); el.textContent=msg; el.classList.add('on');
+  clearTimeout(toastT); toastT=setTimeout(function(){el.classList.remove('on');},2400);
 }
 
-/* ════════════════════════════════
-   RESIZE
-════════════════════════════════ */
-window.addEventListener('resize',()=>{ bereken(); teken(); });
+window.addEventListener('resize', function(){ bereken(); teken(); });
 
-/* ════════════════════════════════
-   START
-════════════════════════════════ */
-nieuwSpel();
+})(); // IIFE -- voorkomt globale scope fouten
 </script>
 
 </body>
