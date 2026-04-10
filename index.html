@@ -7,66 +7,181 @@
 <title>Solitaire – Neeltje</title>
 <style>
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-html, body { width:100%; height:100%; overflow:hidden; font-family:Georgia,'Times New Roman',serif; user-select:none; touch-action:none; }
-body { background:radial-gradient(ellipse at 50% 30%,#3fa84a 0%,#2a7a35 50%,#184d20 100%); }
-body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Ccircle cx='1' cy='1' r='.6' fill='rgba(0,0,0,0.08)'/%3E%3C/svg%3E"); }
-body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-  background:radial-gradient(ellipse at 50% 50%,transparent 45%,rgba(0,0,0,0.45) 100%); }
 
-#neeltje { position:fixed; inset:0; z-index:0; pointer-events:none; display:flex; align-items:center; justify-content:center; }
-#neeltje span { font-family:Georgia,serif; font-size:min(22vw,130px); font-weight:bold; font-style:italic; color:rgba(255,255,255,0.06); letter-spacing:8px; white-space:nowrap; }
+html, body {
+width:100%; min-height:100%;
+font-family:Georgia,‘Times New Roman’,serif;
+user-select:none;
+background:radial-gradient(ellipse at 50% 30%,#3fa84a 0%,#2a7a35 50%,#184d20 100%);
+}
 
-/* DIFF SCHERM */
-#diff-screen { position:fixed; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:28px 20px; }
+/* vilt */
+body::before {
+content:’’; position:fixed; inset:0; pointer-events:none; z-index:0;
+background-image:url("data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘4’ height=‘4’%3E%3Ccircle cx=‘1’ cy=‘1’ r=’.6’ fill=‘rgba(0,0,0,0.08)’/%3E%3C/svg%3E");
+}
+body::after {
+content:’’; position:fixed; inset:0; pointer-events:none; z-index:0;
+background:radial-gradient(ellipse at 50% 50%,transparent 40%,rgba(0,0,0,0.4) 100%);
+}
+
+/* ── NEELTJE ── */
+#neeltje {
+position:fixed; inset:0; z-index:0; pointer-events:none;
+display:flex; align-items:center; justify-content:center;
+}
+#neeltje span {
+font-family:Georgia,serif;
+font-size:18vw;
+font-weight:bold; font-style:italic;
+color:rgba(255,255,255,0.12);
+letter-spacing:6px;
+white-space:nowrap;
+text-shadow:0 4px 20px rgba(0,0,0,0.3);
+}
+
+/* ── DIFF SCHERM ── */
+#diff-screen {
+position:fixed; inset:0; z-index:100;
+display:flex; flex-direction:column;
+align-items:center; justify-content:center;
+gap:14px; padding:28px 20px;
+}
 .ds-kaart { font-size:52px; }
-.ds-titel { font-size:clamp(24px,7vw,34px); font-weight:bold; color:#f5c840; letter-spacing:3px; text-shadow:0 0 24px rgba(245,200,64,.5); }
-.ds-sub { font-size:14px; color:rgba(255,255,255,.55); }
-.diff-btn { width:100%; max-width:320px; background:linear-gradient(160deg,#3a6e16,#1e4010); border:2.5px solid #c8a020; border-radius:18px; padding:16px 20px; cursor:pointer; text-align:left; box-shadow:0 5px 18px rgba(0,0,0,.45); display:flex; align-items:center; gap:14px; -webkit-appearance:none; }
+.ds-titel {
+font-size:clamp(24px,7vw,34px); font-weight:bold;
+color:#f5c840; letter-spacing:3px;
+text-shadow:0 0 24px rgba(245,200,64,.6),0 2px 4px rgba(0,0,0,.5);
+}
+.ds-sub { font-size:14px; color:rgba(255,255,255,.6); }
+.diff-btn {
+width:100%; max-width:320px;
+background:linear-gradient(160deg,#3a6e16,#1e4010);
+border:2.5px solid #c8a020; border-radius:18px;
+padding:16px 20px; cursor:pointer; text-align:left;
+box-shadow:0 5px 18px rgba(0,0,0,.45);
+display:flex; align-items:center; gap:14px;
+-webkit-appearance:none;
+}
 .diff-btn:active { opacity:.8; }
 .diff-nr { font-size:28px; color:#f5c840; font-weight:bold; min-width:34px; text-align:center; }
 .diff-name { font-size:16px; color:#fff; font-weight:bold; margin-bottom:3px; }
 .diff-desc { font-size:12px; color:rgba(255,255,255,.55); }
 .diff-stars { font-size:14px; color:#f5c840; margin-top:3px; }
 
-/* GAME */
-#app { position:fixed; inset:0; z-index:1; display:none; flex-direction:column; padding:8px 6px 4px; overflow:hidden; }
+/* ── GAME ── */
+#app {
+position:fixed; inset:0; z-index:1;
+display:none; flex-direction:column;
+padding:8px 6px 4px; overflow:hidden;
+}
 
-/* HEADER */
+/* ── HEADER ── */
 #hdr { display:flex; align-items:center; gap:5px; margin-bottom:8px; flex-shrink:0; }
-.pill { background:linear-gradient(180deg,#3d7a18,#285210); border:2.5px solid #c8a020; border-radius:22px; padding:6px 11px; font-size:12px; font-weight:bold; color:#f5c840; white-space:nowrap; box-shadow:0 3px 8px rgba(0,0,0,.4); }
+.pill {
+background:linear-gradient(180deg,#3d7a18,#285210);
+border:2.5px solid #c8a020; border-radius:22px;
+padding:6px 11px; font-size:12px; font-weight:bold;
+color:#f5c840; white-space:nowrap;
+box-shadow:0 3px 8px rgba(0,0,0,.4);
+}
 .pill span { color:#fff; font-size:13px; }
-.hbtn { background:linear-gradient(180deg,#3a6e15,#235010); border:2.5px solid #c8a020; border-radius:22px; padding:6px 11px; font-size:12px; font-weight:bold; color:#f5c840; cursor:pointer; white-space:nowrap; font-family:Georgia,serif; box-shadow:0 3px 8px rgba(0,0,0,.4); -webkit-appearance:none; }
+.hbtn {
+background:linear-gradient(180deg,#3a6e15,#235010);
+border:2.5px solid #c8a020; border-radius:22px;
+padding:6px 11px; font-size:12px; font-weight:bold;
+color:#f5c840; cursor:pointer; white-space:nowrap;
+font-family:Georgia,serif;
+box-shadow:0 3px 8px rgba(0,0,0,.4);
+-webkit-appearance:none;
+}
 .hbtn:active { opacity:.8; }
-#btn-nieuw { background:linear-gradient(180deg,#c8a020,#886800); border:2.5px solid #f5d060; border-radius:22px; padding:7px 13px; font-size:12px; font-weight:bold; color:#1a0e00; cursor:pointer; white-space:nowrap; font-family:Georgia,serif; box-shadow:0 3px 10px rgba(200,160,32,.5); flex-shrink:0; -webkit-appearance:none; }
+#btn-nieuw {
+background:linear-gradient(180deg,#c8a020,#886800);
+border:2.5px solid #f5d060; border-radius:22px;
+padding:7px 13px; font-size:12px; font-weight:bold;
+color:#1a0e00; cursor:pointer; white-space:nowrap;
+font-family:Georgia,serif;
+box-shadow:0 3px 10px rgba(200,160,32,.5);
+flex-shrink:0; -webkit-appearance:none;
+}
 #btn-nieuw:active { opacity:.85; }
 #hspc { flex:1; min-width:0; }
 
-/* BORD */
+/* ── BORD ── */
 #board { flex:1; position:relative; overflow:hidden; }
-.slot { border-radius:8px; background:rgba(0,0,0,.2); border:2px dashed rgba(255,255,255,.2); position:absolute; }
-.slot-lbl { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.5em; opacity:.28; pointer-events:none; }
-.slot-lbl.r { color:#ff5555; }
 
-/* KAARTEN */
-.card { position:absolute; border-radius:8px; will-change:transform; overflow:hidden; }
-.card.dn { background:linear-gradient(150deg,#2255cc,#0e2080); border:2px solid rgba(255,255,255,.18); box-shadow:2px 3px 8px rgba(0,0,0,.6); cursor:default; }
-.card.dn::before { content:’’; position:absolute; inset:5px; border-radius:4px; border:1px solid rgba(255,255,255,.18);
-background:repeating-linear-gradient(45deg,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 2px,transparent 2px,transparent 9px),
-repeating-linear-gradient(-45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 2px,transparent 2px,transparent 9px); }
-.card.up { background:#fdf6e3; border:1.5px solid rgba(0,0,0,.15); box-shadow:3px 4px 12px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.9); cursor:grab; }
+/* ── SLOTS ── */
+.slot {
+border-radius:9px; background:rgba(0,0,0,.22);
+border:2px dashed rgba(255,255,255,.22);
+position:absolute;
+}
+.slot-lbl {
+position:absolute; inset:0;
+display:flex; align-items:center; justify-content:center;
+font-size:1.5em; opacity:.3; pointer-events:none;
+}
+.slot-lbl.r { color:#ff6666; }
+
+/* ── KAARTEN ── */
+.card {
+position:absolute; border-radius:9px;
+will-change:transform; overflow:hidden;
+}
+
+/* KAARTRUG -- mooi blauw met gouden rand */
+.card.dn {
+background:linear-gradient(150deg,#1e4fd4,#0c1e88);
+border:2.5px solid #c8a020;
+box-shadow:2px 3px 10px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,255,255,.15);
+cursor:default;
+}
+.card.dn::before {
+content:’’; position:absolute; inset:6px; border-radius:5px;
+border:1.5px solid rgba(255,255,255,.2);
+background:
+repeating-linear-gradient(45deg,rgba(255,255,255,.06) 0,rgba(255,255,255,.06) 2px,transparent 2px,transparent 9px),
+repeating-linear-gradient(-45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 2px,transparent 2px,transparent 9px);
+}
+.card.dn::after {
+content:‘✦’; position:absolute; inset:0;
+display:flex; align-items:center; justify-content:center;
+font-size:1.8em; color:rgba(255,255,255,.1); pointer-events:none;
+}
+
+/* KAARTVOORKANT -- crème met gouden buitenrand */
+.card.up {
+background:linear-gradient(160deg,#fefaf0,#f8f0d8);
+border:2.5px solid #c8a020;
+box-shadow:3px 5px 14px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.95), 0 0 0 1px rgba(200,160,32,.3);
+cursor:grab;
+}
+/* binnenste sierrand */
+.card.up::before {
+content:’’; position:absolute; inset:4px; border-radius:6px;
+border:1px solid rgba(200,160,32,.25);
+pointer-events:none; z-index:0;
+}
 .card.up.r { color:#cc1111; }
 .card.up.b { color:#111; }
 .card.ghost { opacity:.15; pointer-events:none; }
-.c-tl { position:absolute; top:3px; left:4px; font-weight:bold; line-height:1.1; }
-.c-br { position:absolute; bottom:3px; right:4px; font-weight:bold; line-height:1.1; transform:rotate(180deg); }
-.c-fig { position:absolute; display:flex; align-items:center; justify-content:center; pointer-events:none; }
-.c-mid { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
 
-/* WIN */
+.c-tl { position:absolute; top:4px; left:5px; font-weight:bold; line-height:1.1; z-index:1; }
+.c-br { position:absolute; bottom:4px; right:5px; font-weight:bold; line-height:1.1; transform:rotate(180deg); z-index:1; }
+.c-fig { position:absolute; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:1; }
+.c-mid { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:1; }
+
+/* ── WIN ── */
 #win { display:none; position:fixed; inset:0; z-index:999; background:rgba(0,0,0,.78); align-items:center; justify-content:center; }
 #win.show { display:flex; }
-.wbox { background:linear-gradient(155deg,#1e5e2a,#0e3015); border:3px solid #c8a020; border-radius:22px; padding:38px 48px; text-align:center; box-shadow:0 30px 80px rgba(0,0,0,.8); animation:popin .4s cubic-bezier(.34,1.56,.64,1); }
+.wbox {
+background:linear-gradient(155deg,#1e5e2a,#0e3015);
+border:3px solid #c8a020; border-radius:22px;
+padding:38px 48px; text-align:center;
+box-shadow:0 30px 80px rgba(0,0,0,.8);
+animation:popin .4s cubic-bezier(.34,1.56,.64,1);
+}
 @keyframes popin { from{transform:scale(.4);opacity:0} to{transform:scale(1);opacity:1} }
 .wbox h2 { font-size:36px; color:#f5c840; margin-bottom:10px; }
 .wbox p { color:rgba(255,255,255,.7); font-size:14px; margin-bottom:4px; }
@@ -83,23 +198,27 @@ repeating-linear-gradient(-45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 2
 
 <div id="neeltje"><span>Neeltje</span></div>
 
+<!-- DIFF SCHERM -->
+
 <div id="diff-screen">
   <div class="ds-kaart">🃏</div>
   <div class="ds-titel">♠ SOLITAIRE</div>
   <div class="ds-sub">Kies je moeilijkheidsgraad</div>
   <button class="diff-btn" id="d1">
     <div class="diff-nr">1</div>
-    <div><div class="diff-name">Makkelijk</div><div class="diff-desc">1 kaart per keer · Onbeperkt recyclen</div><div class="diff-stars">★☆☆</div></div>
+    <div><div class="diff-name">Makkelijk</div><div class="diff-desc">1 kaart · Onbeperkt recyclen</div><div class="diff-stars">★☆☆</div></div>
   </button>
   <button class="diff-btn" id="d2">
     <div class="diff-nr">2</div>
-    <div><div class="diff-name">Normaal</div><div class="diff-desc">1 kaart per keer · Max 3x recyclen</div><div class="diff-stars">★★☆</div></div>
+    <div><div class="diff-name">Normaal</div><div class="diff-desc">1 kaart · Max 3x recyclen</div><div class="diff-stars">★★☆</div></div>
   </button>
   <button class="diff-btn" id="d3">
     <div class="diff-nr">3</div>
-    <div><div class="diff-name">Moeilijk</div><div class="diff-desc">3 kaarten per keer · Max 1x recyclen</div><div class="diff-stars">★★★</div></div>
+    <div><div class="diff-name">Moeilijk</div><div class="diff-desc">3 kaarten · Max 1x recyclen</div><div class="diff-stars">★★★</div></div>
   </button>
 </div>
+
+<!-- GAME -->
 
 <div id="app">
   <div id="hdr">
@@ -115,6 +234,8 @@ repeating-linear-gradient(-45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 2
   <div id="board"></div>
 </div>
 
+<!-- WIN -->
+
 <div id="win">
   <div class="wbox">
     <h2>🎉 Gewonnen!</h2>
@@ -128,30 +249,33 @@ repeating-linear-gradient(-45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 2
 <div id="toast"></div>
 
 <script>
-/* ══════════════════════════════════
+/* ══════════════════════════════
    SVG FIGUREN
-══════════════════════════════════ */
-function svgBoer(suit, rood) {
-  var kl=rood?'#b01010':'#1a3590', bg=rood?'rgba(255,220,220,0.3)':'rgba(200,220,255,0.3)';
+══════════════════════════════ */
+function svgBoer(suit,rood){
+  var kl=rood?'#b01010':'#1a3590',bg=rood?'rgba(255,210,210,0.35)':'rgba(190,210,255,0.35)';
   return '<svg viewBox="0 0 76 96" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">'
     +'<rect width="76" height="96" rx="4" fill="'+bg+'"/>'
-    +'<ellipse cx="38" cy="76" rx="26" ry="22" fill="'+kl+'"/>'
-    +'<rect x="20" y="56" width="36" height="24" rx="4" fill="'+kl+'"/>'
-    +'<path d="M26 56 Q38 64 50 56 L48 70 Q38 76 28 70Z" fill="white" opacity=".75"/>'
+    +'<ellipse cx="38" cy="78" rx="26" ry="20" fill="'+kl+'"/>'
+    +'<rect x="20" y="58" width="36" height="22" rx="4" fill="'+kl+'"/>'
+    +'<path d="M26 58 Q38 66 50 58 L48 70 Q38 76 28 70Z" fill="white" opacity=".8"/>'
     +'<circle cx="38" cy="36" r="14" fill="#f5d5a0"/>'
-    +'<path d="M24 36 Q24 20 38 18 Q52 20 52 36" fill="#5a2d0c"/>'
+    +'<path d="M24 36 Q24 19 38 17 Q52 19 52 36" fill="#5a2d0c"/>'
     +'<path d="M26 22 L29 14 L35 20 L38 12 L41 20 L47 14 L50 22Z" fill="#c8a020" stroke="#7a5800" stroke-width=".8"/>'
     +'<circle cx="38" cy="13" r="2.5" fill="'+(rood?'#3498db':'#e74c3c')+'"/>'
+    +'<circle cx="29" cy="15" r="1.8" fill="#9b59b6"/>'
+    +'<circle cx="47" cy="15" r="1.8" fill="#2ecc71"/>'
     +'<circle cx="33" cy="37" r="1.8" fill="#2c1800"/>'
     +'<circle cx="43" cy="37" r="1.8" fill="#2c1800"/>'
     +'<path d="M33 43 Q38 47 43 43" stroke="#5a2d0c" stroke-width="1.3" fill="none"/>'
-    +'<line x1="38" y1="60" x2="38" y2="82" stroke="#999" stroke-width="2.5"/>'
-    +'<path d="M33 65 Q38 60 43 65" fill="#bbb"/>'
-    +'<text x="38" y="94" text-anchor="middle" font-size="12" fill="'+(rood?'#cc1111':'#111')+'" font-family="Georgia,serif">'+suit+'</text>'
+    +'<path d="M31 40 Q38 42 45 40" stroke="#5a2d0c" stroke-width="1" fill="none"/>'
+    +'<line x1="38" y1="62" x2="38" y2="84" stroke="#aaa" stroke-width="2.5"/>'
+    +'<path d="M33 67 Q38 62 43 67" fill="#ccc"/>'
+    +'<text x="38" y="94" text-anchor="middle" font-size="11" fill="'+(rood?'#cc1111':'#111')+'" font-family="Georgia,serif">'+suit+'</text>'
     +'</svg>';
 }
-function svgVrouw(suit, rood) {
-  var kl=rood?'#aa0044':'#1a5c1a', bg=rood?'rgba(255,200,220,0.3)':'rgba(200,255,210,0.3)';
+function svgVrouw(suit,rood){
+  var kl=rood?'#aa0044':'#1a5c1a',bg=rood?'rgba(255,190,215,0.35)':'rgba(190,255,200,0.35)';
   return '<svg viewBox="0 0 76 96" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">'
     +'<rect width="76" height="96" rx="4" fill="'+bg+'"/>'
     +'<path d="M12 96 Q20 68 38 62 Q56 68 64 96Z" fill="'+kl+'"/>'
@@ -161,6 +285,8 @@ function svgVrouw(suit, rood) {
     +'<path d="M24 34 Q24 17 38 15 Q52 17 52 34 L51 39 Q44 46 38 46 Q32 46 25 39Z" fill="#7b3f00"/>'
     +'<path d="M25 20 L29 12 L34 18 L38 10 L42 18 L47 12 L51 20Z" fill="#c8a020" stroke="#7a5800" stroke-width=".8"/>'
     +'<circle cx="38" cy="11" r="2.5" fill="#e74c3c"/>'
+    +'<circle cx="29" cy="13" r="1.8" fill="#9b59b6"/>'
+    +'<circle cx="47" cy="13" r="1.8" fill="#9b59b6"/>'
     +'<circle cx="33" cy="33" r="1.6" fill="#2c1800"/>'
     +'<circle cx="43" cy="33" r="1.6" fill="#2c1800"/>'
     +'<path d="M33 40 Q38 44 43 40" stroke="'+(rood?'#cc1111':'#1a5c1a')+'" stroke-width="1.3" fill="none"/>'
@@ -168,159 +294,156 @@ function svgVrouw(suit, rood) {
     +'<circle cx="48" cy="37" r="4" fill="#ff9999" opacity=".35"/>'
     +'<line x1="38" y1="58" x2="38" y2="78" stroke="#c8a020" stroke-width="2"/>'
     +'<circle cx="38" cy="56" r="3.5" fill="#e74c3c"/>'
-    +'<text x="38" y="94" text-anchor="middle" font-size="12" fill="'+(rood?'#cc1111':'#111')+'" font-family="Georgia,serif">'+suit+'</text>'
+    +'<text x="38" y="94" text-anchor="middle" font-size="11" fill="'+(rood?'#cc1111':'#111')+'" font-family="Georgia,serif">'+suit+'</text>'
     +'</svg>';
 }
-function svgHeer(suit, rood) {
-  var kl=rood?'#8b0000':'#1a1a6e', bg=rood?'rgba(255,235,210,0.3)':'rgba(215,215,255,0.3)';
+function svgHeer(suit,rood){
+  var kl=rood?'#8b0000':'#1a1a6e',bg=rood?'rgba(255,230,200,0.35)':'rgba(210,210,255,0.35)';
   return '<svg viewBox="0 0 76 96" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">'
     +'<rect width="76" height="96" rx="4" fill="'+bg+'"/>'
     +'<path d="M8 96 Q18 66 38 60 Q58 66 68 96Z" fill="'+kl+'"/>'
     +'<rect x="20" y="54" width="36" height="24" rx="4" fill="'+kl+'"/>'
-    +'<rect x="27" y="57" width="22" height="14" rx="3" fill="#c8a020" opacity=".85"/>'
+    +'<path d="M20 54 L20 72 Q38 80 56 72 L56 54" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2.5"/>'
+    +'<rect x="27" y="57" width="22" height="14" rx="3" fill="#c8a020" opacity=".9"/>'
+    +'<text x="38" y="68" text-anchor="middle" font-size="10" fill="'+kl+'" font-family="Georgia,serif">✦</text>'
     +'<circle cx="38" cy="33" r="14" fill="#f0c898"/>'
     +'<path d="M24 33 Q24 17 38 15 Q52 17 52 33" fill="#3d2000"/>'
+    +'<path d="M25 39 Q21 48 23 54 Q27 51 29 46" fill="#3d2000"/>'
+    +'<path d="M51 39 Q55 48 53 54 Q49 51 47 46" fill="#3d2000"/>'
     +'<path d="M25 21 L28 13 L33 19 L38 11 L43 19 L48 13 L51 21Z" fill="#c8a020" stroke="#7a5800" stroke-width=".8"/>'
     +'<circle cx="38" cy="12" r="2.8" fill="'+(rood?'#3498db':'#e74c3c')+'"/>'
+    +'<circle cx="28" cy="14" r="1.8" fill="#f39c12"/>'
+    +'<circle cx="48" cy="14" r="1.8" fill="#f39c12"/>'
     +'<circle cx="33" cy="32" r="1.8" fill="#1a0a00"/>'
     +'<circle cx="43" cy="32" r="1.8" fill="#1a0a00"/>'
     +'<path d="M33 40 Q38 43 43 40" stroke="#3d2000" stroke-width="1.5" fill="none"/>'
     +'<path d="M30 37 Q38 40 46 37" stroke="#3d2000" stroke-width="1.2" fill="none"/>'
-    +'<text x="38" y="94" text-anchor="middle" font-size="12" fill="'+(rood?'#cc1111':'#111')+'" font-family="Georgia,serif">'+suit+'</text>'
+    +'<text x="38" y="94" text-anchor="middle" font-size="11" fill="'+(rood?'#cc1111':'#111')+'" font-family="Georgia,serif">'+suit+'</text>'
     +'</svg>';
 }
-function svgAas(suit, rood) {
+function svgAas(suit,rood){
   return '<svg viewBox="0 0 76 96" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">'
-    +'<text x="38" y="64" text-anchor="middle" font-size="52" fill="'+(rood?'#cc1111':'#111')+'" font-family="Georgia,serif">'+suit+'</text>'
+    +'<text x="38" y="64" text-anchor="middle" font-size="54" fill="'+(rood?'#cc1111':'#111')+'" font-family="Georgia,serif">'+suit+'</text>'
     +'</svg>';
 }
 
-/* ══════════════════════════════════
+/* ══════════════════════════════
    GLOBALS
-══════════════════════════════════ */
+══════════════════════════════ */
 var SUITS=['♠','♥','♦','♣'];
 var RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 var ROOD={'♥':1,'♦':1};
-var DIFF={1:{draw:1,recycleMax:999,label:'Makkelijk ★☆☆'},2:{draw:1,recycleMax:3,label:'Normaal ★★☆'},3:{draw:3,recycleMax:1,label:'Moeilijk ★★★'}};
+var DIFF={
+  1:{draw:1,recycleMax:999,label:'Makkelijk ★☆☆'},
+  2:{draw:1,recycleMax:3,  label:'Normaal ★★☆'},
+  3:{draw:3,recycleMax:1,  label:'Moeilijk ★★★'}
+};
+var diff=1,CW,CH,CR,GAP,DSTEP,FSTEP;
+var stock,waste,found,tab;
+var score=0,secs=0,timerRef=null;
+var hist=[],dragInfo=null,recycleCount=0;
+var pdEl=null,pdExtras=[],pdOX=0,pdOY=0,toastT=null;
 
-var diff=1, CW, CH, CR, GAP, DSTEP, FSTEP;
-var stock, waste, found, tab;
-var score=0, secs=0, timerRef=null;
-var hist=[], dragInfo=null, recycleCount=0;
-var pdEl=null, pdExtras=[], pdOX=0, pdOY=0;
-var toastT=null;
+function gi(id){return document.getElementById(id);}
+function ri(r){return RANKS.indexOf(r);}
+function cp(o){return JSON.parse(JSON.stringify(o));}
 
-function gi(id){ return document.getElementById(id); }
-function ri(r){ return RANKS.indexOf(r); }
-function cp(o){ return JSON.parse(JSON.stringify(o)); }
-
-/* ══════════════════════════════════
-   KNOPPEN -- event listeners (geen onclick)
-══════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', function() {
-  gi('d1').addEventListener('click', function(){ startSpel(1); });
-  gi('d2').addEventListener('click', function(){ startSpel(2); });
-  gi('d3').addEventListener('click', function(){ startSpel(3); });
-  gi('btn-undo').addEventListener('click', undo);
-  gi('btn-hint').addEventListener('click', hint);
-  gi('btn-niv').addEventListener('click', naarDiff);
-  gi('btn-nieuw').addEventListener('click', nieuwSpel);
-  gi('btn-nog').addEventListener('click', nieuwSpel);
-  gi('btn-ander').addEventListener('click', naarDiff);
+/* ══════════════════════════════
+   KNOPPEN
+══════════════════════════════ */
+document.addEventListener('DOMContentLoaded',function(){
+  gi('d1').addEventListener('click',function(){startSpel(1);});
+  gi('d2').addEventListener('click',function(){startSpel(2);});
+  gi('d3').addEventListener('click',function(){startSpel(3);});
+  gi('btn-undo').addEventListener('click',undo);
+  gi('btn-hint').addEventListener('click',hint);
+  gi('btn-niv').addEventListener('click',naarDiff);
+  gi('btn-nieuw').addEventListener('click',nieuwSpel);
+  gi('btn-nog').addEventListener('click',nieuwSpel);
+  gi('btn-ander').addEventListener('click',naarDiff);
 });
 
-/* ══════════════════════════════════
+/* ══════════════════════════════
    MOEILIJKHEID
-══════════════════════════════════ */
-function startSpel(n) {
+══════════════════════════════ */
+function startSpel(n){
   diff=n;
   gi('diff-screen').style.display='none';
   gi('app').style.display='flex';
   nieuwSpel();
 }
-
-function naarDiff() {
+function naarDiff(){
   clearInterval(timerRef);
   gi('diff-screen').style.display='flex';
   gi('app').style.display='none';
   gi('win').classList.remove('show');
 }
 
-/* ══════════════════════════════════
+/* ══════════════════════════════
    AFMETINGEN
-══════════════════════════════════ */
-function bereken() {
-  var brd=gi('board'), bW=brd.clientWidth;
+══════════════════════════════ */
+function bereken(){
+  var brd=gi('board'),bW=brd.clientWidth;
   GAP=Math.max(4,Math.floor(bW*0.012));
   CW=Math.floor((bW-GAP*6)/7);
   CH=Math.round(CW*1.4);
-  CR=Math.max(4,Math.round(CW*0.1));
+  CR=Math.max(5,Math.round(CW*0.1));
   DSTEP=Math.round(CH*0.18);
   FSTEP=Math.round(CH*0.27);
 }
 
-/* ══════════════════════════════════
-   UNDO / SNAP
-══════════════════════════════════ */
-function snap() {
+/* ══════════════════════════════
+   UNDO
+══════════════════════════════ */
+function snap(){
   hist.push({stock:cp(stock),waste:cp(waste),found:cp(found),tab:cp(tab),score:score,rc:recycleCount});
-  if(hist.length>60) hist.shift();
+  if(hist.length>60)hist.shift();
 }
-function undo() {
+function undo(){
   if(!hist.length){toast('Geen zet om ongedaan te maken');return;}
   var s=hist.pop();
   stock=s.stock;waste=s.waste;found=s.found;tab=s.tab;score=s.score;recycleCount=s.rc;
-  gi('sc').textContent=score; teken();
+  gi('sc').textContent=score;teken();
 }
 
-/* ══════════════════════════════════
+/* ══════════════════════════════
    NIEUW SPEL
-══════════════════════════════════ */
-function nieuwSpel() {
+══════════════════════════════ */
+function nieuwSpel(){
   gi('win').classList.remove('show');
   hist=[];score=0;secs=0;recycleCount=0;
   gi('sc').textContent='0';gi('ti').textContent='0:00';
   gi('hs').textContent=localStorage.getItem('sol_hs')||'0';
   clearInterval(timerRef);
 
-  var deck=[], i, j, c, r, cd, tmp;
-  for(i=0;i<SUITS.length;i++)
-    for(j=0;j<RANKS.length;j++)
-      deck.push({suit:SUITS[i],rank:RANKS[j],up:false});
-
-  for(i=deck.length-1;i>0;i--){
-    j=Math.floor(Math.random()*(i+1));
-    tmp=deck[i];deck[i]=deck[j];deck[j]=tmp;
-  }
+  var deck=[],i,j,c,r,cd,tmp;
+  for(i=0;i<4;i++)for(j=0;j<13;j++)deck.push({suit:SUITS[i],rank:RANKS[j],up:false});
+  for(i=deck.length-1;i>0;i--){j=Math.floor(Math.random()*(i+1));tmp=deck[i];deck[i]=deck[j];deck[j]=tmp;}
 
   tab=[[],[],[],[],[],[],[]];
-  for(c=0;c<7;c++)
-    for(r=0;r<=c;r++){cd=deck.pop();cd.up=(r===c);tab[c].push(cd);}
-
+  for(c=0;c<7;c++)for(r=0;r<=c;r++){cd=deck.pop();cd.up=(r===c);tab[c].push(cd);}
   stock=deck;waste=[];found=[[],[],[],[]];
   bereken();teken();
 
   timerRef=setInterval(function(){
-    secs++;
-    var m=Math.floor(secs/60),s=secs%60;
+    secs++;var m=Math.floor(secs/60),s=secs%60;
     gi('ti').textContent=m+':'+(s<10?'0':'')+s;
     if(secs%10===0){score=Math.max(0,score-2);gi('sc').textContent=score;}
   },1000);
 }
-
 function pts(n){score=Math.max(0,score+n);gi('sc').textContent=score;}
 
-/* ══════════════════════════════════
+/* ══════════════════════════════
    KAART ELEMENT
-══════════════════════════════════ */
-function maakEl(card) {
+══════════════════════════════ */
+function maakEl(card){
   var el=document.createElement('div');
-  var up=card.up, rood=!!ROOD[card.suit];
+  var up=card.up,rood=!!ROOD[card.suit];
   el.className='card '+(up?('up '+(rood?'r':'b')):'dn');
   el.style.width=CW+'px';el.style.height=CH+'px';el.style.borderRadius=CR+'px';
-  if(!up) return el;
+  if(!up)return el;
 
-  var fs=Math.max(7,Math.round(CW*0.15));
+  var fs=Math.max(8,Math.round(CW*0.155));
   var tl=document.createElement('div');
   tl.className='c-tl';tl.style.fontSize=fs+'px';tl.innerHTML=card.rank+'<br>'+card.suit;
   var br=document.createElement('div');
@@ -328,7 +451,7 @@ function maakEl(card) {
   el.appendChild(tl);el.appendChild(br);
 
   var fig=document.createElement('div');
-  var pad=Math.round(CW*0.06), tp=Math.round(CH*0.14);
+  var pad=Math.round(CW*0.07),tp=Math.round(CH*0.15);
   if(card.rank==='J'||card.rank==='Q'||card.rank==='K'||card.rank==='A'){
     fig.className='c-fig';
     fig.style.cssText='position:absolute;left:'+pad+'px;right:'+pad+'px;top:'+tp+'px;bottom:'+tp+'px;';
@@ -338,7 +461,7 @@ function maakEl(card) {
     else                     fig.innerHTML=svgAas(card.suit,rood);
   } else {
     fig.className='c-mid';
-    fig.style.fontSize=Math.max(14,Math.round(CW*0.54))+'px';
+    fig.style.fontSize=Math.max(16,Math.round(CW*0.54))+'px';
     fig.textContent=card.suit;
   }
   el.appendChild(fig);
@@ -346,23 +469,21 @@ function maakEl(card) {
 }
 
 function posEl(el,x,y,z){el.style.left=x+'px';el.style.top=y+'px';el.style.zIndex=z;}
-
 function mkSlot(x,y,w,h){
-  var el=document.createElement('div');
-  el.className='slot';
+  var el=document.createElement('div');el.className='slot';
   el.style.cssText='left:'+x+'px;top:'+y+'px;width:'+(w||CW)+'px;height:'+(h||CH)+'px;';
   return el;
 }
 
-/* ══════════════════════════════════
+/* ══════════════════════════════
    RENDER
-══════════════════════════════════ */
-function teken() {
+══════════════════════════════ */
+function teken(){
   var brd=gi('board');brd.innerHTML='';
-  var c,f,i,k,sl,lbl,dz;
-  var ROW1=0, ROW2=CH+12;
+  var c,f,i,k,sl,lbl,dz,top;
+  var ROW1=0,ROW2=CH+12;
   var colX=[],bH=brd.clientHeight;
-  for(c=0;c<7;c++) colX.push(c*(CW+GAP));
+  for(c=0;c<7;c++)colX.push(c*(CW+GAP));
   var fX=[colX[3],colX[4],colX[5],colX[6]];
   var FSUIT=['♠','♥','♦','♣'];
 
@@ -370,76 +491,62 @@ function teken() {
   sl=mkSlot(colX[0],ROW1);sl.innerHTML='<div class="slot-lbl">↺</div>';
   sl.addEventListener('click',function(){if(!stock.length)klikStock();});
   brd.appendChild(sl);
-
   // Waste slot
   brd.appendChild(mkSlot(colX[1],ROW1));
-
   // Foundation slots
   for(f=0;f<4;f++){
     sl=mkSlot(fX[f],ROW1);
     lbl=document.createElement('div');
     lbl.className='slot-lbl'+(f===1||f===2?' r':'');
     lbl.textContent=FSUIT[f];
-    sl.appendChild(lbl);
-    brd.appendChild(sl);
+    sl.appendChild(lbl);brd.appendChild(sl);
     (function(ff){
       sl.addEventListener('dragover',function(e){if(magFound(dragInfo,ff))e.preventDefault();});
       sl.addEventListener('drop',function(e){e.preventDefault();if(magFound(dragInfo,ff)){snap();verplaatsFound(ff);}});
     })(f);
   }
-
   // Tableau slots
-  for(c=0;c<7;c++){
-    sl=mkSlot(colX[c],ROW2,CW,bH-ROW2-4);
-    brd.appendChild(sl);
-  }
+  for(c=0;c<7;c++){sl=mkSlot(colX[c],ROW2,CW,bH-ROW2-4);brd.appendChild(sl);}
 
   // Stock kaart
-  if(stock.length){
-    k=maakEl({up:false});posEl(k,colX[0],ROW1,2);
-    k.addEventListener('click',klikStock);
-    brd.appendChild(k);
-  }
+  if(stock.length){k=maakEl({up:false});posEl(k,colX[0],ROW1,2);k.addEventListener('click',klikStock);brd.appendChild(k);}
 
   // Recycle teller
   if(DIFF[diff].recycleMax<999){
     var ri2=document.createElement('div');
     var ov=Math.max(0,DIFF[diff].recycleMax-recycleCount);
-    ri2.style.cssText='position:absolute;left:'+colX[0]+'px;top:'+(ROW1+CH+2)+'px;width:'+CW+'px;text-align:center;font-size:9px;color:rgba(255,255,255,.45);z-index:3;pointer-events:none;';
+    ri2.style.cssText='position:absolute;left:'+colX[0]+'px;top:'+(ROW1+CH+2)+'px;width:'+CW+'px;text-align:center;font-size:9px;color:rgba(255,255,255,.5);z-index:3;pointer-events:none;';
     ri2.textContent=ov>0?'↺ '+ov+'x':'Klaar';
     brd.appendChild(ri2);
   }
 
-  // Waste kaarten
+  // Waste
   if(waste.length){
     var show=diff===3?Math.min(3,waste.length):1;
-    var start=waste.length-show;
-    var fan=Math.round(CW*0.22);
-    for(i=start;i<waste.length;i++){
+    var wstart=waste.length-show,fan=Math.round(CW*0.22);
+    for(i=wstart;i<waste.length;i++){
       k=maakEl(Object.assign({},waste[i],{up:true}));
-      posEl(k,colX[1]+(i-start)*fan,ROW1,i+2);
+      posEl(k,colX[1]+(i-wstart)*fan,ROW1,i+2);
       brd.appendChild(k);
-      if(i===waste.length-1) koppelDrag(k,{bron:'waste'});
+      if(i===waste.length-1)koppelDrag(k,{bron:'waste'});
     }
   }
 
-  // Foundation kaarten
+  // Foundations
   for(f=0;f<4;f++){
-    if(!found[f].length) continue;
-    var top=found[f][found[f].length-1];
+    if(!found[f].length)continue;
+    top=found[f][found[f].length-1];
     k=maakEl(Object.assign({},top,{up:true}));
-    k.classList.add('nodrag');
-    posEl(k,fX[f],ROW1,2);
-    brd.appendChild(k);
+    k.classList.add('nodrag');posEl(k,fX[f],ROW1,2);brd.appendChild(k);
     (function(ff){
       k.addEventListener('dragover',function(e){if(magFound(dragInfo,ff))e.preventDefault();});
       k.addEventListener('drop',function(e){e.preventDefault();if(magFound(dragInfo,ff)){snap();verplaatsFound(ff);}});
     })(f);
   }
 
-  // Tableau kaarten
+  // Tableau
   for(c=0;c<7;c++){
-    var kolom=tab[c], y=ROW2;
+    var kolom=tab[c],y=ROW2;
     for(i=0;i<kolom.length;i++){
       k=maakEl(Object.assign({},kolom[i]));
       posEl(k,colX[c],y,ROW2+i+1);
@@ -447,9 +554,7 @@ function teken() {
         koppelDrag(k,{bron:'tab',col:c,vanIdx:i});
       } else if(i===kolom.length-1){
         k.style.cursor='pointer';
-        (function(col,idx){
-          k.addEventListener('click',function(){snap();tab[col][idx].up=true;pts(5);teken();});
-        })(c,i);
+        (function(col,idx){k.addEventListener('click',function(){snap();tab[col][idx].up=true;pts(5);teken();});})(c,i);
       }
       brd.appendChild(k);
       y+=kolom[i].up?FSTEP:DSTEP;
@@ -464,9 +569,9 @@ function teken() {
   }
 }
 
-/* ══════════════════════════════════
+/* ══════════════════════════════
    DRAG
-══════════════════════════════════ */
+══════════════════════════════ */
 function koppelDrag(el,info){
   el.draggable=true;
   el.addEventListener('dragstart',function(e){dragInfo=info;e.dataTransfer.effectAllowed='move';setTimeout(function(){el.style.opacity='0.15';},0);});
@@ -478,7 +583,7 @@ function startPD(e,el,info){
   var r=el.getBoundingClientRect();
   pdOX=e.clientX-r.left;pdOY=e.clientY-r.top;
   pdEl=el.cloneNode(true);
-  pdEl.style.cssText+= ';position:fixed;width:'+CW+'px;height:'+CH+'px;z-index:1000;pointer-events:none;'
+  pdEl.style.cssText+=';position:fixed;width:'+CW+'px;height:'+CH+'px;z-index:1000;pointer-events:none;'
     +'left:'+(e.clientX-pdOX)+'px;top:'+(e.clientY-pdOY)+'px;'
     +'box-shadow:0 20px 50px rgba(0,0,0,.85);transform:rotate(2deg) scale(1.07);border-radius:'+CR+'px;transition:none;';
   document.body.appendChild(pdEl);
@@ -491,22 +596,19 @@ function startPD(e,el,info){
       ex.style.cssText+=';position:fixed;width:'+CW+'px;height:'+CH+'px;z-index:'+(1000+i)+';pointer-events:none;'
         +'left:'+(e.clientX-pdOX)+'px;top:'+(e.clientY-pdOY+off)+'px;'
         +'transform:rotate(2deg) scale(1.07);box-shadow:0 10px 28px rgba(0,0,0,.7);border-radius:'+CR+'px;transition:none;';
-      document.body.appendChild(ex);
-      pdExtras.push({el:ex,off:off});
+      document.body.appendChild(ex);pdExtras.push({el:ex,off:off});
     }
   }
   document.addEventListener('pointermove',movePD,{passive:false});
   document.addEventListener('pointerup',endPD);
   document.addEventListener('pointercancel',endPD);
 }
-
 function movePD(e){
   if(!pdEl)return;e.preventDefault();
   var x=e.clientX-pdOX,y=e.clientY-pdOY;
   pdEl.style.left=x+'px';pdEl.style.top=y+'px';
   for(var i=0;i<pdExtras.length;i++){pdExtras[i].el.style.left=x+'px';pdExtras[i].el.style.top=(y+pdExtras[i].off)+'px';}
 }
-
 function endPD(e){
   document.removeEventListener('pointermove',movePD);
   document.removeEventListener('pointerup',endPD);
@@ -518,14 +620,11 @@ function endPD(e){
   pdExtras=[];
   if(!dragInfo){teken();return;}
   var ok=false,brd=gi('board'),br,slots;
-
-  // foundations
   slots=brd.querySelectorAll('.slot');
   for(var f=0;f<4&&!ok;f++){
     br=slots[f+2].getBoundingClientRect();
     if(cx>=br.left&&cx<=br.right&&cy>=br.top&&cy<=br.bottom&&magFound(dragInfo,f)){snap();verplaatsFound(f);ok=true;}
   }
-  // tableau
   if(!ok){
     var brdR=gi('board').getBoundingClientRect();
     var bX=cx-brdR.left;
@@ -536,9 +635,9 @@ function endPD(e){
   dragInfo=null;teken();
 }
 
-/* ══════════════════════════════════
+/* ══════════════════════════════
    REGELS
-══════════════════════════════════ */
+══════════════════════════════ */
 function getKaarten(info){
   if(!info)return[];
   if(info.bron==='waste')return waste.length?[waste[waste.length-1]]:[];
@@ -562,27 +661,23 @@ function magFound(info,f){
   return k.suit===top.suit&&ri(k.rank)===ri(top.rank)+1;
 }
 
-/* ══════════════════════════════════
+/* ══════════════════════════════
    ACTIES
-══════════════════════════════════ */
+══════════════════════════════ */
 function klikStock(){
   var d=DIFF[diff];
   if(!stock.length){
     if(recycleCount>=d.recycleMax){toast('Geen recycles meer!');return;}
     snap();
-    var nieuweStock=[];
-    for(var i=waste.length-1;i>=0;i--)nieuweStock.push(Object.assign({},waste[i],{up:false}));
-    stock=nieuweStock;waste=[];recycleCount++;pts(-Math.round(50*diff));
+    var ns=[];for(var i=waste.length-1;i>=0;i--)ns.push(Object.assign({},waste[i],{up:false}));
+    stock=ns;waste=[];recycleCount++;pts(-Math.round(50*diff));
   } else {
-    snap();
-    var n=Math.min(d.draw,stock.length);
+    snap();var n=Math.min(d.draw,stock.length);
     for(var j=0;j<n;j++){var c2=stock.pop();c2.up=true;waste.push(c2);}
   }
   teken();
 }
-function draaiBovenste(col){
-  var k=tab[col];if(k.length&&!k[k.length-1].up){k[k.length-1].up=true;pts(5);}
-}
+function draaiBovenste(col){var k=tab[col];if(k.length&&!k[k.length-1].up){k[k.length-1].up=true;pts(5);}}
 function verplaatsTab(toCol){
   if(!dragInfo)return;
   var ks=getKaarten(dragInfo);
@@ -594,7 +689,7 @@ function verplaatsTab(toCol){
 function verplaatsFound(f){
   if(!dragInfo)return;
   var k=getKaarten(dragInfo)[0];
-  if(dragInfo.bron==='waste'){waste.pop();}
+  if(dragInfo.bron==='waste')waste.pop();
   else{tab[dragInfo.col].pop();draaiBovenste(dragInfo.col);}
   found[f].push(k);pts(10);dragInfo=null;teken();checkWin();
 }
@@ -609,9 +704,9 @@ document.addEventListener('dblclick',function(e){
   for(var c=0;c<7;c++){var kol=tab[c];if(!kol.length||!kol[kol.length-1].up)continue;if(autoFound({bron:'tab',col:c,vanIdx:kol.length-1}))return;}
 });
 
-/* ══════════════════════════════════
+/* ══════════════════════════════
    HINT
-══════════════════════════════════ */
+══════════════════════════════ */
 function hint(){
   var c,f,i,kol,top,t;
   if(waste.length){for(f=0;f<4;f++)if(magFound({bron:'waste'},f)){toast('💡 Stuur '+waste[waste.length-1].rank+waste[waste.length-1].suit+' naar foundation');return;}}
@@ -621,9 +716,9 @@ function hint(){
   toast('Geen zet -- klik de stock');
 }
 
-/* ══════════════════════════════════
+/* ══════════════════════════════
    WIN
-══════════════════════════════════ */
+══════════════════════════════ */
 function checkWin(){
   var totaal=0;for(var f=0;f<4;f++)totaal+=found[f].length;
   if(totaal!==52)return;
@@ -633,8 +728,7 @@ function checkWin(){
   gi('wp').textContent='Score: '+score;
   gi('wt').textContent='Tijd: '+m+':'+(s<10?'0':'')+s;
   gi('wd').textContent='Niveau: '+DIFF[diff].label;
-  gi('win').classList.add('show');
-  confetti();
+  gi('win').classList.add('show');confetti();
   var hs=parseInt(localStorage.getItem('sol_hs')||'0');
   if(score>hs){localStorage.setItem('sol_hs',score);gi('hs').textContent=score;}
 }
@@ -648,9 +742,9 @@ function confetti(){
   }
 }
 
-/* ══════════════════════════════════
+/* ══════════════════════════════
    TOAST & RESIZE
-══════════════════════════════════ */
+══════════════════════════════ */
 function toast(msg){
   var el=gi('toast');el.textContent=msg;el.classList.add('on');
   clearTimeout(toastT);toastT=setTimeout(function(){el.classList.remove('on');},2400);
