@@ -377,12 +377,19 @@ function teken(){
     }
   }
 
-  /* Foundation kaarten */
+  /* Foundation kaarten -- ook sleepbaar terug naar tableau */
   for(f=0;f<4;f++){
     if(!found[f].length)continue;
     var top=found[f][found[f].length-1];
-    k=maakEl(Object.assign({},top,{up:true}));k.classList.add('nodrag');pe(k,fX[f],R1,2);brd.appendChild(k);
-    (function(ff){k.addEventListener('dragover',function(e){if(mF(dInfo,ff))e.preventDefault();});k.addEventListener('drop',function(e){e.preventDefault();if(mF(dInfo,ff)){snap();vF(ff);}});})(f);
+    k=maakEl(Object.assign({},top,{up:true}));
+    pe(k,fX[f],R1,2);brd.appendChild(k);
+    /* Drop op foundation zelf */
+    (function(ff){
+      k.addEventListener('dragover',function(e){if(mF(dInfo,ff))e.preventDefault();});
+      k.addEventListener('drop',function(e){e.preventDefault();if(mF(dInfo,ff)){snap();vF(ff);}});
+    })(f);
+    /* Sleep van foundation terug naar tableau */
+    koppel(k,{bron:'found',f:f});
   }
 
   /* Tableau kaarten */
@@ -524,8 +531,21 @@ function verwerkDrop(cx,cy){
 }
 
 /* ══ REGELS ══ */
-function getK(info){if(!info)return[];if(info.bron==='waste')return waste.length?[waste[waste.length-1]]:[];if(info.bron==='tab')return tab[info.col].slice(info.vanIdx);return[];}
-function mT(info,tc){if(!info)return false;var ks=getK(info);if(!ks.length)return false;var k=ks[0],kol=tab[tc];if(!kol.length)return k.rank==='K';var top=kol[kol.length-1];return top.up&&(!!ROOD[k.suit])!==(!!ROOD[top.suit])&&ri(k.rank)===ri(top.rank)-1;}
+function getK(info){
+  if(!info)return[];
+  if(info.bron==='waste')return waste.length?[waste[waste.length-1]]:[];
+  if(info.bron==='tab')return tab[info.col].slice(info.vanIdx);
+  if(info.bron==='found')return found[info.f].length?[found[info.f][found[info.f].length-1]]:[];
+  return[];
+}
+function mT(info,tc){
+  if(!info)return false;
+  var ks=getK(info);if(!ks.length)return false;
+  var k=ks[0],kol=tab[tc];
+  if(!kol.length)return k.rank==='K';
+  var top=kol[kol.length-1];
+  return top.up&&(!!ROOD[k.suit])!==(!!ROOD[top.suit])&&ri(k.rank)===ri(top.rank)-1;
+}
 function mF(info,f){if(!info)return false;var ks=getK(info);if(ks.length!==1)return false;var k=ks[0],pile=found[f];if(!pile.length)return k.rank==='A';var top=pile[pile.length-1];return k.suit===top.suit&&ri(k.rank)===ri(top.rank)+1;}
 
 /* ══ ACTIES ══ */
@@ -536,7 +556,15 @@ function klikStock(){
   sndKlik();teken();if(kanAuto())setTimeout(autoComplete,400);
 }
 function dB(col){var k=tab[col];if(k.length&&!k[k.length-1].up){k[k.length-1].up=true;pts(5);sndDraai();}}
-function vT(tc){if(!dInfo)return;var ks=getK(dInfo);if(dInfo.bron==='waste'){waste.pop();pts(5);}else{tab[dInfo.col].splice(dInfo.vanIdx);dB(dInfo.col);pts(3);}for(var i=0;i<ks.length;i++)tab[tc].push(ks[i]);addMove();sndKlik();dInfo=null;teken();}
+function vT(tc){
+  if(!dInfo)return;
+  var ks=getK(dInfo);
+  if(dInfo.bron==='waste'){waste.pop();pts(5);}
+  else if(dInfo.bron==='found'){found[dInfo.f].pop();pts(-5);}
+  else{tab[dInfo.col].splice(dInfo.vanIdx);dB(dInfo.col);pts(3);}
+  for(var i=0;i<ks.length;i++)tab[tc].push(ks[i]);
+  addMove();sndKlik();dInfo=null;teken();
+}
 function vF(f){if(!dInfo)return;var k=getK(dInfo)[0];if(dInfo.bron==='waste')waste.pop();else{tab[dInfo.col].pop();dB(dInfo.col);}found[f].push(k);pts(10);addMove();sndKlik();dInfo=null;teken();checkWin();}
 function autoF(info){for(var f=0;f<4;f++){if(mF(info,f)){snap();dInfo=info;vF(f);return true;}}return false;}
 
