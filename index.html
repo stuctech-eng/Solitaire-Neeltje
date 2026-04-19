@@ -5,10 +5,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Solitaire – Neeltje</title>
+
+<!-- PWA: installeerbaar als iPhone app -->
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Solitaire">
+<meta name="theme-color" content="#144d1a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Solitaire voor Neeltje">
+
+<!-- App icoon voor homescreen (groen kaart icoon) -->
+
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23144d1a'/%3E%3Crect x='20' y='20' width='140' height='140' rx='20' fill='%231e7a2a'/%3E%3Ctext x='90' y='115' text-anchor='middle' font-size='90' font-family='Georgia,serif' fill='%23c8a020'%3E%E2%99%A0%3C/text%3E%3C/svg%3E">
+
+<!-- Service Worker voor offline gebruik -->
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('data:application/javascript,'+encodeURIComponent(
+      'self.addEventListener("install",e=>e.waitUntil(caches.open("sol-v1").then(c=>c.addAll(["/"]))));'+
+      'self.addEventListener("fetch",e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));'
+    )).catch(function(){});
+  });
+}
+</script>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;}
 html,body{width:100%;height:100%;font-family:Georgia,serif;user-select:none;
   background:radial-gradient(ellipse at 40% 20%,#3a9a40,#237a2a 50%,#0d3d12);}
+/* Safe area voor iPhone notch en Dynamic Island */
+#app{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Ccircle cx='1' cy='1' r='.6' fill='rgba(0,0,0,0.07)'/%3E%3C/svg%3E");}
 
@@ -53,34 +82,38 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .slot-lbl.r{color:#ff8888;}
 
 /* KAARTEN */
-.card{position:absolute;border-radius:12px;overflow:hidden;transition:box-shadow 0.1s;}
+.card{position:absolute;border-radius:12px;overflow:hidden;
+  transition:left 0.2s cubic-bezier(0.25,0.8,0.25,1), top 0.2s cubic-bezier(0.25,0.8,0.25,1), box-shadow 0.1s;
+}
+/* Geen transitie tijdens slepen */
+.card.sleep{transition:none !important;}
 
 /* rug */
 .card.dn{
-background:linear-gradient(145deg,#1a3fbf,#0a1870);
-border:3px solid rgba(100,140,255,0.45);
-box-shadow:2px 4px 10px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.12);
-cursor:default;
+  background:linear-gradient(145deg,#1a3fbf,#0a1870);
+  border:3px solid rgba(100,140,255,0.45);
+  box-shadow:2px 4px 10px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.12);
+  cursor:default;
 }
 .card.dn::before{
-content:’’;position:absolute;inset:7px;border-radius:7px;
-border:2px solid rgba(255,255,255,0.18);
-background:
-repeating-linear-gradient(45deg,rgba(255,255,255,.07) 0,rgba(255,255,255,.07) 2px,transparent 2px,transparent 10px),
-repeating-linear-gradient(-45deg,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 2px,transparent 2px,transparent 10px);
+  content:'';position:absolute;inset:7px;border-radius:7px;
+  border:2px solid rgba(255,255,255,0.18);
+  background:
+    repeating-linear-gradient(45deg,rgba(255,255,255,.07) 0,rgba(255,255,255,.07) 2px,transparent 2px,transparent 10px),
+    repeating-linear-gradient(-45deg,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 2px,transparent 2px,transparent 10px);
 }
 
 /* voorkant */
 .card.up{
-background:linear-gradient(170deg,#ffffff,#f5f0e8);
-border:3px solid #c8a020;
-box-shadow:3px 5px 16px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,1),0 0 0 1px rgba(200,160,32,.15);
-cursor:grab;
+  background:linear-gradient(170deg,#ffffff,#f5f0e8);
+  border:3px solid #c8a020;
+  box-shadow:3px 5px 16px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,1),0 0 0 1px rgba(200,160,32,.15);
+  cursor:grab;
 }
 /* binnenrand */
 .card.up::after{
-content:’’;position:absolute;inset:3px;border-radius:9px;
-border:2px solid rgba(200,160,32,.28);pointer-events:none;z-index:0;
+  content:'';position:absolute;inset:3px;border-radius:9px;
+  border:2px solid rgba(200,160,32,.28);pointer-events:none;z-index:0;
 }
 .card.up.r{color:#cc1111;}
 .card.up.b{color:#111;}
@@ -92,7 +125,12 @@ border:2px solid rgba(200,160,32,.28);pointer-events:none;z-index:0;
 .c-fig{position:absolute;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:1;}
 .c-mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:1;font-weight:bold;}
 
-/* WIN */
+/* Korte "neerleggen" animatie op nieuw geplaatste kaarten */
+@keyframes neerleggen{
+  0%{transform:scale(1.08);box-shadow:0 12px 30px rgba(0,0,0,.6);}
+  100%{transform:scale(1);box-shadow:3px 5px 16px rgba(0,0,0,.65);}
+}
+.card.up.gelegd{animation:neerleggen 0.2s ease-out;}
 #win{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.78);align-items:center;justify-content:center;}
 #win.show{display:flex;}
 .wbox{background:linear-gradient(155deg,#1e5e2a,#0e3015);border:3px solid #c8a020;border-radius:22px;padding:40px 50px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.8);animation:popin .4s cubic-bezier(.34,1.56,.64,1);}
@@ -137,7 +175,6 @@ border:2px solid rgba(200,160,32,.28);pointer-events:none;z-index:0;
   </div>
   <div id="btns">
     <button class="hbtn" onclick="undo()">↩ Undo</button>
-    <button class="hbtn" onclick="autoMove()">🎯 Auto</button>
     <button class="hbtn" onclick="hint()">💡 Hint</button>
     <button class="hbtn" onclick="naarDiff()">☰</button>
     <div id="hsp"></div>
@@ -229,32 +266,7 @@ function nieuwSpel(){
 function pts(n){score=Math.max(0,score+n);gi('sc').textContent=score;}
 function addMove(){moves++;gi('mv').textContent=moves;}
 
-/* ══ AUTO-MOVE (van de nieuwe code, verbeterd) ══ */
-function autoMove(){
-  /* Stap 1: directe moves zonder animatie */
-  var moved=true;
-  while(moved){
-    moved=false;
-    /* tableau tops */
-    for(var c=0;c<7;c++){
-      var kol=tab[c];if(!kol.length)continue;
-      var top=kol[kol.length-1];if(!top.up)continue;
-      for(var f=0;f<4;f++){
-        if(mF({bron:'tab',col:c,vanIdx:kol.length-1},f)){
-          snap();dInfo={bron:'tab',col:c,vanIdx:kol.length-1};vF(f);moved=true;break;
-        }
-      }
-    }
-    /* waste */
-    if(!moved&&waste.length){
-      for(var f2=0;f2<4;f2++){
-        if(mF({bron:'waste'},f2)){snap();dInfo={bron:'waste'};vF(f2);moved=true;break;}
-      }
-    }
-  }
-}
-
-/* Auto-complete -- alles face-up, geen stock/waste meer */
+/* ══ AUTO-COMPLETE -- alle kaarten face-up, geen stock/waste ══ */
 function kanAuto(){
   if(stock.length||waste.length)return false;
   for(var c=0;c<7;c++)for(var i=0;i<tab[c].length;i++)if(!tab[c][i].up)return false;
@@ -285,6 +297,64 @@ function runAutoStap(){
   var tot=0;for(var ff=0;ff<4;ff++)tot+=found[ff].length;
   if(tot===52){autoRunning=false;checkWin();return;}
   setTimeout(runAutoStap,100);
+}
+
+/* ══ VASTGELOPEN DETECTIE ══ */
+function isVastgelopen(){
+  /* Zijn er nog zetten mogelijk? */
+  var c,f,i,t,kol,top;
+
+  /* 1. Stock heeft nog kaarten */
+  if(stock.length)return false;
+
+  /* 2. Waste naar foundation */
+  if(waste.length){
+    for(f=0;f<4;f++)if(mF({bron:'waste'},f))return false;
+  }
+
+  /* 3. Waste naar tableau */
+  if(waste.length){
+    for(c=0;c<7;c++)if(mT({bron:'waste'},c))return false;
+  }
+
+  /* 4. Tableau naar foundation */
+  for(c=0;c<7;c++){
+    kol=tab[c];if(!kol.length)continue;
+    top=kol[kol.length-1];if(!top.up)continue;
+    for(f=0;f<4;f++)if(mF({bron:'tab',col:c,vanIdx:kol.length-1},f))return false;
+  }
+
+  /* 5. Tableau naar tableau */
+  for(c=0;c<7;c++){
+    kol=tab[c];
+    for(i=0;i<kol.length;i++){
+      if(!kol[i].up)continue;
+      for(t=0;t<7;t++){
+        if(t===c)continue;
+        if(mT({bron:'tab',col:c,vanIdx:i},t))return false;
+      }
+    }
+  }
+
+  /* 6. Nog face-down kaarten (kunnen omgedraaid worden) */
+  for(c=0;c<7;c++){
+    kol=tab[c];
+    for(i=0;i<kol.length;i++)if(!kol[i].up)return false;
+  }
+
+  return true; /* Geen enkele zet meer mogelijk */
+}
+
+function controleerVastgelopen(){
+  if(autoRunning)return;
+  var tot=0;for(var f=0;f<4;f++)tot+=found[f].length;
+  if(tot===52)return; /* Al gewonnen */
+  if(kanAuto()){setTimeout(autoComplete,600);return;}
+  if(isVastgelopen()){
+    setTimeout(function(){
+      toast('⚠️ Geen zetten meer mogelijk -- probeer Undo of Nieuw Spel');
+    },400);
+  }
 }
 
 /* ══ KAART ELEMENT ══ */
@@ -373,7 +443,9 @@ function teken(){
     for(i=ws;i<waste.length;i++){
       k=maakEl(Object.assign({},waste[i],{up:true}));
       pe(k,wasteX+(i-ws)*fan,R1,i+2);brd.appendChild(k);
-      if(i===waste.length-1)koppel(k,{bron:'waste'});
+      if(i===waste.length-1){
+        koppel(k,{bron:'waste'});
+      }
     }
   }
 
@@ -398,7 +470,15 @@ function teken(){
     for(i=0;i<kol.length;i++){
       k=maakEl(Object.assign({},kol[i]));pe(k,colX[c],y,R2+i+1);
       if(kol[i].up){
-        koppel(k,{bron:'tab',col:c,vanIdx:i});
+        /* Bovenste face-up kaart: tik = probeer foundation, anders slepen */
+      if(i===kol.length-1){
+          (function(col,idx){
+            koppel(k,{bron:'tab',col:col,vanIdx:idx});
+          })(c,i);
+        } else {
+          /* Niet-bovenste kaart: alleen slepen */
+          koppel(k,{bron:'tab',col:c,vanIdx:i});
+        }
       }else if(i===kol.length-1){
         k.style.cursor='pointer';
         (function(col,idx){k.addEventListener('click',function(){
@@ -445,7 +525,27 @@ function koppel(el,info){
     var t=e.changedTouches[0];
     ruimClones();
     var wasD=isDrag;isDrag=false;
-    if(!wasD){pdEl=null;dInfo=null;return;}
+    if(!wasD){
+      /* Tik zonder slepen */
+      if(info.bron==='waste'||info.bron==='tab'){
+        /* Probeer naar foundation */
+        var naar=null;
+        for(var ff=0;ff<4;ff++){
+          if(mF(info,ff)){naar=ff;break;}
+        }
+        if(naar!==null){
+          snap();
+          dInfo=info; /* zet dInfo VOOR vF */
+          vF(naar);
+          pdEl=null;dInfo=null;return;
+        }
+      }
+      /* Foundation kaart: tik = probeer naar tableau (niet terug naar zichzelf) */
+      if(info.bron==='found'){
+        /* Doe niets bij tik -- alleen slepen */
+      }
+      pdEl=null;dInfo=null;return;
+    }
     verwerkDrop(t.clientX,t.clientY);
     pdEl=null;
   },{passive:true});
@@ -481,7 +581,15 @@ function onMU(e){
   if(!pdEl)return;
   ruimClones();
   var wasD=isDrag;isDrag=false;
-  if(!wasD){pdEl=null;dInfo=null;return;}
+  if(!wasD){
+    var inf=pdEl.info;
+    if(inf&&(inf.bron==='waste'||inf.bron==='tab')){
+      for(var ff=0;ff<4;ff++){
+        if(mF(inf,ff)){snap();dInfo=inf;vF(ff);pdEl=null;dInfo=null;return;}
+      }
+    }
+    pdEl=null;dInfo=null;return;
+  }
   verwerkDrop(e.clientX,e.clientY);pdEl=null;
 }
 
@@ -511,23 +619,37 @@ function beweegClones(cx,cy){
   for(var j=0;j<pdEx.length;j++){pdEx[j].el.style.left=x+'px';pdEx[j].el.style.top=(y+pdEx[j].off)+'px';}
 }
 function ruimClones(){
-  if(pdEl){if(pdEl.orig)pdEl.orig.style.opacity='';if(pdEl.clone)pdEl.clone.remove();}
-  for(var i=0;i<pdEx.length;i++)pdEx[i].el.remove();pdEx=[];
+  ruimClones2();
 }
 function verwerkDrop(cx,cy){
   var ok=false,brd=gi('board'),slots=brd.querySelectorAll('.slot'),br;
+  var doelF=null,doelC=null;
+
   for(var f=0;f<4&&!ok;f++){
     br=slots[f].getBoundingClientRect();
-    if(cx>=br.left&&cx<=br.right&&cy>=br.top&&cy<=br.bottom&&mF(dInfo,f)){snap();vF(f);ok=true;}
+    if(cx>=br.left&&cx<=br.right&&cy>=br.top&&cy<=br.bottom&&mF(dInfo,f)){doelF=f;ok=true;}
   }
   if(!ok){
     var bX=cx-brd.getBoundingClientRect().left;
     var col=Math.floor(bX/(CW+GAP));
-    if(col>=0&&col<7&&mT(dInfo,col)){snap();vT(col);ok=true;}
-    if(!ok){col=Math.round(bX/(CW+GAP));if(col>=0&&col<7&&mT(dInfo,col)){snap();vT(col);ok=true;}}
+    if(col>=0&&col<7&&mT(dInfo,col)){doelC=col;ok=true;}
+    if(!ok){col=Math.round(bX/(CW+GAP));if(col>=0&&col<7&&mT(dInfo,col)){doelC=col;ok=true;}}
   }
-  dInfo=null;teken();
-  if(ok&&kanAuto())setTimeout(autoComplete,400);
+
+  /* Verwijder sleep-kloon */
+  ruimClones2();
+
+  if(!ok){dInfo=null;teken();return;}
+
+  /* Verwerk zet en herteken -- CSS transitie laat kaarten soepel glijden */
+  if(doelF!==null){snap();vF(doelF);}
+  else if(doelC!==null){snap();vT(doelC);}
+  dInfo=null;
+}
+
+function ruimClones2(){
+  if(pdEl){if(pdEl.orig)pdEl.orig.style.opacity='';if(pdEl.clone&&pdEl.clone.parentNode)pdEl.clone.remove();}
+  for(var i=0;i<pdEx.length;i++)pdEx[i].el.remove();pdEx=[];
 }
 
 /* ══ REGELS ══ */
@@ -551,9 +673,9 @@ function mF(info,f){if(!info)return false;var ks=getK(info);if(ks.length!==1)ret
 /* ══ ACTIES ══ */
 function klikStock(){
   var d=DIFF[diff];
-  if(!stock.length){if(rCount>=d.rMax){toast('Geen recycles meer!');return;}snap();var ns=[];for(var i=waste.length-1;i>=0;i--)ns.push(Object.assign({},waste[i],{up:false}));stock=ns;waste=[];rCount++;pts(-Math.round(50*diff));}
+  if(!stock.length){if(rCount>=d.rMax){toast('Geen recycles meer!');setTimeout(controleerVastgelopen,600);return;}snap();var ns=[];for(var i=waste.length-1;i>=0;i--)ns.push(Object.assign({},waste[i],{up:false}));stock=ns;waste=[];rCount++;pts(-Math.round(50*diff));}
   else{snap();var n=Math.min(d.draw,stock.length);for(var j=0;j<n;j++){var c2=stock.pop();c2.up=true;waste.push(c2);}}
-  sndKlik();teken();if(kanAuto())setTimeout(autoComplete,400);
+  sndKlik();teken();setTimeout(controleerVastgelopen,600);
 }
 function dB(col){var k=tab[col];if(k.length&&!k[k.length-1].up){k[k.length-1].up=true;pts(5);sndDraai();}}
 function vT(tc){
@@ -564,8 +686,18 @@ function vT(tc){
   else{tab[dInfo.col].splice(dInfo.vanIdx);dB(dInfo.col);pts(3);}
   for(var i=0;i<ks.length;i++)tab[tc].push(ks[i]);
   addMove();sndKlik();dInfo=null;teken();
+  setTimeout(controleerVastgelopen,600);
 }
-function vF(f){if(!dInfo)return;var k=getK(dInfo)[0];if(dInfo.bron==='waste')waste.pop();else{tab[dInfo.col].pop();dB(dInfo.col);}found[f].push(k);pts(10);addMove();sndKlik();dInfo=null;teken();checkWin();}
+function vF(f){
+  if(!dInfo)return;
+  var k=getK(dInfo)[0];
+  if(dInfo.bron==='waste')waste.pop();
+  else if(dInfo.bron==='found'){found[dInfo.f].pop();}
+  else{tab[dInfo.col].pop();dB(dInfo.col);}
+  found[f].push(k);pts(10);addMove();sndKlik();dInfo=null;teken();
+  checkWin();
+  setTimeout(controleerVastgelopen,600);
+}
 function autoF(info){for(var f=0;f<4;f++){if(mF(info,f)){snap();dInfo=info;vF(f);return true;}}return false;}
 
 document.addEventListener('dblclick',function(e){
@@ -578,12 +710,81 @@ document.addEventListener('dblclick',function(e){
 
 /* ══ HINT ══ */
 function hint(){
-  var c,f,i,kol,top,t;
-  if(waste.length){for(f=0;f<4;f++)if(mF({bron:'waste'},f)){toast('💡 '+waste[waste.length-1].rank+waste[waste.length-1].suit+' → foundation');return;}}
-  for(c=0;c<7;c++){kol=tab[c];if(!kol.length||!kol[kol.length-1].up)continue;top=kol[kol.length-1];for(f=0;f<4;f++)if(mF({bron:'tab',col:c,vanIdx:kol.length-1},f)){toast('💡 '+top.rank+top.suit+' → foundation');return;}}
-  for(c=0;c<7;c++){kol=tab[c];for(i=0;i<kol.length;i++){if(!kol[i].up)continue;for(t=0;t<7;t++){if(t===c)continue;if(mT({bron:'tab',col:c,vanIdx:i},t)){toast('💡 '+kol[i].rank+kol[i].suit+' → kolom '+(t+1));return;}}}}
-  if(waste.length){for(t=0;t<7;t++)if(mT({bron:'waste'},t)){toast('💡 '+waste[waste.length-1].rank+waste[waste.length-1].suit+' → kolom '+(t+1));return;}}
-  toast('Geen zet -- klik stock');
+  var c,f,i,t,kol,top,kaart,info;
+
+  /* Prioriteit 1: waste bovenste → foundation */
+  if(waste.length){
+    kaart=waste[waste.length-1];
+    for(f=0;f<4;f++){
+      info={bron:'waste'};
+      if(mF(info,f)){
+        toast('💡 '+kaart.rank+kaart.suit+' (waste) → foundation');
+        return;
+      }
+    }
+  }
+
+  /* Prioriteit 2: bovenste tableau kaart → foundation */
+  for(c=0;c<7;c++){
+    kol=tab[c];
+    if(!kol.length)continue;
+    top=kol[kol.length-1];
+    if(!top.up)continue; /* alleen face-up */
+    info={bron:'tab',col:c,vanIdx:kol.length-1};
+    for(f=0;f<4;f++){
+      if(mF(info,f)){
+        toast('💡 '+top.rank+top.suit+' (kolom '+(c+1)+') → foundation');
+        return;
+      }
+    }
+  }
+
+  /* Prioriteit 3: waste → tableau */
+  if(waste.length){
+    kaart=waste[waste.length-1];
+    info={bron:'waste'};
+    for(t=0;t<7;t++){
+      if(mT(info,t)){
+        toast('💡 '+kaart.rank+kaart.suit+' (waste) → kolom '+(t+1));
+        return;
+      }
+    }
+  }
+
+  /* Prioriteit 4: tableau stapel → tableau (alleen face-up kaarten) */
+  for(c=0;c<7;c++){
+    kol=tab[c];
+    /* Zoek de eerste face-up kaart van bovenaf */
+    var eersteUp=-1;
+    for(i=0;i<kol.length;i++){
+      if(kol[i].up&&eersteUp===-1)eersteUp=i;
+    }
+    if(eersteUp===-1)continue;
+    kaart=kol[eersteUp];
+    info={bron:'tab',col:c,vanIdx:eersteUp};
+    for(t=0;t<7;t++){
+      if(t===c)continue;
+      if(mT(info,t)){
+        /* Alleen suggereren als het nuttig is:
+           - Onthult een face-down kaart, OF
+           - Maakt een lege kolom vrij voor een Heer */
+        var nuttig=(eersteUp>0&&!kol[eersteUp-1].up)||(eersteUp===0);
+        if(nuttig){
+          toast('💡 '+kaart.rank+kaart.suit+' (kolom '+(c+1)+') → kolom '+(t+1));
+          return;
+        }
+      }
+    }
+  }
+
+  /* Stock klikken als er nog kaarten zijn */
+  if(stock.length){
+    toast('💡 Klik de stock voor een nieuwe kaart');
+    return;
+  }
+
+  /* Geen zet gevonden */
+  toast('Geen zet gevonden');
 }
 
 /* ══ WIN ══ */
