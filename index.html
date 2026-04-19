@@ -264,12 +264,13 @@ function bereken(){
   CW=Math.floor((bW-GAP*6)/7);
 
   if(landscape){
-    /* Landscape: kaarten minder hoog zodat stapels passen */
-    CH=Math.round(CW*1.3);
-    DS=Math.round(CH*0.12);
-    FS=Math.round(CH*0.18);
+    /* Landscape: kaarthoogte beperkt door beschikbare hoogte
+       Bord hoogte - rij1 (kaart+gap) = ruimte voor tableau
+       Kaart mag max 35% van boordhoogte zijn */
+    CH=Math.min(Math.round(CW*1.4), Math.round(bH*0.35));
+    DS=Math.round(CH*0.10);
+    FS=Math.round(CH*0.15);
   } else {
-    /* Portrait: normaal */
     CH=Math.round(CW*1.65);
     DS=Math.round(CH*0.15);
     FS=Math.round(CH*0.23);
