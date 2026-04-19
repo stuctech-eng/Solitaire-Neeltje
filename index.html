@@ -66,12 +66,35 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .stat-val{font-size:17px;font-weight:bold;color:#fff;margin-top:1px;}
 
 /* KNOPPEN */
-#btns{display:flex;align-items:center;gap:6px;padding:6px 8px;flex-shrink:0;background:rgba(0,0,0,0.3);}
+#btns{display:flex;align-items:center;gap:6px;padding:6px 8px;flex-shrink:0;background:rgba(0,0,0,0.3);flex-wrap:nowrap;}
 .hbtn{background:linear-gradient(180deg,#3a6e15,#235010);border:1.5px solid #c8a020;border-radius:18px;padding:7px 13px;font-size:13px;font-weight:bold;color:#f5c840;cursor:pointer;white-space:nowrap;font-family:Georgia,serif;-webkit-appearance:none;}
 .hbtn:active{opacity:.8;}
 #hsp{flex:1;}
 #btn-nw{background:linear-gradient(180deg,#c8a020,#886800);border:1.5px solid #f5d060;border-radius:18px;padding:7px 16px;font-size:13px;font-weight:bold;color:#1a0e00;cursor:pointer;white-space:nowrap;font-family:Georgia,serif;flex-shrink:0;-webkit-appearance:none;}
 #btn-nw:active{opacity:.85;}
+#btn-restart{background:linear-gradient(180deg,#8b0000,#5a0000);border:1.5px solid #ff6666;border-radius:18px;padding:7px 13px;font-size:13px;font-weight:bold;color:#ffaaaa;cursor:pointer;white-space:nowrap;font-family:Georgia,serif;flex-shrink:0;-webkit-appearance:none;}
+#btn-restart:active{opacity:.85;}
+
+/* LANDSCAPE modus */
+@media (orientation:landscape){
+  #stats{padding:4px 12px;}
+  .stat-lbl{font-size:9px;}
+  .stat-val{font-size:13px;}
+  #btns{padding:3px 8px;gap:4px;}
+  .hbtn{padding:4px 8px;font-size:11px;}
+  #btn-nw{padding:4px 10px;font-size:11px;}
+  #btn-restart{padding:4px 8px;font-size:11px;}
+
+  /* Diff scherm landscape */
+  #diff-screen{flex-direction:row;flex-wrap:wrap;gap:8px;padding:8px 16px;align-content:center;}
+  .ds-titel{font-size:20px;width:100%;text-align:center;margin:0;}
+  .ds-sub{display:none;}
+  .diff-btn{max-width:30%;padding:10px 14px;flex:1;}
+  .diff-nr{font-size:22px;min-width:28px;}
+  .diff-name{font-size:13px;margin-bottom:2px;}
+  .diff-desc{font-size:10px;}
+  .diff-stars{font-size:12px;margin-top:2px;}
+}
 
 /* BORD */
 #board{flex:1;position:relative;overflow:hidden;touch-action:none;}
@@ -177,8 +200,9 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <button class="hbtn" onclick="undo()">↩ Undo</button>
     <button class="hbtn" onclick="hint()">💡 Hint</button>
     <button class="hbtn" onclick="naarDiff()">☰</button>
+    <button id="btn-restart" onclick="restartSpel()">↺ Restart</button>
     <div id="hsp"></div>
-    <button id="btn-nw" onclick="nieuwSpel()">↺ Nieuw Spel</button>
+    <button id="btn-nw" onclick="nieuwSpel()">🃏 Nieuw Spel</button>
   </div>
   <div id="board"></div>
 </div>
@@ -229,15 +253,53 @@ function cp(o){return JSON.parse(JSON.stringify(o));}
 function startSpel(n){diff=n;gi('diff-screen').style.display='none';gi('app').style.display='flex';nieuwSpel();}
 function naarDiff(){clearInterval(tRef);autoRunning=false;gi('diff-screen').style.display='flex';gi('app').style.display='none';gi('win').classList.remove('show');}
 
-/* ══ AFMETINGEN ══ */
+/* ══ AFMETINGEN -- portrait én landscape ══ */
 function bereken(){
-  var brd=gi('board'),bW=brd.clientWidth;
+  var brd=gi('board');
+  var bW=brd.clientWidth;
+  var bH=brd.clientHeight;
+  var landscape=bW>bH;
+
   GAP=Math.max(3,Math.floor(bW*0.01));
   CW=Math.floor((bW-GAP*6)/7);
-  CH=Math.round(CW*1.65);
-  CR=Math.max(7,Math.round(CW*0.12));
-  DS=Math.round(CH*0.15);
-  FS=Math.round(CH*0.23);
+
+  if(landscape){
+    /* Landscape: kaarten minder hoog zodat stapels passen */
+    CH=Math.round(CW*1.3);
+    DS=Math.round(CH*0.12);
+    FS=Math.round(CH*0.18);
+  } else {
+    /* Portrait: normaal */
+    CH=Math.round(CW*1.65);
+    DS=Math.round(CH*0.15);
+    FS=Math.round(CH*0.23);
+  }
+  CR=Math.max(5,Math.round(CW*0.1));
+}
+
+/* ══ RESTART -- zelfde spel opnieuw ══ */
+var startDeck=null; /* bewaar de originele volgorde */
+
+function restartSpel(){
+  if(!startDeck){nieuwSpel();return;}
+  autoRunning=false;
+  gi('win').classList.remove('show');
+  hist=[];score=0;secs=0;moves=0;rCount=0;
+  gi('sc').textContent='0';gi('ti').textContent='0:00';gi('mv').textContent='0';
+  gi('hs').textContent=localStorage.getItem('sol_hs')||'0';
+  clearInterval(tRef);
+
+  /* Zelfde deck opnieuw uitdelen */
+  var deck=cp(startDeck);
+  tab=[[],[],[],[],[],[],[]];
+  var c,r,cd;
+  for(c=0;c<7;c++)
+    for(r=0;r<=c;r++){cd=deck.pop();cd.up=(r===c);tab[c].push(cd);}
+  stock=deck;waste=[];found=[[],[],[],[]];
+  bereken();teken();
+
+  tRef=setInterval(function(){secs++;var m=Math.floor(secs/60),s=secs%60;gi('ti').textContent=m+':'+(s<10?'0':'')+s;},1000);
+  toast('↺ Zelfde spel opnieuw!');
 }
 
 /* ══ UNDO ══ */
@@ -255,6 +317,7 @@ function nieuwSpel(){
   var deck=[],i,j,c,r,cd,tmp;
   for(i=0;i<4;i++)for(j=0;j<13;j++)deck.push({suit:SUITS[i],rank:RANKS[j],up:false});
   for(i=deck.length-1;i>0;i--){j=Math.floor(Math.random()*(i+1));tmp=deck[i];deck[i]=deck[j];deck[j]=tmp;}
+  startDeck=cp(deck); /* bewaar voor restart */
   tab=[[],[],[],[],[],[],[]];
   for(c=0;c<7;c++)for(r=0;r<=c;r++){cd=deck.pop();cd.up=(r===c);tab[c].push(cd);}
   stock=deck;waste=[];found=[[],[],[],[]];
@@ -803,6 +866,9 @@ function checkWin(){
 function confetti(){var kl=['#d4a017','#f5c842','#cc1111','#22c55e','#3b82f6','#a855f7','#f97316'];for(var i=0;i<120;i++){var el=document.createElement('div');el.className='kf';el.style.cssText='left:'+Math.random()*100+'vw;background:'+kl[i%kl.length]+';animation-duration:'+(1.2+Math.random()*2.5)+'s;animation-delay:'+Math.random()*2+'s;';document.body.appendChild(el);(function(e){setTimeout(function(){e.remove();},6000);})(el);}}
 function toast(msg){var el=gi('toast');el.textContent=msg;el.classList.add('on');clearTimeout(tT);tT=setTimeout(function(){el.classList.remove('on');},2400);}
 window.addEventListener('resize',function(){bereken();teken();});
+window.addEventListener('orientationchange',function(){
+  setTimeout(function(){bereken();teken();},100);
+});
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 </script>
 
