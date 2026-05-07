@@ -1,41 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Solitaire Fixed Responsive</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Solitaire Stable</title>
 
 <style>
-html,body{
-  margin:0;
-  height:100%;
-  overflow:hidden;
-  background: radial-gradient(circle at top,#0b3d2e,#041a14);
+/* =========================
+   FULLSCREEN FIX (iOS SAFE)
+========================= */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+
+  background: radial-gradient(circle at top, #0b3d2e, #041a14);
 }
 
-#board{
-  position:relative;
-  width:100vw;
-  height:100vh;
+/* fallback iOS viewport */
+@supports (-webkit-touch-callout: none) {
+  body {
+    height: -webkit-fill-available;
+  }
+}
+
+/* BOARD */
+#board {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
 }
 
 /* CARD */
-.card{
-  width:60px;
-  height:90px;
-  position:absolute;
-  border-radius:8px;
-  background:white;
-  box-shadow:0 4px 10px rgba(0,0,0,0.35);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:16px;
-  user-select:none;
-  touch-action:none;
+.card {
+  position: absolute;
+  width: 10vw;
+  max-width: 78px;
+  aspect-ratio: 5 / 7;
+
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 16px;
+  user-select: none;
+
   transition: transform 0.15s ease;
 }
 
-.card:active{
+.card:active {
   transform: scale(0.96);
 }
 </style>
@@ -47,51 +69,61 @@ html,body{
 <script>
 const board = document.getElementById("board");
 
+/* =========================
+   STATE
+========================= */
 const state = {
   deck: [],
   tableau: [[],[],[],[],[],[],[]],
-  cardSize: {w:60,h:90},
-  spacing: {x:0,y:0}
+  cardSize: 70,
+  spacingX: 0,
+  spacingY: 22
 };
 
 /* =========================
-   RESPONSIVE LAYOUT ENGINE
+   VIEWPORT SAFE SIZE
 ========================= */
+function getSize() {
+  return {
+    w: document.documentElement.clientWidth,
+    h: document.documentElement.clientHeight
+  };
+}
 
-function calcLayout(){
-  const w = window.innerWidth;
-  const h = window.innerHeight;
+/* =========================
+   LAYOUT CALC
+========================= */
+function calcLayout() {
+  const { w, h } = getSize();
 
-  const cols = 7;
-
-  // dynamische spacing → voorkomt witte randen
-  state.spacing.x = Math.min(80, w / (cols + 1));
-  state.spacing.y = 22;
-
-  state.cardSize.w = 60;
-  state.cardSize.h = 90;
+  state.cardSize = Math.min(78, w / 8.5);
+  state.spacingX = w / 7.2;
+  state.spacingY = Math.min(24, h / 30);
 }
 
 /* =========================
    DECK
 ========================= */
+function createDeck() {
+  const s = ["♠","♥","♦","♣"];
+  const v = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 
-function createDeck(){
-  const s=["♠","♥","♦","♣"];
-  const v=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
-  let d=[];
-  for(let ss of s){
-    for(let vv of v){
-      d.push({suit:ss,value:vv,faceUp:false,el:null});
+  let d = [];
+  for (let ss of s) {
+    for (let vv of v) {
+      d.push({ suit: ss, value: vv, faceUp: false });
     }
   }
   return d;
 }
 
-function shuffle(a){
-  for(let i=a.length-1;i>0;i--){
-    let j=Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
+/* =========================
+   SHUFFLE
+========================= */
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
 }
@@ -99,18 +131,17 @@ function shuffle(a){
 /* =========================
    DEAL
 ========================= */
+function deal() {
+  let i = 0;
 
-function deal(){
-  let i=0;
-
-  for(let c=0;c<7;c++){
-    for(let r=0;r<=c;r++){
+  for (let col = 0; col < 7; col++) {
+    for (let row = 0; row <= col; row++) {
       let card = state.deck[i++];
 
-      card.faceUp = (r===c);
-      state.tableau[c].push(card);
+      card.faceUp = (row === col);
+      state.tableau[col].push(card);
 
-      render(card,c,r);
+      render(card, col, row);
     }
   }
 
@@ -120,18 +151,17 @@ function deal(){
 /* =========================
    RENDER
 ========================= */
+function render(card, col, row) {
+  const el = document.createElement("div");
+  el.className = "card";
 
-function render(card,col,row){
-  const el=document.createElement("div");
-  el.className="card";
+  el.innerText = card.faceUp ? (card.value + card.suit) : "🂠";
 
-  el.innerText = card.faceUp ? (card.value+card.suit) : "🂠";
-
-  position(card,el,col,row);
+  position(card, el, col, row);
 
   el.onclick = (e) => {
-    e.stopPropagation(); // ❗ BELANGRIJK FIX
-    flip(card,el);
+    e.stopPropagation();
+    flip(card, el);
   };
 
   board.appendChild(el);
@@ -139,22 +169,23 @@ function render(card,col,row){
 }
 
 /* =========================
-   POSITION (RESPONSIVE FIX)
+   POSITION (RESPONSIVE)
 ========================= */
+function position(card, el, col, row) {
+  const { w } = getSize();
 
-function position(card,el,col,row){
-  const x = 20 + col * state.spacing.x;
-  const y = 120 + row * state.spacing.y;
+  const x = (w - state.spacingX * 7) / 2 + col * state.spacingX;
+  const y = 120 + row * state.spacingY;
 
-  el.style.transform = `translate(${x}px,${y}px)`;
+  el.style.transform = `translate3d(${x}px,${y}px,0)`;
 }
 
 /* =========================
    FLIP
 ========================= */
+function flip(card, el) {
+  if (card.faceUp) return;
 
-function flip(card,el){
-  if(card.faceUp) return;
   card.faceUp = true;
   el.innerText = card.value + card.suit;
 }
@@ -162,18 +193,17 @@ function flip(card,el){
 /* =========================
    DRAW
 ========================= */
-
-function draw(){
+function draw() {
   let card = state.deck.pop();
-  if(!card) return;
+  if (!card) return;
 
   card.faceUp = true;
 
-  const el=document.createElement("div");
-  el.className="card";
+  const el = document.createElement("div");
+  el.className = "card";
   el.innerText = card.value + card.suit;
 
-  el.style.transform = `translate(20px,20px)`;
+  el.style.transform = `translate3d(20px,20px,0)`;
 
   board.appendChild(el);
 }
@@ -181,8 +211,7 @@ function draw(){
 /* =========================
    INIT
 ========================= */
-
-function init(){
+function init() {
   board.innerHTML = "";
 
   calcLayout();
@@ -194,21 +223,19 @@ function init(){
 init();
 
 /* =========================
-   RESIZE FIX (LANDSCAPE BUG FIX)
+   RESIZE + ORIENTATION SAFE
 ========================= */
-
 window.addEventListener("resize", () => {
-  init(); // clean re-layout
+  init();
 });
 
-/* orientation change fix (iOS belangrijk) */
 window.addEventListener("orientationchange", () => {
   setTimeout(init, 150);
 });
 
-/* click deck area */
+/* DRAW CLICK AREA */
 board.onclick = (e) => {
-  if(e.clientX < window.innerWidth * 0.2){
+  if (e.clientX < getSize().w * 0.2) {
     draw();
   }
 };
