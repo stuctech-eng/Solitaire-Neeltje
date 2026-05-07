@@ -600,40 +600,10 @@ function koppelDrag(el,bron,col,vanIdx){
     dragStartX=t.clientX;dragStartY=t.clientY;
     var r=el.getBoundingClientRect();
     dragOX=t.clientX-r.left;dragOY=t.clientY-r.top;
-  },{passive:true});
-
-  el.addEventListener('touchmove',function(e){
-    if(!dragInfo||dragSourceEl!==el||e.touches.length>1)return;
-    var t=e.touches[0];
-    var dx=t.clientX-dragStartX,dy=t.clientY-dragStartY;
-    if(!dragMoved&&Math.sqrt(dx*dx+dy*dy)<6)return;
-    e.preventDefault();
-    if(!dragMoved){
-      dragMoved=true;
-      el.classList.add('ghost');
-      maakDragKlonen(getK(dragInfo),t.clientX,t.clientY);
-    }
-    beweegDragEls(t.clientX,t.clientY);
-  },{passive:false});
-
-  el.addEventListener('touchend',function(e){
-    if(!dragInfo||dragSourceEl!==el)return;
-    el.classList.remove('ghost');
-    var t=e.changedTouches[0];
-    if(!dragMoved){
-      verwijderKlonen();
-      var inf=dragInfo;dragInfo=null;dragSourceEl=null;
-      tikAutoFoundation(inf);return;
-    }
-    var cx=t.clientX,cy=t.clientY;
-    var snapInfo=dragInfo;dragInfo=null;dragMoved=false;dragSourceEl=null;
-    verwerkDropNa(cx,cy,snapInfo);
-  },{passive:true});
-
-  el.addEventListener('touchcancel',function(){
-    if(dragSourceEl!==el)return;
-    el.classList.remove('ghost');
-    verwijderKlonen();dragInfo=null;dragMoved=false;dragSourceEl=null;teken();
+    /* Events op document -- zodat ze werken ook buiten het element */
+    document.addEventListener('touchmove',onTM,{passive:false});
+    document.addEventListener('touchend',onTE,{passive:true});
+    document.addEventListener('touchcancel',onTC,{passive:true});
   },{passive:true});
 
   /* MOUSE */
@@ -648,6 +618,45 @@ function koppelDrag(el,bron,col,vanIdx){
     document.addEventListener('mousemove',onMM);
     document.addEventListener('mouseup',onMU);
   });
+}
+
+function onTM(e){
+  if(!dragInfo||e.touches.length>1)return;
+  var t=e.touches[0];
+  var dx=t.clientX-dragStartX,dy=t.clientY-dragStartY;
+  if(!dragMoved&&Math.sqrt(dx*dx+dy*dy)<6)return;
+  e.preventDefault();
+  if(!dragMoved){
+    dragMoved=true;
+    if(dragSourceEl)dragSourceEl.classList.add('ghost');
+    maakDragKlonen(getK(dragInfo),t.clientX,t.clientY);
+  }
+  beweegDragEls(t.clientX,t.clientY);
+}
+
+function onTE(e){
+  document.removeEventListener('touchmove',onTM);
+  document.removeEventListener('touchend',onTE);
+  document.removeEventListener('touchcancel',onTC);
+  if(!dragInfo)return;
+  if(dragSourceEl)dragSourceEl.classList.remove('ghost');
+  var t=e.changedTouches[0];
+  if(!dragMoved){
+    verwijderKlonen();
+    var inf=dragInfo;dragInfo=null;dragSourceEl=null;
+    tikAutoFoundation(inf);return;
+  }
+  var cx=t.clientX,cy=t.clientY;
+  var snapInfo=dragInfo;dragInfo=null;dragMoved=false;dragSourceEl=null;
+  verwerkDropNa(cx,cy,snapInfo);
+}
+
+function onTC(){
+  document.removeEventListener('touchmove',onTM);
+  document.removeEventListener('touchend',onTE);
+  document.removeEventListener('touchcancel',onTC);
+  if(dragSourceEl)dragSourceEl.classList.remove('ghost');
+  verwijderKlonen();dragInfo=null;dragMoved=false;dragSourceEl=null;teken();
 }
 
 function onMM(e){
@@ -774,153 +783,6 @@ function springTerug(origX,origY,callback){
     g.el.style.left=origX+'px';g.el.style.top=(origY+g.off)+'px';
   });
   setTimeout(function(){if(callback)callback();},220);
-}
-
-    kaarten.forEach(function(kd,idx){
-      var kloon=maakEl(Object.assign({},kd,{up:true}));
-      kloon.style.position='fixed';
-      kloon.style.width=CW+'px';
-      kloon.style.height=CH+'px';
-      kloon.style.zIndex=(1000+idx)+'';
-      kloon.style.pointerEvents='none';
-      kloon.style.left=(e.clientX-dragOX)+'px';
-      kloon.style.top=(e.clientY-dragOY+idx*FS)+'px';
-      kloon.style.transform='rotate(1.5deg) scale(1.04)';
-      kloon.style.boxShadow='0 16px 48px rgba(0,0,0,.65),0 0 0 2px rgba(96,165,250,.5)';
-      kloon.style.borderRadius=CR+'px';
-      kloon.style.transition='none';
-      document.body.appendChild(kloon);
-      dragEls.push({el:kloon,off:idx*FS});
-    });
-
-    el.addEventListener('pointermove',onDragMove);
-    el.addEventListener('pointerup',onDragUp);
-    el.addEventListener('pointercancel',onDragCancel);
-  });
-}
-
-function onDragMove(e){
-  if(!dragInfo)return;
-  dragMoved=true;
-  var x=e.clientX-dragOX,y=e.clientY-dragOY;
-  dragEls.forEach(function(g){
-    g.el.style.left=x+'px';
-    g.el.style.top=(y+g.off)+'px';
-  });
-}
-
-function onDragUp(e){
-  this.removeEventListener('pointermove',onDragMove);
-  this.removeEventListener('pointerup',onDragUp);
-  this.removeEventListener('pointercancel',onDragCancel);
-  this.classList.remove('ghost');
-
-  if(!dragMoved){
-    /* Tik -- geen sleep */
-    verwijderKlonen();
-    var inf=dragInfo;dragInfo=null;
-    /* Auto foundation bij tik */
-    if(inf&&(inf.bron==='waste'||inf.bron==='tab')){
-      var ks=getK(inf);
-      if(ks.length===1){
-        for(var ff=0;ff<4;ff++){if(mF(inf,ff)){snap();dragInfo=inf;doVF(ff);dragInfo=null;return;}}
-      }
-    }
-    return;
-  }
-
-  /* Sleep -- zoek drop doel */
-  var cx=e.clientX,cy=e.clientY;
-  var brd=gi('board'),slots=brd.querySelectorAll('.slot'),br;
-  var doelF=null,doelC=null,doelX=null,doelY=null,ok=false;
-
-  for(var f=0;f<4&&!ok;f++){
-    br=slots[f].getBoundingClientRect();
-    if(cx>=br.left&&cx<=br.right&&cy>=br.top&&cy<=br.bottom&&mF(dragInfo,f)){
-      doelF=f;doelX=br.left;doelY=br.top;ok=true;
-    }
-  }
-  if(!ok){
-    var brdR=brd.getBoundingClientRect(),bX=cx-brdR.left;
-    var col=Math.floor(bX/(CW+GAP));
-    if(col<0)col=0;if(col>6)col=6;
-    if(mT(dragInfo,col)){
-      doelC=col;ok=true;
-      var kol=tab[col],R2=CH+10,yp=R2;
-      for(var ki=0;ki<kol.length;ki++)yp+=kol[ki].up?FS:DS;
-      doelX=brdR.left+col*(CW+GAP);doelY=brdR.top+yp;
-    }
-    if(!ok){
-      col=Math.round(bX/(CW+GAP));
-      if(col<0)col=0;if(col>6)col=6;
-      if(mT(dragInfo,col)){
-        doelC=col;ok=true;
-        var kol2=tab[col],R2b=CH+10,yp2=R2b;
-        for(var ki2=0;ki2<kol2.length;ki2++)yp2+=kol2[ki2].up?FS:DS;
-        doelX=brdR.left+col*(CW+GAP);doelY=brdR.top+yp2;
-      }
-    }
-  }
-
-  var snapInfo=dragInfo;
-
-  if(!ok){
-    /* Ongeldig -- spring terug */
-    springTerug(e.clientX-dragOX,e.clientY-dragOY,function(){
-      verwijderKlonen();dragInfo=null;teken();
-    });
-    return;
-  }
-
-  /* Geldig -- spring naar doel */
-  springNaarDoel(doelX,doelY,function(){
-    verwijderKlonen();
-    dragInfo=snapInfo;
-    if(doelF!==null){snap();doVF(doelF);}
-    else if(doelC!==null){snap();doVT(doelC);}
-    dragInfo=null;
-  });
-}
-
-function onDragCancel(){
-  this.removeEventListener('pointermove',onDragMove);
-  this.removeEventListener('pointerup',onDragUp);
-  this.removeEventListener('pointercancel',onDragCancel);
-  this.classList.remove('ghost');
-  verwijderKlonen();dragInfo=null;teken();
-}
-
-/* Spring naar eindpositie */
-function springNaarDoel(eindX,eindY,callback){
-  if(!dragEls.length){if(callback)callback();return;}
-  dragEls.forEach(function(g,idx){
-    g.el.style.transition='left .26s var(--spring),top .26s var(--spring),transform .2s ease,box-shadow .2s';
-    g.el.style.transform='rotate(0deg) scale(1)';
-    g.el.style.boxShadow='0 4px 16px rgba(0,0,0,.35)';
-    g.el.style.left=eindX+'px';
-    g.el.style.top=(eindY+g.off)+'px';
-  });
-  setTimeout(function(){if(callback)callback();},280);
-}
-
-/* Spring terug */
-function springTerug(origX,origY,callback){
-  if(!dragEls.length){if(callback)callback();return;}
-  dragEls.forEach(function(g){
-    g.el.style.transition='left .22s ease,top .22s ease,transform .2s ease,opacity .2s';
-    g.el.style.transform='rotate(0deg) scale(.95)';
-    g.el.style.opacity='0';
-    g.el.style.left=origX+'px';
-    g.el.style.top=(origY+g.off)+'px';
-  });
-  setTimeout(function(){if(callback)callback();},240);
-}
-
-function verwijderKlonen(){
-  dragEls.forEach(function(g){if(g.el.parentNode)g.el.remove();});
-  dragEls=[];
-  /* Verwijder ook eventuele ghost class */
-  gi('board').querySelectorAll('.ghost').forEach(function(el){el.classList.remove('ghost');});
 }
 
 /* ══════════════════════════════════════
