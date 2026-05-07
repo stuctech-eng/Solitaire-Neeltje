@@ -709,29 +709,80 @@ function ruimClones2(){ruimClones();}
 
 function verwerkDrop(cx,cy){
   var ok=false,brd=gi('board'),slots=brd.querySelectorAll('.slot'),br;
-  var doelF=null,doelC=null;
-  for(var f=0;f<4&&!ok;f++){br=slots[f].getBoundingClientRect();if(cx>=br.left&&cx<=br.right&&cy>=br.top&&cy<=br.bottom&&mF(dInfo,f)){doelF=f;ok=true;}}
+  var doelF=null,doelC=null,doelX=null,doelY=null;
+
+  /* Zoek doel */
+  for(var f=0;f<4&&!ok;f++){
+    br=slots[f].getBoundingClientRect();
+    if(cx>=br.left&&cx<=br.right&&cy>=br.top&&cy<=br.bottom&&mF(dInfo,f)){
+      doelF=f;doelX=br.left;doelY=br.top;ok=true;
+    }
+  }
   if(!ok){
-    var bX=cx-brd.getBoundingClientRect().left;
+    var brdR=brd.getBoundingClientRect();
+    var bX=cx-brdR.left;
     var col=Math.floor(bX/(CW+GAP));
-    if(col>=0&&col<7&&mT(dInfo,col)){doelC=col;ok=true;}
-    if(!ok){col=Math.round(bX/(CW+GAP));if(col>=0&&col<7&&mT(dInfo,col)){doelC=col;ok=true;}}
+    if(col>=0&&col<7&&mT(dInfo,col)){
+      doelC=col;
+      /* Bereken eindpositie: onderkant van de kolom */
+      var kol=tab[col];
+      var R2=CH+10;
+      var yPos=R2;
+      for(var ki=0;ki<kol.length;ki++)yPos+=kol[ki].up?FS:DS;
+      doelX=brdR.left+col*(CW+GAP);doelY=brdR.top+yPos;
+      ok=true;
+    }
+    if(!ok){
+      col=Math.round(bX/(CW+GAP));
+      if(col>=0&&col<7&&mT(dInfo,col)){
+        doelC=col;
+        var kol2=tab[col],R2b=CH+10,yPos2=R2b;
+        for(var ki2=0;ki2<kol2.length;ki2++)yPos2+=kol2[ki2].up?FS:DS;
+        doelX=brdR.left+col*(CW+GAP);doelY=brdR.top+yPos2;
+        ok=true;
+      }
+    }
   }
-  /* Kloon recht zetten, even wachten */
-  if(pdEl&&pdEl.clone){
-    pdEl.clone.style.transition='transform .15s ease,box-shadow .15s';
-    pdEl.clone.style.transform='rotate(0deg) scale(1)';
-    pdEl.clone.style.boxShadow=ok?'0 8px 24px rgba(0,0,0,.4)':'0 4px 12px rgba(0,0,0,.3)';
+
+  if(!ok){
+    /* Ongeldig -- kloon springt terug naar origineel */
+    springNaar(cx-pdOX,cy-pdOY,function(){ruimClones2();dInfo=null;teken();});
+    return;
   }
+
+  /* Geldig -- kloon springt naar eindpositie met bounce */
   var snapDInfo=dInfo;
-  setTimeout(function(){
+  springNaar(doelX,doelY,function(){
     ruimClones2();
-    if(!ok){dInfo=null;teken();return;}
     dInfo=snapDInfo;
     if(doelF!==null){snap();vF(doelF);}
     else if(doelC!==null){snap();vT(doelC);}
     dInfo=null;
-  },ok?160:80);
+  });
+}
+
+/* Spring animatie -- kloon vliegt met cubic-bezier bounce naar doel */
+function springNaar(eindX,eindY,callback){
+  if(!pdEl||!pdEl.clone){ruimClones2();if(callback)callback();return;}
+  var cl=pdEl.clone;
+  /* Zet draaiing recht + spring transitie */
+  cl.style.transition='left .28s cubic-bezier(.2,1.4,.4,1),top .28s cubic-bezier(.2,1.4,.4,1),transform .2s ease,box-shadow .2s';
+  cl.style.transform='rotate(0deg) scale(1)';
+  cl.style.boxShadow='0 6px 20px rgba(0,0,0,.35)';
+  cl.style.left=eindX+'px';
+  cl.style.top=eindY+'px';
+  /* Extra klonen volgen iets vertraagd */
+  for(var j=0;j<pdEx.length;j++){
+    (function(g,off){
+      setTimeout(function(){
+        g.el.style.transition='left .28s cubic-bezier(.2,1.4,.4,1),top .28s cubic-bezier(.2,1.4,.4,1),transform .2s ease';
+        g.el.style.transform='rotate(0deg) scale(1)';
+        g.el.style.left=eindX+'px';
+        g.el.style.top=(eindY+off)+'px';
+      },30);
+    })(pdEx[j],pdEx[j].off);
+  }
+  setTimeout(function(){if(callback)callback();},300);
 }
 
 /* ══ REGELS ══ */
