@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Solitaire Stable Core</title>
+<title>Solitaire Fixed Base</title>
 
 <style>
 html,body{
@@ -20,33 +20,29 @@ html,body{
 
 /* CARD */
 .card{
-  width:70px;
-  height:100px;
+  width:60px;
+  height:90px;
   position:absolute;
-  border-radius:10px;
-  transition:transform .25s ease;
-  transform-style:preserve-3d;
-}
-
-/* faces */
-.face{
-  position:absolute;
-  inset:0;
-  border-radius:10px;
-  backface-visibility:hidden;
+  border-radius:8px;
+  background:white;
+  box-shadow:0 4px 10px rgba(0,0,0,0.3);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  user-select:none;
+  touch-action:none;
 }
 
 .back{
-  background:linear-gradient(135deg,#1b1f3a,#4361ee);
+  background: linear-gradient(135deg,#2b2d42,#4361ee);
+  color:white;
 }
 
-.front{
-  background:white;
-  transform:rotateY(180deg);
+/* highlight click */
+.card:active{
+  transform:scale(0.98);
 }
-
-.face-up{ transform:rotateY(180deg); }
-.face-down{ transform:rotateY(0deg); }
 </style>
 </head>
 
@@ -56,41 +52,25 @@ html,body{
 <script>
 const board = document.getElementById("board");
 
-/* =========================
-   STATE (NO DOM RELIANCE)
-========================= */
-
 const state = {
   deck: [],
-  tableau: [[],[],[],[],[],[],[]],
+  tableau: [[],[],[],[],[],[],[]]
 };
 
-/* =========================
-   CARD FACTORY
-========================= */
-
+/* CREATE */
 function createDeck(){
-  const suits=["♠","♥","♦","♣"];
-  const vals=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+  const s=["♠","♥","♦","♣"];
+  const v=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
   let d=[];
-
-  for(let s of suits){
-    for(let v of vals){
-      d.push({
-        suit:s,
-        value:v,
-        faceUp:false,
-        el:null
-      });
+  for(let ss of s){
+    for(let vv of v){
+      d.push({suit:ss,value:vv,faceUp:false});
     }
   }
   return d;
 }
 
-/* =========================
-   SHUFFLE SAFE
-========================= */
-
+/* SHUFFLE */
 function shuffle(a){
   for(let i=a.length-1;i>0;i--){
     let j=Math.floor(Math.random()*(i+1));
@@ -99,109 +79,70 @@ function shuffle(a){
   return a;
 }
 
-/* =========================
-   DEAL (SAFE STATE ONLY)
-========================= */
-
+/* DEAL */
 function deal(){
   let i=0;
 
-  for(let c=0;c<7;c++){
-    for(let r=0;r<=c;r++){
+  for(let col=0;col<7;col++){
+    for(let row=0;row<=col;row++){
       let card=state.deck[i++];
 
-      card.faceUp = (r===c);
-      state.tableau[c].push(card);
+      card.faceUp = (row===col);
+      state.tableau[col].push(card);
 
-      render(card,c,r);
+      render(card,col,row);
     }
   }
 
   state.deck = state.deck.slice(i);
 }
 
-/* =========================
-   RENDER (ONLY ONCE)
-========================= */
-
+/* RENDER */
 function render(card,col,row){
   const el=document.createElement("div");
   el.className="card";
 
-  el.innerHTML=`
-    <div class="face back"></div>
-    <div class="face front">
-      <div style="padding:8px;font-size:18px;">
-        ${card.value}${card.suit}
-      </div>
-    </div>
-  `;
+  el.innerText = card.faceUp
+    ? card.value + card.suit
+    : "🂠";
 
-  el.onclick=()=>flip(card);
+  const x = 10 + col * 70;
+  const y = 100 + row * 22;
+
+  el.style.transform = `translate(${x}px,${y}px)`;
+
+  el.onclick = () => flip(card,el);
 
   board.appendChild(el);
-  card.el=el;
-
-  position(card,col,row);
+  card.el = el;
 }
 
-/* =========================
-   POSITION (SAFE UPDATE ONLY)
-========================= */
+/* FLIP */
+function flip(card,el){
+  if(card.faceUp) return;
 
-function position(card,col,row){
-  const x=20+col*80;
-  const y=120+row*25;
-
-  if(card.el){
-    card.el.style.transform=`translate3d(${x}px,${y}px,0) ${
-      card.faceUp ? "rotateY(180deg)" : "rotateY(0deg)"
-    }`;
-  }
+  card.faceUp = true;
+  el.innerText = card.value + card.suit;
 }
 
-/* =========================
-   FLIP SAFE
-========================= */
-
-function flip(card){
-  card.faceUp=true;
-
-  if(card.el){
-    card.el.classList.add("face-up");
-  }
-}
-
-/* =========================
-   DRAW
-========================= */
-
+/* DRAW */
 function draw(){
-  let card=state.deck.pop();
+  let card = state.deck.pop();
   if(!card) return;
 
-  card.faceUp=true;
-  state.tableau[0].push(card);
+  card.faceUp = true;
 
-  render(card,0,state.tableau[0].length);
+  const el=document.createElement("div");
+  el.className="card";
+
+  el.innerText = card.value + card.suit;
+
+  el.style.transform = `translate(10px,20px)`;
+
+  board.appendChild(el);
 }
 
-/* =========================
-   LAYOUT UPDATE (NO RESET)
-========================= */
-
-function updateLayout(){
-  state.tableau.forEach((col,c)=>{
-    col.forEach((card,r)=>{
-      position(card,c,r);
-    });
-  });
-}
-
-/* =========================
-   INIT
-========================= */
-
+/* INIT */
 function init(){
   state.deck = shuffle(createDeck());
   deal();
@@ -209,15 +150,7 @@ function init(){
 
 init();
 
-/* =========================
-   RESIZE FIX (IMPORTANT FIX)
-========================= */
-
-window.addEventListener("resize",()=>{
-  updateLayout();   // ❌ NO DOM RESET
-});
-
-/* click left side = draw */
+/* CLICK LEFT = DRAW */
 board.onclick=(e)=>{
   if(e.clientX < window.innerWidth*0.2){
     draw();
