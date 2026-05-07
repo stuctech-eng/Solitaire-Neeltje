@@ -1,64 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Solitaire Stable</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<title>Solitaire</title>
 
 <style>
 /* =========================
-   FULLSCREEN FIX (iOS SAFE)
+   RESET + MOBILE FIX
 ========================= */
 html, body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
-
+  background: radial-gradient(circle at top, #0b3d2e, #06261d);
   overflow: hidden;
-  position: fixed;
-  inset: 0;
-
-  background: radial-gradient(circle at top, #0b3d2e, #041a14);
+  font-family: sans-serif;
+  touch-action: none;
 }
 
-/* fallback iOS viewport */
-@supports (-webkit-touch-callout: none) {
-  body {
-    height: -webkit-fill-available;
-  }
-}
-
-/* BOARD */
+/* SAFE BOARD */
 #board {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
+  position: relative;
+  width: 100vw;
+  height: 100vh;
 }
 
-/* CARD */
+/* =========================
+   CARD STYLE (MODERN)
+========================= */
 .card {
+  width: 70px;
+  height: 100px;
   position: absolute;
-  width: 10vw;
-  max-width: 78px;
-  aspect-ratio: 5 / 7;
-
   border-radius: 10px;
-  background: white;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 16px;
+  transform-style: preserve-3d;
+  transition: transform 0.25s ease, left 0.25s ease, top 0.25s ease;
   user-select: none;
-
-  transition: transform 0.15s ease;
 }
 
-.card:active {
-  transform: scale(0.96);
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: 10px;
+}
+
+/* FRONT */
+.front {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: white;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* BACK (MODERN BLUE PATTERN) */
+.back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  background-size: 200% 200%;
+  animation: bgMove 4s ease infinite;
+}
+
+@keyframes bgMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* flip */
+.face-down .front { display: none; }
+.face-up .back { display: none; }
+
+/* =========================
+   TABLEAU STACK OFFSET
+========================= */
+.stack {
+  position: absolute;
+}
+
+/* highlight drop */
+.highlight {
+  outline: 2px solid rgba(255,255,255,0.5);
 }
 </style>
 </head>
@@ -67,179 +100,162 @@ html, body {
 <div id="board"></div>
 
 <script>
+/* =========================
+   BASIC SOLITAIRE ENGINE
+========================= */
+
 const board = document.getElementById("board");
 
-/* =========================
-   STATE
-========================= */
-const state = {
-  deck: [],
-  tableau: [[],[],[],[],[],[],[]],
-  cardSize: 70,
-  spacingX: 0,
-  spacingY: 22
-};
+const suits = ["♠","♥","♦","♣"];
+const values = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 
-/* =========================
-   VIEWPORT SAFE SIZE
-========================= */
-function getSize() {
-  return {
-    w: document.documentElement.clientWidth,
-    h: document.documentElement.clientHeight
-  };
-}
+let deck = [];
+let columns = [[],[],[],[],[],[],[]];
 
-/* =========================
-   LAYOUT CALC
-========================= */
-function calcLayout() {
-  const { w, h } = getSize();
-
-  state.cardSize = Math.min(78, w / 8.5);
-  state.spacingX = w / 7.2;
-  state.spacingY = Math.min(24, h / 30);
-}
-
-/* =========================
-   DECK
-========================= */
-function createDeck() {
-  const s = ["♠","♥","♦","♣"];
-  const v = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
-
-  let d = [];
-  for (let ss of s) {
-    for (let vv of v) {
-      d.push({ suit: ss, value: vv, faceUp: false });
+function createDeck(){
+  deck = [];
+  for(let s of suits){
+    for(let v of values){
+      deck.push({suit:s, value:v});
     }
   }
-  return d;
 }
 
-/* =========================
-   SHUFFLE
-========================= */
-function shuffle(a) {
-  for (let i = a.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+/* shuffle (Fisher-Yates safe) */
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
   }
-  return a;
 }
 
 /* =========================
-   DEAL
+   CARD CREATION
 ========================= */
-function deal() {
-  let i = 0;
+function createCard(card, x, y, faceUp=false){
 
-  for (let col = 0; col < 7; col++) {
-    for (let row = 0; row <= col; row++) {
-      let card = state.deck[i++];
-
-      card.faceUp = (row === col);
-      state.tableau[col].push(card);
-
-      render(card, col, row);
-    }
-  }
-
-  state.deck = state.deck.slice(i);
-}
-
-/* =========================
-   RENDER
-========================= */
-function render(card, col, row) {
   const el = document.createElement("div");
-  el.className = "card";
+  el.className = "card " + (faceUp ? "face-up":"face-down");
 
-  el.innerText = card.faceUp ? (card.value + card.suit) : "🂠";
+  el.style.left = x + "px";
+  el.style.top = y + "px";
 
-  position(card, el, col, row);
+  el.innerHTML = `
+    <div class="card-inner">
+      <div class="front">${card.value}${card.suit}</div>
+      <div class="back"></div>
+    </div>
+  `;
 
-  el.onclick = (e) => {
-    e.stopPropagation();
-    flip(card, el);
-  };
+  el.dataset.value = card.value;
+  el.dataset.suit = card.suit;
+
+  el.addEventListener("click", () => {
+    flip(el);
+  });
+
+  enableDrag(el);
 
   board.appendChild(el);
-  card.el = el;
-}
-
-/* =========================
-   POSITION (RESPONSIVE)
-========================= */
-function position(card, el, col, row) {
-  const { w } = getSize();
-
-  const x = (w - state.spacingX * 7) / 2 + col * state.spacingX;
-  const y = 120 + row * state.spacingY;
-
-  el.style.transform = `translate3d(${x}px,${y}px,0)`;
+  return el;
 }
 
 /* =========================
    FLIP
 ========================= */
-function flip(card, el) {
-  if (card.faceUp) return;
-
-  card.faceUp = true;
-  el.innerText = card.value + card.suit;
+function flip(el){
+  if(el.classList.contains("face-down")){
+    el.classList.remove("face-down");
+    el.classList.add("face-up");
+  } else {
+    el.classList.remove("face-up");
+    el.classList.add("face-down");
+  }
 }
 
 /* =========================
-   DRAW
+   DEAL TABLEAU
 ========================= */
-function draw() {
-  let card = state.deck.pop();
-  if (!card) return;
+function deal(){
+  let startX = 20;
+  let startY = 20;
 
-  card.faceUp = true;
+  let index = 0;
 
-  const el = document.createElement("div");
-  el.className = "card";
-  el.innerText = card.value + card.suit;
+  for(let col=0; col<7; col++){
+    for(let row=0; row<=col; row++){
 
-  el.style.transform = `translate3d(20px,20px,0)`;
+      const card = deck[index++];
+      const x = startX + col * 45;
+      const y = startY + row * 25;
 
-  board.appendChild(el);
+      const faceUp = row === col;
+
+      const el = createCard(card, x, y, faceUp);
+      columns[col].push(el);
+    }
+  }
+}
+
+/* =========================
+   DRAG SYSTEM (SIMPLE + STABLE)
+========================= */
+let dragEl = null;
+let offsetX = 0;
+let offsetY = 0;
+
+function enableDrag(el){
+
+  el.addEventListener("pointerdown", (e)=>{
+
+    dragEl = el;
+    const rect = el.getBoundingClientRect();
+
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+
+    el.style.zIndex = 999;
+
+    el.setPointerCapture(e.pointerId);
+  });
+
+  el.addEventListener("pointermove", (e)=>{
+    if(!dragEl) return;
+
+    dragEl.style.left = (e.clientX - offsetX) + "px";
+    dragEl.style.top = (e.clientY - offsetY) + "px";
+  });
+
+  el.addEventListener("pointerup", ()=>{
+    if(dragEl){
+      dragEl.style.zIndex = 1;
+    }
+    dragEl = null;
+  });
 }
 
 /* =========================
    INIT
 ========================= */
-function init() {
-  board.innerHTML = "";
-
-  calcLayout();
-
-  state.deck = shuffle(createDeck());
+function init(){
+  createDeck();
+  shuffle(deck);
   deal();
 }
 
 init();
 
 /* =========================
-   RESIZE + ORIENTATION SAFE
+   LANDSCAPE FIX FORCE
 ========================= */
-window.addEventListener("resize", () => {
-  init();
-});
+function resizeFix(){
+  board.style.width = window.innerWidth + "px";
+  board.style.height = window.innerHeight + "px";
+}
 
-window.addEventListener("orientationchange", () => {
-  setTimeout(init, 150);
-});
+window.addEventListener("resize", resizeFix);
+resizeFix();
 
-/* DRAW CLICK AREA */
-board.onclick = (e) => {
-  if (e.clientX < getSize().w * 0.2) {
-    draw();
-  }
-};
 </script>
-
 </body>
 </html>
