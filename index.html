@@ -1,84 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Solitaire Core</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Solitaire Stable Core</title>
 
 <style>
-html, body {
+html,body{
   margin:0;
-  padding:0;
   height:100%;
-  background: radial-gradient(circle at top, #0b3d2e, #041a14);
   overflow:hidden;
-  font-family: sans-serif;
+  background: radial-gradient(circle at top,#0b3d2e,#041a14);
 }
 
-/* BOARD */
-#board {
+#board{
   position:relative;
   width:100%;
   height:100%;
-  touch-action:none;
 }
 
 /* CARD */
-.card {
+.card{
   width:70px;
   height:100px;
   position:absolute;
   border-radius:10px;
+  transition:transform .25s ease;
   transform-style:preserve-3d;
-  transition: transform 0.25s ease;
-  will-change: transform;
 }
 
-/* FRONT / BACK */
-.face {
+/* faces */
+.face{
   position:absolute;
   inset:0;
   border-radius:10px;
   backface-visibility:hidden;
 }
 
-/* Mooie moderne kaart achterkant */
-.back {
-  background: linear-gradient(135deg,#1b1f3a,#3a0ca3,#4361ee);
-  border:2px solid rgba(255,255,255,0.2);
+.back{
+  background:linear-gradient(135deg,#1b1f3a,#4361ee);
 }
 
-/* Front */
-.front {
-  background: white;
-  transform: rotateY(180deg);
+.front{
+  background:white;
+  transform:rotateY(180deg);
 }
 
-/* flip */
-.face-down {
-  transform: rotateY(0deg);
-}
-.face-up {
-  transform: rotateY(180deg);
-}
-
-/* piles */
-.pile {
-  position:absolute;
-  width:70px;
-  height:100px;
-  border:1px dashed rgba(255,255,255,0.2);
-  border-radius:10px;
-}
-
-/* responsive layout */
-@media (orientation: portrait) {
-  .top { top:10px; }
-}
-
-@media (orientation: landscape) {
-  .top { top:5px; }
-}
+.face-up{ transform:rotateY(180deg); }
+.face-down{ transform:rotateY(0deg); }
 </style>
 </head>
 
@@ -86,91 +54,81 @@ html, body {
 <div id="board"></div>
 
 <script>
-/* =========================
-   STATE ENGINE (IMPORTANT)
-========================= */
-
 const board = document.getElementById("board");
 
-let state = {
+/* =========================
+   STATE (NO DOM RELIANCE)
+========================= */
+
+const state = {
   deck: [],
   tableau: [[],[],[],[],[],[],[]],
-  waste: [],
-  foundation: [[],[],[],[]]
 };
 
 /* =========================
-   CREATE DECK
+   CARD FACTORY
 ========================= */
 
-function createDeck() {
-  const suits = ["♠","♥","♦","♣"];
-  const values = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+function createDeck(){
+  const suits=["♠","♥","♦","♣"];
+  const vals=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+  let d=[];
 
-  let deck = [];
-
-  for (let s of suits) {
-    for (let v of values) {
-      deck.push({
+  for(let s of suits){
+    for(let v of vals){
+      d.push({
         suit:s,
         value:v,
-        color:(s==="♥"||s==="♦")?"red":"black",
-        id: crypto.randomUUID()
+        faceUp:false,
+        el:null
       });
     }
   }
-
-  return deck;
+  return d;
 }
 
 /* =========================
-   SHUFFLE (SAFE)
+   SHUFFLE SAFE
 ========================= */
 
-function shuffle(deck) {
-  for (let i = deck.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    let j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
   }
-  return deck;
+  return a;
 }
 
 /* =========================
-   DEAL
+   DEAL (SAFE STATE ONLY)
 ========================= */
 
-function deal() {
-  let index = 0;
+function deal(){
+  let i=0;
 
-  for (let col = 0; col < 7; col++) {
-    for (let row = 0; row <= col; row++) {
-      let card = state.deck[index++];
+  for(let c=0;c<7;c++){
+    for(let r=0;r<=c;r++){
+      let card=state.deck[i++];
 
-      card.faceUp = (row === col);
+      card.faceUp = (r===c);
+      state.tableau[c].push(card);
 
-      state.tableau[col].push(card);
-
-      renderCard(card, col, row);
+      render(card,c,r);
     }
   }
 
-  state.deck = state.deck.slice(index);
+  state.deck = state.deck.slice(i);
 }
 
 /* =========================
-   RENDER CARD
+   RENDER (ONLY ONCE)
 ========================= */
 
-function renderCard(card, col, row) {
-  const el = document.createElement("div");
-  el.className = "card";
+function render(card,col,row){
+  const el=document.createElement("div");
+  el.className="card";
 
-  const x = 20 + col * 80;
-  const y = 120 + row * 25;
-
-  el.style.transform = `translate3d(${x}px,${y}px,0)`;
-
-  el.innerHTML = `
+  el.innerHTML=`
     <div class="face back"></div>
     <div class="face front">
       <div style="padding:8px;font-size:18px;">
@@ -179,102 +137,92 @@ function renderCard(card, col, row) {
     </div>
   `;
 
-  if (card.faceUp) {
-    el.classList.add("face-up");
-  } else {
-    el.classList.add("face-down");
+  el.onclick=()=>flip(card);
+
+  board.appendChild(el);
+  card.el=el;
+
+  position(card,col,row);
+}
+
+/* =========================
+   POSITION (SAFE UPDATE ONLY)
+========================= */
+
+function position(card,col,row){
+  const x=20+col*80;
+  const y=120+row*25;
+
+  if(card.el){
+    card.el.style.transform=`translate3d(${x}px,${y}px,0) ${
+      card.faceUp ? "rotateY(180deg)" : "rotateY(0deg)"
+    }`;
   }
-
-  el.onclick = () => flip(card, el);
-
-  board.appendChild(el);
-
-  card.el = el;
 }
 
 /* =========================
-   FLIP (STABLE)
+   FLIP SAFE
 ========================= */
 
-function flip(card, el) {
-  if (card.faceUp) return;
+function flip(card){
+  card.faceUp=true;
 
-  card.faceUp = true;
+  if(card.el){
+    card.el.classList.add("face-up");
+  }
+}
 
-  requestAnimationFrame(() => {
-    el.classList.remove("face-down");
-    el.classList.add("face-up");
+/* =========================
+   DRAW
+========================= */
+
+function draw(){
+  let card=state.deck.pop();
+  if(!card) return;
+
+  card.faceUp=true;
+  state.tableau[0].push(card);
+
+  render(card,0,state.tableau[0].length);
+}
+
+/* =========================
+   LAYOUT UPDATE (NO RESET)
+========================= */
+
+function updateLayout(){
+  state.tableau.forEach((col,c)=>{
+    col.forEach((card,r)=>{
+      position(card,c,r);
+    });
   });
-}
-
-/* =========================
-   DRAW (DECK CLICK)
-========================= */
-
-function drawCard() {
-  if (state.deck.length === 0) return;
-
-  let card = state.deck.pop();
-  card.faceUp = true;
-
-  state.waste.push(card);
-
-  renderWaste(card);
-}
-
-/* =========================
-   WASTE RENDER
-========================= */
-
-function renderWaste(card) {
-  const x = 20;
-  const y = 20;
-
-  const el = card.el || document.createElement("div");
-  el.className = "card face-up";
-
-  el.style.transform = `translate3d(${x}px,${y}px,0)`;
-
-  el.innerHTML = `
-    <div class="face back"></div>
-    <div class="face front">
-      <div style="padding:8px;font-size:18px;">
-        ${card.value}${card.suit}
-      </div>
-    </div>
-  `;
-
-  board.appendChild(el);
-  card.el = el;
 }
 
 /* =========================
    INIT
 ========================= */
 
-function init() {
+function init(){
   state.deck = shuffle(createDeck());
   deal();
-
-  board.onclick = (e) => {
-    // linkerkant = draw
-    if (e.clientX < window.innerWidth * 0.2) {
-      drawCard();
-    }
-  };
 }
 
 init();
 
 /* =========================
-   RESIZE SAFE (iPhone)
+   RESIZE FIX (IMPORTANT FIX)
 ========================= */
 
-window.addEventListener("resize", () => {
-  // simpele rerender (kan later geoptimaliseerd worden)
-  board.innerHTML = "";
-  init();
+window.addEventListener("resize",()=>{
+  updateLayout();   // ❌ NO DOM RESET
 });
+
+/* click left side = draw */
+board.onclick=(e)=>{
+  if(e.clientX < window.innerWidth*0.2){
+    draw();
+  }
+};
 </script>
 
 </body>
