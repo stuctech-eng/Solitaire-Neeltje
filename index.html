@@ -754,6 +754,8 @@ function verwerkDropNa(cx,cy,snapInfo){
     springTerug(cx-dragOX,cy-dragOY,function(){verwijderKlonen();teken();});
     return;
   }
+  /* Flicker fix: verberg originele kaart direct -- kloon is al zichtbaar */
+  if(dragSourceEl)dragSourceEl.style.visibility='hidden';
   springNaarDoel(doelX,doelY,function(){
     verwijderKlonen();
     dragInfo=snapInfo;
@@ -832,6 +834,29 @@ function dB(col){
   var k=tab[col];
   if(k.length&&!k[k.length-1].up){
     k[k.length-1].up=true;pts(5);
+    /* Flip animatie na hertekenen */
+    setTimeout(function(){
+      var brd=gi('board');
+      if(!brd)return;
+      /* Vind de bovenste kaart van deze kolom */
+      var colX2=col*(CW+GAP);
+      var R2=CH+10;
+      var cards=brd.querySelectorAll('.card');
+      cards.forEach(function(el){
+        var x=parseInt(el.style.left);
+        if(Math.abs(x-colX2)<4&&el.classList.contains('face-up')){
+          /* Trigger flip via class wisseling */
+          var inner=el.querySelector('.card-inner');
+          if(inner){
+            el.classList.remove('face-up');
+            el.classList.add('face-down');
+            void inner.offsetWidth;
+            el.classList.remove('face-down');
+            el.classList.add('face-up');
+          }
+        }
+      });
+    },30);
     sndDraai();
   }
 }
