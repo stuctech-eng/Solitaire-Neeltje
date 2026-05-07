@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Solitaire Fixed Base</title>
+<title>Solitaire Fixed Responsive</title>
 
 <style>
 html,body{
@@ -14,8 +14,8 @@ html,body{
 
 #board{
   position:relative;
-  width:100%;
-  height:100%;
+  width:100vw;
+  height:100vh;
 }
 
 /* CARD */
@@ -25,23 +25,18 @@ html,body{
   position:absolute;
   border-radius:8px;
   background:white;
-  box-shadow:0 4px 10px rgba(0,0,0,0.3);
+  box-shadow:0 4px 10px rgba(0,0,0,0.35);
   display:flex;
   align-items:center;
   justify-content:center;
   font-size:16px;
   user-select:none;
   touch-action:none;
+  transition: transform 0.15s ease;
 }
 
-.back{
-  background: linear-gradient(135deg,#2b2d42,#4361ee);
-  color:white;
-}
-
-/* highlight click */
 .card:active{
-  transform:scale(0.98);
+  transform: scale(0.96);
 }
 </style>
 </head>
@@ -54,23 +49,45 @@ const board = document.getElementById("board");
 
 const state = {
   deck: [],
-  tableau: [[],[],[],[],[],[],[]]
+  tableau: [[],[],[],[],[],[],[]],
+  cardSize: {w:60,h:90},
+  spacing: {x:0,y:0}
 };
 
-/* CREATE */
+/* =========================
+   RESPONSIVE LAYOUT ENGINE
+========================= */
+
+function calcLayout(){
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  const cols = 7;
+
+  // dynamische spacing → voorkomt witte randen
+  state.spacing.x = Math.min(80, w / (cols + 1));
+  state.spacing.y = 22;
+
+  state.cardSize.w = 60;
+  state.cardSize.h = 90;
+}
+
+/* =========================
+   DECK
+========================= */
+
 function createDeck(){
   const s=["♠","♥","♦","♣"];
   const v=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
   let d=[];
   for(let ss of s){
     for(let vv of v){
-      d.push({suit:ss,value:vv,faceUp:false});
+      d.push({suit:ss,value:vv,faceUp:false,el:null});
     }
   }
   return d;
 }
 
-/* SHUFFLE */
 function shuffle(a){
   for(let i=a.length-1;i>0;i--){
     let j=Math.floor(Math.random()*(i+1));
@@ -79,53 +96,73 @@ function shuffle(a){
   return a;
 }
 
-/* DEAL */
+/* =========================
+   DEAL
+========================= */
+
 function deal(){
   let i=0;
 
-  for(let col=0;col<7;col++){
-    for(let row=0;row<=col;row++){
-      let card=state.deck[i++];
+  for(let c=0;c<7;c++){
+    for(let r=0;r<=c;r++){
+      let card = state.deck[i++];
 
-      card.faceUp = (row===col);
-      state.tableau[col].push(card);
+      card.faceUp = (r===c);
+      state.tableau[c].push(card);
 
-      render(card,col,row);
+      render(card,c,r);
     }
   }
 
   state.deck = state.deck.slice(i);
 }
 
-/* RENDER */
+/* =========================
+   RENDER
+========================= */
+
 function render(card,col,row){
   const el=document.createElement("div");
   el.className="card";
 
-  el.innerText = card.faceUp
-    ? card.value + card.suit
-    : "🂠";
+  el.innerText = card.faceUp ? (card.value+card.suit) : "🂠";
 
-  const x = 10 + col * 70;
-  const y = 100 + row * 22;
+  position(card,el,col,row);
 
-  el.style.transform = `translate(${x}px,${y}px)`;
-
-  el.onclick = () => flip(card,el);
+  el.onclick = (e) => {
+    e.stopPropagation(); // ❗ BELANGRIJK FIX
+    flip(card,el);
+  };
 
   board.appendChild(el);
   card.el = el;
 }
 
-/* FLIP */
+/* =========================
+   POSITION (RESPONSIVE FIX)
+========================= */
+
+function position(card,el,col,row){
+  const x = 20 + col * state.spacing.x;
+  const y = 120 + row * state.spacing.y;
+
+  el.style.transform = `translate(${x}px,${y}px)`;
+}
+
+/* =========================
+   FLIP
+========================= */
+
 function flip(card,el){
   if(card.faceUp) return;
-
   card.faceUp = true;
   el.innerText = card.value + card.suit;
 }
 
-/* DRAW */
+/* =========================
+   DRAW
+========================= */
+
 function draw(){
   let card = state.deck.pop();
   if(!card) return;
@@ -134,25 +171,44 @@ function draw(){
 
   const el=document.createElement("div");
   el.className="card";
-
   el.innerText = card.value + card.suit;
 
-  el.style.transform = `translate(10px,20px)`;
+  el.style.transform = `translate(20px,20px)`;
 
   board.appendChild(el);
 }
 
-/* INIT */
+/* =========================
+   INIT
+========================= */
+
 function init(){
+  board.innerHTML = "";
+
+  calcLayout();
+
   state.deck = shuffle(createDeck());
   deal();
 }
 
 init();
 
-/* CLICK LEFT = DRAW */
-board.onclick=(e)=>{
-  if(e.clientX < window.innerWidth*0.2){
+/* =========================
+   RESIZE FIX (LANDSCAPE BUG FIX)
+========================= */
+
+window.addEventListener("resize", () => {
+  init(); // clean re-layout
+});
+
+/* orientation change fix (iOS belangrijk) */
+window.addEventListener("orientationchange", () => {
+  setTimeout(init, 150);
+});
+
+/* click deck area */
+board.onclick = (e) => {
+  if(e.clientX < window.innerWidth * 0.2){
     draw();
   }
 };
