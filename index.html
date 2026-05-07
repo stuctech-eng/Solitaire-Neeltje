@@ -1,504 +1,134 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport"
-content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 
-<title>Modern Solitaire</title>
+<title>Solitaire Core</title>
 
 <style>
-:root{
-  --card-w:min(11vw,78px);
-  --card-h:calc(var(--card-w) * 1.42);
-  --gap:min(1vw,6px);
-  --radius:14px;
-  --stack-gap:24px;
-}
-
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  -webkit-tap-highlight-color:transparent;
-}
-
 html,body{
-  width:100%;
+  margin:0;
   height:100%;
   overflow:hidden;
+  background:#0c3d33;
   touch-action:none;
-  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-  background:
-    radial-gradient(circle at top,#1f8b71 0%,#0b4a3d 45%,#051814 100%);
+  font-family:-apple-system;
 }
 
 #game{
+  position:relative;
   width:100vw;
   height:100vh;
-  position:relative;
-  overflow:hidden;
 }
 
-/* TOP */
-
-#top{
-  position:absolute;
-  top:max(10px,env(safe-area-inset-top));
-  left:0;
-  width:100%;
-  display:flex;
-  justify-content:space-between;
-  padding:0 10px;
-  z-index:2;
-}
-
-.row{
-  display:flex;
-  gap:var(--gap);
-}
-
-.slot{
-  width:var(--card-w);
-  height:var(--card-h);
-  border-radius:var(--radius);
-  border:2px dashed rgba(255,255,255,.18);
-  background:rgba(255,255,255,.04);
-  backdrop-filter:blur(6px);
-}
-
-/* TABLEAU */
-
-#tableau{
-  position:absolute;
-  top:calc(var(--card-h) + 30px);
-  left:0;
-  width:100%;
-  height:calc(100% - var(--card-h) - 40px);
-  display:flex;
-  justify-content:center;
-  gap:var(--gap);
-  padding:0 4px;
-}
-
-.column{
-  width:var(--card-w);
-  position:relative;
-}
-
-/* CARDS */
-
+/* kaarten */
 .card{
   position:absolute;
-  width:var(--card-w);
-  height:var(--card-h);
-  border-radius:var(--radius);
-  transform-style:preserve-3d;
-  transition:
-    transform .28s cubic-bezier(.2,.8,.2,1),
-    left .28s cubic-bezier(.2,.8,.2,1),
-    top .28s cubic-bezier(.2,.8,.2,1),
-    box-shadow .2s;
-  will-change:transform,left,top;
-}
-
-.card.dragging{
-  transition:none!important;
-  z-index:99999!important;
-  filter:brightness(1.08);
-}
-
-.face{
-  position:absolute;
-  inset:0;
-  border-radius:var(--radius);
-  overflow:hidden;
-  backface-visibility:hidden;
-  -webkit-backface-visibility:hidden;
-}
-
-/* FRONT */
-
-.front{
-  background:
-    linear-gradient(145deg,#ffffff,#eef2f6);
-  border:1px solid rgba(0,0,0,.14);
-
-  box-shadow:
-    0 10px 30px rgba(0,0,0,.35),
-    inset 0 1px 0 rgba(255,255,255,.7);
-
+  width:70px;
+  height:100px;
+  border-radius:10px;
+  background:white;
+  box-shadow:0 6px 18px rgba(0,0,0,.35);
   display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  padding:7px;
-}
-
-.red{
-  color:#d80032;
-}
-
-.corner{
-  font-size:13px;
+  align-items:center;
+  justify-content:center;
   font-weight:700;
-  line-height:1;
+  user-select:none;
+  touch-action:none;
+  transition:transform .15s;
 }
 
-.center{
-  flex:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:34px;
-}
-
-/* BACK */
-
-.back{
-  transform:rotateY(180deg);
-  background:
-    linear-gradient(145deg,#1b44ff,#5d84ff);
-  border:1px solid rgba(255,255,255,.15);
-
-  box-shadow:
-    0 12px 35px rgba(0,0,0,.45);
-}
-
-.back::before{
-  content:"";
+/* tableau container */
+.column{
   position:absolute;
-  inset:0;
-
-  background:
-    repeating-linear-gradient(
-      45deg,
-      rgba(255,255,255,.16) 0 8px,
-      transparent 8px 16px
-    );
-}
-
-.back::after{
-  content:"♠ ♥ ♣ ♦";
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:22px;
-  font-weight:700;
-  color:white;
-  letter-spacing:4px;
-}
-
-/* FLIP */
-
-.face-up{
-  transform:rotateY(0deg);
-}
-
-.face-down{
-  transform:rotateY(180deg);
-}
-
-/* WIN */
-
-#win{
-  position:absolute;
-  inset:0;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  background:rgba(0,0,0,.45);
-  color:white;
-  font-size:42px;
-  font-weight:800;
-  backdrop-filter:blur(12px);
-  z-index:999999;
-}
-
-/* LANDSCAPE */
-
-@media (orientation:landscape){
-
-  :root{
-    --card-w:min(8vw,82px);
-    --stack-gap:18px;
-  }
-
-  .center{
-    font-size:28px;
-  }
-
-  .corner{
-    font-size:12px;
-  }
+  top:120px;
 }
 </style>
 </head>
+
 <body>
 
-<div id="game">
-
-  <div id="top">
-
-    <div class="row">
-      <div id="deckSlot" class="slot"></div>
-      <div id="wasteSlot" class="slot"></div>
-    </div>
-
-    <div class="row">
-      <div class="slot"></div>
-      <div class="slot"></div>
-      <div class="slot"></div>
-      <div class="slot"></div>
-    </div>
-
-  </div>
-
-  <div id="tableau"></div>
-
-  <div id="win">🎉 Gewonnen 🎉</div>
-
-</div>
+<div id="game"></div>
 
 <script>
-/* =========================
-   SAFE MODERN SOLITAIRE
-   FIXED FOR iPHONE
-========================= */
-
-const suits=["♠","♥","♣","♦"];
-const ranks=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
-
-const tableau=[[],[],[],[],[],[],[]];
-const foundations=[[],[],[],[]];
-const waste=[];
-let deck=[];
-
-const game=document.getElementById("game");
-const tableauEl=document.getElementById("tableau");
-
-const deckSlot=document.getElementById("deckSlot");
-const wasteSlot=document.getElementById("wasteSlot");
 
 /* =========================
-   AUDIO SAFE
+   GAME STATE
 ========================= */
 
-let audioReady=false;
-let audioCtx=null;
+const game = document.getElementById("game");
 
-function initAudio(){
-  if(audioReady) return;
+const suits = ["♠","♥","♦","♣"];
+const ranks = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 
-  audioReady=true;
-
-  audioCtx=new(
-    window.AudioContext||
-    window.webkitAudioContext
-  )();
-}
-
-window.addEventListener("pointerdown",initAudio,{once:true});
-
-function beep(freq=500,dur=.04){
-
-  if(!audioCtx) return;
-
-  const o=audioCtx.createOscillator();
-  const g=audioCtx.createGain();
-
-  o.frequency.value=freq;
-  o.type="triangle";
-
-  o.connect(g);
-  g.connect(audioCtx.destination);
-
-  g.gain.value=.02;
-
-  o.start();
-
-  g.gain.exponentialRampToValueAtTime(
-    0.0001,
-    audioCtx.currentTime+dur
-  );
-
-  o.stop(audioCtx.currentTime+dur);
-}
+let deck = [];
+let tableau = [[],[],[],[],[],[],[]];
 
 /* =========================
-   DECK
+   CREATE DECK
 ========================= */
 
-function makeDeck(){
-
+function createDeck(){
   const d=[];
-
-  suits.forEach(suit=>{
-
-    ranks.forEach((rank,index)=>{
-
-      d.push({
-        suit,
-        rank,
-        value:index+1,
-        color:
-          suit==="♥"||suit==="♦"
-          ? "red"
-          : "black",
-        faceUp:false,
-        el:null
-      });
-
-    });
-
-  });
-
+  for(let s of suits){
+    for(let r of ranks){
+      d.push({suit:s,rank:r,faceUp:false,el:null});
+    }
+  }
   return d;
 }
 
-function shuffle(arr){
-
-  for(let i=arr.length-1;i>0;i--){
-
-    const j=Math.floor(
-      Math.random()*(i+1)
-    );
-
-    [arr[i],arr[j]]=[arr[j],arr[i]];
+/* shuffle */
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
   }
 }
 
 /* =========================
-   CARD UI
+   RENDER CARD
 ========================= */
 
-function createCard(card){
-
+function createCard(c){
   const el=document.createElement("div");
-
-  el.className="card face-down";
-
-  el.innerHTML=`
-    <div class="face front">
-
-      <div class="corner ${card.color}">
-        ${card.rank}<br>${card.suit}
-      </div>
-
-      <div class="center ${card.color}">
-        ${card.suit}
-      </div>
-
-      <div
-        class="corner ${card.color}"
-        style="transform:rotate(180deg)"
-      >
-        ${card.rank}<br>${card.suit}
-      </div>
-
-    </div>
-
-    <div class="face back"></div>
-  `;
+  el.className="card";
+  el.textContent=c.rank + c.suit;
 
   game.appendChild(el);
+  c.el = el;
 
-  card.el=el;
-
-  addDrag(card);
+  enableDrag(c);
 
   return el;
 }
 
-function updateFace(card){
-
-  card.el.classList.toggle(
-    "face-up",
-    card.faceUp
-  );
-
-  card.el.classList.toggle(
-    "face-down",
-    !card.faceUp
-  );
-}
-
 /* =========================
-   LAYOUT
+   LAYOUT ENGINE (BELANGRIJK)
+   - alles via translate3d
+   - geen left/top mix
 ========================= */
 
 function layout(){
 
-  const cardW=
-    parseFloat(
-      getComputedStyle(
-        document.documentElement
-      ).getPropertyValue("--card-w")
-    );
+  const w = window.innerWidth;
 
-  const gap=
-    parseFloat(
-      getComputedStyle(
-        document.documentElement
-      ).getPropertyValue("--gap")
-    );
-
-  const totalWidth=
-    (cardW*7)+(gap*6);
-
-  const startX=
-    (window.innerWidth-totalWidth)/2;
-
-  /* deck */
-
-  deck.forEach((card,index)=>{
-
-    card.el.style.left=
-      deckSlot.offsetLeft+"px";
-
-    card.el.style.top=
-      deckSlot.offsetTop+"px";
-
-    card.el.style.zIndex=index;
-
-  });
-
-  /* waste */
-
-  waste.forEach((card,index)=>{
-
-    card.el.style.left=
-      wasteSlot.offsetLeft+"px";
-
-    card.el.style.top=
-      wasteSlot.offsetTop+"px";
-
-    card.el.style.zIndex=
-      100+index;
-
-  });
-
-  /* tableau */
+  const spacing = Math.min(80, w/8);
+  const startX = (w - spacing*7)/2;
 
   tableau.forEach((col,colIndex)=>{
 
-    const x=
-      startX+
-      (colIndex*(cardW+gap));
+    const x = startX + colIndex*spacing;
 
-    col.forEach((card,rowIndex)=>{
+    col.forEach((card,row)=>{
 
-      card.el.style.left=x+"px";
+      const y = 120 + row*22;
 
-      card.el.style.top=
-        (
-          cardW+
-          65+
-          (rowIndex*24)
-        )+"px";
+      card.el.style.transform =
+        `translate3d(${x}px,${y}px,0)`;
 
-      card.el.style.zIndex=rowIndex;
+      card.el.style.zIndex = row;
 
     });
 
@@ -511,161 +141,86 @@ function layout(){
 
 function deal(){
 
-  let delay=0;
+  let i = 0;
 
-  for(let col=0;col<7;col++){
+  for(let col=0; col<7; col++){
+    for(let row=col; row<7; row++){
 
-    for(let row=col;row<7;row++){
+      const card = deck.pop();
 
-      const card=deck.pop();
+      tableau[col].push(card);
 
-      tableau[row].push(card);
+      createCard(card);
 
       setTimeout(()=>{
-
-        card.faceUp=(row===col);
-
-        updateFace(card);
-
         layout();
+      }, i*40);
 
-        card.el.style.transform=
-          `rotate(${(Math.random()*4)-2}deg)`;
-
-        beep(300+(row*20),.03);
-
-      },delay);
-
-      delay+=70;
+      i++;
     }
   }
-
-  setTimeout(layout,delay+100);
 }
 
 /* =========================
-   DRAW
+   DRAG (MINIMAAL & STABIEL)
 ========================= */
 
-deckSlot.addEventListener("click",()=>{
+function enableDrag(card){
 
-  if(deck.length===0){
+  let dragging = false;
+  let ox=0, oy=0;
 
-    while(waste.length){
+  const el = card.el;
 
-      const c=waste.pop();
+  el.addEventListener("pointerdown",(e)=>{
 
-      c.faceUp=false;
+    dragging = true;
 
-      updateFace(c);
+    const r = el.getBoundingClientRect();
 
-      deck.unshift(c);
-    }
-
-    layout();
-
-    return;
-  }
-
-  const card=deck.pop();
-
-  card.faceUp=true;
-
-  updateFace(card);
-
-  waste.push(card);
-
-  layout();
-
-  card.el.style.transform=
-    `rotate(${(Math.random()*6)-3}deg) scale(1.03)`;
-
-  beep(700,.05);
-});
-
-/* =========================
-   DRAG
-========================= */
-
-function addDrag(card){
-
-  const el=card.el;
-
-  let dragging=false;
-
-  let offsetX=0;
-  let offsetY=0;
-
-  el.addEventListener("pointerdown",e=>{
-
-    if(!card.faceUp) return;
-
-    dragging=true;
-
-    const rect=
-      el.getBoundingClientRect();
-
-    offsetX=
-      e.clientX-rect.left;
-
-    offsetY=
-      e.clientY-rect.top;
-
-    el.classList.add("dragging");
+    ox = e.clientX - r.left;
+    oy = e.clientY - r.top;
 
     el.setPointerCapture(e.pointerId);
 
-    beep(850,.02);
+    el.style.transition = "none";
   });
 
-  el.addEventListener("pointermove",e=>{
+  el.addEventListener("pointermove",(e)=>{
 
     if(!dragging) return;
 
-    const x=e.clientX-offsetX;
-    const y=e.clientY-offsetY;
+    const x = e.clientX - ox;
+    const y = e.clientY - oy;
 
-    el.style.left=x+"px";
-    el.style.top=y+"px";
-
-    el.style.transform=
-      `rotate(${(e.movementX)*0.6}deg) scale(1.03)`;
+    el.style.transform =
+      `translate3d(${x}px,${y}px,0)`;
   });
 
   el.addEventListener("pointerup",()=>{
 
-    if(!dragging) return;
+    dragging = false;
 
-    dragging=false;
-
-    el.classList.remove("dragging");
+    el.style.transition = ".15s";
 
     layout();
-
-    beep(420,.03);
   });
 }
 
 /* =========================
-   START
+   START GAME
 ========================= */
 
-deck=makeDeck();
-
+deck = createDeck();
 shuffle(deck);
-
-deck.forEach(card=>{
-  createCard(card);
-});
-
-layout();
 
 deal();
 
-window.addEventListener(
-  "resize",
-  layout
-);
+layout();
+
+/* responsive fix */
+window.addEventListener("resize",layout);
+
 </script>
 
 </body>
