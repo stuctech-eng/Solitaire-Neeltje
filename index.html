@@ -52,25 +52,17 @@ transparent 1px, transparent 8px
 );
 }
 
-/* ══ TOP RIJ -- exact zelfde grid als tableau ══ */
+/* ══ TOP RIJ ══ */
 #top-row {
 position: absolute;
 left: 0; right: 0; top: 0;
-display: flex;
-align-items: flex-start;
-padding-top: calc(env(safe-area-inset-top) + 8px);
-padding-bottom: 6px;
 z-index: 10;
-}
-
-/* gap tussen waste en foundations -- 1 kaardbreedte */
-#slot-gap {
-flex-shrink: 0;
+/* Hoogte wordt door JS gezet */
 }
 
 /* ══ SLOTS ══ */
 .slot {
-flex-shrink: 0;
+position: absolute; /* JS zet left en top */
 border-radius: 10px;
 background: rgba(255,255,255,.06);
 border: 1.5px dashed rgba(255,255,255,.18);
@@ -79,7 +71,6 @@ display: flex;
 align-items: center;
 justify-content: center;
 color: rgba(255,255,255,.28);
-position: relative;
 }
 .card {
 position: absolute;
@@ -220,32 +211,36 @@ function updateSizes() {
   const totalW = CW * 7 + GAP * 6;
   START_X = Math.floor((W - totalW) / 2);
 
-  /* Top rij layout:
-     Links: stock + waste (2 slots)
-     Rechts: 4 foundations
-     Zelfde breedte als tableau kolommen */
+  /* Top rij: exact 7 posities = zelfde grid als tableau
+     [Stock][Waste][leeg][♠][♥][♦][♣]
+     Geen flex, geen gap -- vaste left posities via JS */
   const topRow = $('top-row');
-  topRow.style.paddingLeft  = START_X + 'px';
-  topRow.style.paddingRight = START_X + 'px';
-  topRow.style.gap          = GAP + 'px';
+  topRow.style.padding = '';
+  topRow.style.gap = '';
+  topRow.style.display = 'block'; /* positioneer slots absoluut */
 
-  /* gap spacer = precies 1 kaardbreedte + 1 GAP */
-  const gap = $('slot-gap');
-  gap.style.width     = (CW + GAP) + 'px';
-  gap.style.flex      = 'none';
-  gap.style.minWidth  = '';
+  const positions = [0, 1, null, 3, 4, 5, 6]; /* null = lege plek */
+  const slotIds = ['slot-stock','slot-waste',null,'slot-f0','slot-f1','slot-f2','slot-f3'];
+  const topPad = Math.max(8, (window.safeAreaTop || 0) + 8);
 
-  const br = Math.round(CW * 0.12) + 'px';
-  const slotFs = Math.round(CW * 0.30) + 'px';
-
-  document.querySelectorAll('.slot').forEach(s => {
-    s.style.width        = CW + 'px';
-    s.style.height       = CH + 'px';
-    s.style.borderRadius = br;
-    s.style.fontSize     = slotFs;
+  slotIds.forEach((id, i) => {
+    if (!id) return;
+    const slot = $(id);
+    slot.style.position = 'absolute';
+    slot.style.left = (START_X + i * (CW + GAP)) + 'px';
+    slot.style.top  = topPad + 'px';
+    slot.style.width  = CW + 'px';
+    slot.style.height = CH + 'px';
+    slot.style.borderRadius = Math.round(CW * 0.12) + 'px';
+    slot.style.fontSize     = Math.round(CW * 0.28) + 'px';
   });
 
-  TOP_H = topRow.getBoundingClientRect().bottom + 8;
+  /* Hoogte van top rij instellen */
+  topRow.style.height = (CH + topPad + 8) + 'px';
+  /* slot-gap verbergen -- niet meer nodig */
+  $('slot-gap').style.display = 'none';
+
+  TOP_H = CH + topPad + 16; /* kaardhoogte + padding + ruimte */
 }
 
 /* ══ DECK ══ */
@@ -369,6 +364,13 @@ function herInit() {
 window.addEventListener('resize', herInit);
 window.addEventListener('orientationchange', () => setTimeout(herInit, 100));
 document.addEventListener('contextmenu', e => e.preventDefault());
+
+/* Safe area detecteren */
+const safeDiv = document.createElement('div');
+safeDiv.style.cssText = 'position:fixed;top:env(safe-area-inset-top,0);left:0;width:1px;height:1px;';
+document.body.appendChild(safeDiv);
+window.safeAreaTop = safeDiv.getBoundingClientRect().top;
+safeDiv.remove();
 
 init();
 </script>
