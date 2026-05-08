@@ -207,7 +207,7 @@ function updateSizes() {
   for (let g = 4; g <= 14; g++) {
     const w = Math.floor((W - margin * 2 - g * (totalSlots - 1)) / totalSlots);
     const h = Math.round(w * 1.42);
-    const maxH = land ? H * 0.30 : H * 0.19;
+  const maxH = land ? H * 0.30 : H * 0.22;
     if (h <= maxH && w > bestCW) { bestCW = w; GAP = g; }
   }
   CW = bestCW || Math.floor((W - margin * 2) / 7.8);
