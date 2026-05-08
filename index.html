@@ -311,136 +311,59 @@ function layoutSlots() {
 let AC = null;
 function getAC() {
   if (!AC) try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  if (AC && AC.state === 'suspended') AC.resume();
   return AC;
 }
 
-function sndKaartOppakken() {
+function beep(freq, dur, vol, type, freqEnd) {
   const ac = getAC(); if (!ac) return;
   try {
-    /* Zacht whoosh -- ruis met filter sweep */
-    const buf = ac.createBuffer(1, ac.sampleRate * 0.12, ac.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
-    const src = ac.createBufferSource();
-    src.buffer = buf;
-    const filter = ac.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.setValueAtTime(800, ac.currentTime);
-    filter.frequency.exponentialRampToValueAtTime(200, ac.currentTime + 0.12);
-    filter.Q.value = 0.8;
-    const gain = ac.createGain();
-    gain.gain.setValueAtTime(0.18, ac.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.12);
-    src.connect(filter); filter.connect(gain); gain.connect(ac.destination);
-    src.start();
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(freq, ac.currentTime);
+    if (freqEnd) o.frequency.exponentialRampToValueAtTime(freqEnd, ac.currentTime + dur);
+    g.gain.setValueAtTime(vol, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime + dur);
   } catch(e) {}
 }
 
+/* Kaart neerleggen -- droog tik */
 function sndKaartNeerleggen() {
-  const ac = getAC(); if (!ac) return;
-  try {
-    /* Thock -- korte impuls met resonantie */
-    const buf = ac.createBuffer(1, ac.sampleRate * 0.15, ac.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < data.length; i++) {
-      const t = i / ac.sampleRate;
-      data[i] = Math.exp(-t * 40) * Math.sin(2 * Math.PI * 180 * t) * 0.8
-              + Math.exp(-t * 80) * (Math.random() * 2 - 1) * 0.3;
-    }
-    const src = ac.createBufferSource();
-    src.buffer = buf;
-    const gain = ac.createGain();
-    gain.gain.setValueAtTime(0.55, ac.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.15);
-    src.connect(gain); gain.connect(ac.destination);
-    src.start();
-  } catch(e) {}
+  beep(300, 0.06, 0.3, 'sine', 120);
 }
 
+/* Kaart omdraaien -- oplopend tik */
 function sndKaartFlip() {
-  const ac = getAC(); if (!ac) return;
-  try {
-    /* Papier flip -- ruis sweep omhoog */
-    const buf = ac.createBuffer(1, ac.sampleRate * 0.09, ac.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / data.length);
-    const src = ac.createBufferSource();
-    src.buffer = buf;
-    const filter = ac.createBiquadFilter();
-    filter.type = 'highpass';
-    filter.frequency.setValueAtTime(400, ac.currentTime);
-    filter.frequency.exponentialRampToValueAtTime(2000, ac.currentTime + 0.09);
-    const gain = ac.createGain();
-    gain.gain.setValueAtTime(0.22, ac.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.09);
-    src.connect(filter); filter.connect(gain); gain.connect(ac.destination);
-    src.start();
-  } catch(e) {}
+  beep(400, 0.05, 0.2, 'sine', 800);
+  setTimeout(() => beep(800, 0.05, 0.15, 'sine', 1200), 50);
 }
 
+/* Foundation -- helder en bevredigend */
 function sndFoundation() {
-  const ac = getAC(); if (!ac) return;
-  try {
-    /* Heldere pling -- twee harmonische tonen */
-    [[880, 0, 0.3], [1320, 0.04, 0.2]].forEach(([freq, delay, vol]) => {
-      const o = ac.createOscillator();
-      const g = ac.createGain();
-      o.type = 'sine';
-      o.frequency.value = freq;
-      g.gain.setValueAtTime(0, ac.currentTime + delay);
-      g.gain.linearRampToValueAtTime(vol, ac.currentTime + delay + 0.01);
-      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + delay + 0.4);
-      o.connect(g); g.connect(ac.destination);
-      o.start(ac.currentTime + delay);
-      o.stop(ac.currentTime + delay + 0.4);
-    });
-  } catch(e) {}
+  beep(523, 0.15, 0.2, 'sine');
+  setTimeout(() => beep(784, 0.15, 0.18, 'sine'), 80);
+  setTimeout(() => beep(1047, 0.25, 0.15, 'sine'), 160);
 }
 
+/* Stock klikken */
 function sndStock() {
-  const ac = getAC(); if (!ac) return;
-  try {
-    /* Zacht klik */
-    const buf = ac.createBuffer(1, ac.sampleRate * 0.05, ac.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ac.sampleRate * 0.008));
-    const src = ac.createBufferSource();
-    src.buffer = buf;
-    const gain = ac.createGain();
-    gain.gain.setValueAtTime(0.3, ac.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.05);
-    src.connect(gain); gain.connect(ac.destination);
-    src.start();
-  } catch(e) {}
+  beep(250, 0.08, 0.25, 'sine', 180);
 }
 
+/* Kaart oppakken */
+function sndKaartOppakken() {
+  beep(600, 0.04, 0.12, 'sine', 800);
+}
+
+/* Win -- vrolijke fanfare */
 function sndWin() {
-  const ac = getAC(); if (!ac) return;
-  try {
-    /* Vrolijke fanfare -- oplopende akkoorden */
-    const noten = [
-      [523, 0],    /* C */
-      [659, 0.12], /* E */
-      [784, 0.24], /* G */
-      [1047,0.36], /* C hoog */
-      [784, 0.52], /* G */
-      [880, 0.60], /* A */
-      [1047,0.70], /* C hoog */
-      [1319,0.82]  /* E hoog */
-    ];
-    noten.forEach(([freq, t]) => {
-      const o = ac.createOscillator();
-      const g = ac.createGain();
-      o.type = 'triangle';
-      o.frequency.value = freq;
-      g.gain.setValueAtTime(0, ac.currentTime + t);
-      g.gain.linearRampToValueAtTime(0.2, ac.currentTime + t + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + t + 0.35);
-      o.connect(g); g.connect(ac.destination);
-      o.start(ac.currentTime + t);
-      o.stop(ac.currentTime + t + 0.4);
-    });
-  } catch(e) {}
+  const noten = [523,659,784,1047,784,880,1047,1319];
+  noten.forEach((f, i) => {
+    setTimeout(() => beep(f, 0.25, 0.18, 'triangle'), i * 100);
+  });
 }
 let score = 0, timerSecs = 0, timerRef = null;
 let history = []; /* voor undo */
@@ -698,6 +621,7 @@ function enableDrag(el, card, pile, ...pileArgs) {
       return clone;
     });
     el.style.opacity = '0.15';
+    sndKaartOppakken();
     drag = { cards, clones, pile, pileArgs, ox: e.clientX - rect.left, oy: e.clientY - rect.top, el };
   });
 }
@@ -789,6 +713,7 @@ function flipTop(col) {
   const pile = state.tableau[col];
   if (!pile.length || pile[pile.length-1].faceUp) return;
   pile[pile.length-1].faceUp = true;
+  sndKaartFlip();
   render();
 }
 
@@ -798,12 +723,16 @@ function drawFromStock() {
   } else {
     const c = state.stock.pop(); c.faceUp = true; state.waste.push(c);
   }
+  sndStock();
   render();
 }
 
 function checkWin() {
-  if (state.foundations.reduce((s, f) => s + f.length, 0) === 52)
-    setTimeout(() => toast('🎉 Gewonnen! Gefeliciteerd!'), 300);
+  if (state.foundations.reduce((s, f) => s + f.length, 0) === 52) {
+    stopTimer();
+    sndWin();
+    setTimeout(() => toast('🎉 Gewonnen! Score: ' + score), 300);
+  }
 }
 
 function deal() {
