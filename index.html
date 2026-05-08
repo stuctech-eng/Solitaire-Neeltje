@@ -588,8 +588,11 @@ const THEMAS = {
 
 function pasThemaToe(t) {
   const T = THEMAS[t];
+  const bg = `radial-gradient(circle at 50% 0%, ${T.tafelGlow}, transparent 50%), linear-gradient(180deg, ${T.tafelTop} 0%, ${T.tafelBot} 100%)`;
   // Tafel
-  board.style.background = `radial-gradient(circle at 50% 0%, ${T.tafelGlow}, transparent 50%), linear-gradient(180deg, ${T.tafelTop} 0%, ${T.tafelBot} 100%)`;
+  board.style.background = bg;
+  // Startscherm
+  $('start-screen').style.background = `linear-gradient(180deg, ${T.tafelTop} 0%, ${T.tafelBot} 100%)`;
   // Slots
   document.querySelectorAll('.slot').forEach(s => {
     s.style.background = T.slotBg;
