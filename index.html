@@ -34,9 +34,8 @@ position: fixed;
 inset: 0;
 overflow: hidden;
 background:
-radial-gradient(ellipse at 50% 25%, rgba(0,180,100,0.18), transparent 60%),
-radial-gradient(ellipse at 50% 100%, rgba(0,0,0,0.35), transparent 60%),
-linear-gradient(180deg, #0d5540 0%, #063126 50%, #041e14 100%);
+radial-gradient(circle at 50% 0%, rgba(0,200,120,0.10), transparent 50%),
+linear-gradient(180deg, #0b4d3b 0%, #063126 100%);
 }
 
 #board::after {
@@ -44,7 +43,12 @@ content: "";
 position: absolute;
 inset: 0;
 pointer-events: none;
-background: radial-gradient(ellipse at 50% 50%, transparent 35%, rgba(0,0,0,0.25) 100%);
+opacity: .04;
+background-image: repeating-linear-gradient(
+45deg,
+rgba(255,255,255,.08) 0px, rgba(255,255,255,.08) 1px,
+transparent 1px, transparent 8px
+);
 }
 
 /* ══ TOP RIJ ══ */
@@ -52,38 +56,20 @@ background: radial-gradient(ellipse at 50% 50%, transparent 35%, rgba(0,0,0,0.25
 position: absolute;
 left: 0; right: 0; top: 0;
 z-index: 10;
-}
-
-/* Meet element voor safe area */
-#safe-probe {
-position: fixed;
-top: env(safe-area-inset-top, 0px);
-left: 0; width: 1px; height: 1px;
-pointer-events: none;
-z-index: -1;
+padding-top: calc(env(safe-area-inset-top, 44px) + 6px);
 }
 
 /* ══ SLOTS ══ */
 .slot {
 position: absolute;
 border-radius: 10px;
-background: rgba(0,0,0,0.20);
-border: 1.5px dashed rgba(255,255,255,.14);
-box-shadow:
-inset 0 2px 8px rgba(0,0,0,.45),
-inset 0 0 0 1px rgba(255,255,255,.04);
+background: rgba(255,255,255,.06);
+border: 1.5px dashed rgba(255,255,255,.18);
+box-shadow: inset 0 2px 4px rgba(0,0,0,.3);
 display: flex;
 align-items: center;
 justify-content: center;
-color: rgba(255,255,255,.22);
-}
-
-/* Waste slot inner glow */
-#slot-waste {
-box-shadow:
-inset 0 2px 10px rgba(0,0,0,.5),
-inset 0 0 14px rgba(255,255,255,.05),
-inset 0 0 0 1px rgba(255,255,255,.07);
+color: rgba(255,255,255,.25);
 }
 
 /* ══ KAART ══ */
@@ -158,7 +144,7 @@ font-size: 2em;
 color: rgba(255,255,255,.10);
 }
 .card.face-up .card-back { display: none; }
-.card { box-shadow: 0 8px 24px rgba(0,0,0,.38), 0 2px 6px rgba(0,0,0,.25); }
+.card { box-shadow: 0 4px 14px rgba(0,0,0,.45), 0 1px 3px rgba(0,0,0,.3); }
 
 .red   { color: #d11d3f; }
 .black { color: #111; }
@@ -186,7 +172,6 @@ white-space: nowrap;
 </head>
 <body>
 <div id="board">
-  <div id="safe-probe"></div>
   <div id="top-row">
     <div id="slot-stock"  class="slot">↺</div>
     <div id="slot-waste"  class="slot"></div>
@@ -248,49 +233,44 @@ function updateSizes() {
   const H   = window.innerHeight;
   const land = W > H;
 
-  /* Premium sizing -- maximale kaartgrootte, minimale gaps */
-  const SIDE = 4;
-  GAP = Math.max(2, Math.floor(W * 0.005));
-  CW  = Math.floor((W - SIDE * 2 - GAP * 6) / 7);
-
-  /* Max hoogte check */
-  const maxH = land ? H * 0.32 : H * 0.22;
-  if (CW * 1.42 > maxH) CW = Math.floor(maxH / 1.42);
-  CW = Math.max(CW, 38);
+  /* Kaartbreedte: 7 kaarten + 6 gaps passen altijd */
+  const maxW = Math.floor((W - 12) / 7.4);
+  const maxH = land ? Math.floor(H * 0.28) : Math.floor(H * 0.20);
+  CW = Math.min(maxW, Math.round(maxH / 1.42));
+  CW = Math.max(CW, 40); /* minimaal 40px */
 
   CH       = Math.round(CW * 1.42);
-  STACK_UP = Math.round(CH * 0.28);
+  GAP      = Math.max(3, Math.floor((W - 12 - CW * 7) / 6));
+  STACK_UP = Math.round(CH * 0.27);
   STACK_DN = Math.round(CH * 0.15);
 
   const totalW = CW * 7 + GAP * 6;
-  START_X = Math.max(SIDE, Math.floor((W - totalW) / 2));
+  START_X = Math.max(6, Math.floor((W - totalW) / 2));
 
+  /* Slots positioneren */
   layoutSlots();
 }
 
 function layoutSlots() {
-  const probe   = $('safe-probe');
-  const safeTop = probe ? probe.getBoundingClientRect().top : 44;
-  const topPad  = safeTop + 6;
+  /* Lees de werkelijke top padding na CSS env() */
+  const topRow  = $('top-row');
+  const topPad  = parseFloat(getComputedStyle(topRow).paddingTop) || 50;
+  const br      = Math.round(CW * 0.12) + 'px';
+  const fs      = Math.round(CW * 0.28) + 'px';
 
-  const br = Math.round(CW * 0.12) + 'px';
-  const fs = Math.round(CW * 0.28) + 'px';
+  /* 7 kolom posities:
+     0=stock  1=waste  2=leeg  3=f0  4=f1  5=f2  6=f3 */
+  const slotMap = {
+    'slot-stock': 0,
+    'slot-waste': 1,
+    'slot-f0':    3,
+    'slot-f1':    4,
+    'slot-f2':    5,
+    'slot-f3':    6
+  };
 
-  /* Stock en waste links, foundations DIRECT daarna -- optisch beter
-     [stock][waste][f0][f1][f2][f3][leeg]
-     Geen grote lege ruimte tussen waste en foundations */
-  const slotMap = [
-    ['slot-stock', 0],
-    ['slot-waste', 1],
-    ['slot-f0',    3],
-    ['slot-f1',    4],
-    ['slot-f2',    5],
-    ['slot-f3',    6],
-  ];
-
-  slotMap.forEach(([id, col]) => {
+  Object.entries(slotMap).forEach(([id, col]) => {
     const s = $(id);
-    s.style.position     = 'absolute';
     s.style.left         = (START_X + col * (CW + GAP)) + 'px';
     s.style.top          = topPad + 'px';
     s.style.width        = CW + 'px';
@@ -299,8 +279,8 @@ function layoutSlots() {
     s.style.fontSize     = fs;
   });
 
-  $('top-row').style.height = (topPad + CH + 10) + 'px';
-  TOP_H = topPad + CH + 22; /* meer lucht boven tableau */
+  topRow.style.height = (topPad + CH + 10) + 'px';
+  TOP_H = topPad + CH + 14;
 }
 
 /* ══════════════════════════════════════════
