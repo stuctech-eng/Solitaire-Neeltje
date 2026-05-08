@@ -119,7 +119,8 @@ border: 1px solid rgba(0,0,0,.1);
 display: flex;
 flex-direction: column;
 justify-content: space-between;
-padding: 5px;
+padding: 4px 5px;
+overflow: hidden;
 }
 
 .card.face-down .card-front { display: none; }
@@ -264,8 +265,8 @@ function makeCard(data) {
   el.style.height = CH + 'px';
   el.style.borderRadius = Math.round(CW * 0.13) + 'px';
 
-  const fs = Math.max(10, Math.round(CW * 0.20));
-  const cs = Math.max(18, Math.round(CW * 0.58));
+  const fs = Math.max(8, Math.round(CW * 0.16));
+  const cs = Math.max(16, Math.round(CW * 0.50));
   const cls = data.color;
 
   el.innerHTML = `
