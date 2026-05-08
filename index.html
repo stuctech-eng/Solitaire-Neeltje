@@ -133,24 +133,75 @@ html, body {
 .card { box-shadow: 0 4px 14px rgba(0,0,0,.45), 0 1px 3px rgba(0,0,0,.3); }
 .red   { color: #d11d3f; }
 .black { color: #111; }
-#toast {
+/* ══ BOTTOM BAR ══ */
+#bottom-bar {
   position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,.85);
-  color: #fff;
-  padding: 8px 20px;
-  border-radius: 20px;
-  font-size: 13px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .3s;
-  z-index: 9999;
-  white-space: nowrap;
+  bottom: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 8px 10px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255,255,255,.08);
+  gap: 6px;
+}
+
+.bb-btn {
+background: rgba(255,255,255,.1);
+border: 1px solid rgba(255,255,255,.15);
+border-radius: 16px;
+padding: 7px 12px;
+color: rgba(255,255,255,.9);
+font-size: 13px;
+font-weight: 600;
+font-family: -apple-system, sans-serif;
+cursor: pointer;
+white-space: nowrap;
+-webkit-appearance: none;
+flex: 1;
+text-align: center;
+}
+.bb-btn:active { opacity: .7; }
+
+.bb-stat {
+text-align: center;
+flex: 1;
+}
+.bb-stat-lbl {
+font-size: 9px;
+color: rgba(255,255,255,.4);
+text-transform: uppercase;
+letter-spacing: 1px;
+display: block;
+}
+.bb-stat-val {
+font-size: 16px;
+font-weight: 700;
+color: #fff;
+display: block;
+}
+position: fixed;
+bottom: 20px;
+left: 50%;
+transform: translateX(-50%);
+background: rgba(0,0,0,.85);
+color: #fff;
+padding: 8px 20px;
+border-radius: 20px;
+font-size: 13px;
+pointer-events: none;
+opacity: 0;
+transition: opacity .3s;
+z-index: 9999;
+white-space: nowrap;
 }
 #toast.show { opacity: 1; }
 </style>
+
 </head>
 <body>
 <div id="board">
@@ -162,6 +213,19 @@ html, body {
     <div id="slot-f2"    class="slot" style="color:rgba(220,50,50,.28)">♦</div>
     <div id="slot-f3"    class="slot">♣</div>
   </div>
+</div>
+<div id="bottom-bar">
+  <button class="bb-btn" onclick="undoZet()">↩ Undo</button>
+  <div class="bb-stat">
+    <span class="bb-stat-lbl">Score</span>
+    <span class="bb-stat-val" id="stat-score">0</span>
+  </div>
+  <div class="bb-stat">
+    <span class="bb-stat-lbl">Tijd</span>
+    <span class="bb-stat-val" id="stat-tijd">0:00</span>
+  </div>
+  <button class="bb-btn" onclick="hintZet()">💡 Hint</button>
+  <button class="bb-btn" onclick="nieuwSpel()" style="background:rgba(255,255,255,.18)">↺ Nieuw</button>
 </div>
 <div id="toast"></div>
 
@@ -243,8 +307,110 @@ function layoutSlots() {
   TOP_H = topPad + CH + 14;
 }
 
-function createCard(suit, rank) {
-  return { suit, rank, color: RED.has(suit) ? 'red' : 'black', faceUp: false, el: null };
+/* ══ SCORE & TIMER ══ */
+let score = 0, timerSecs = 0, timerRef = null;
+let history = []; /* voor undo */
+
+function updateScore(delta) {
+  score = Math.max(0, score + delta);
+  $('stat-score').textContent = score;
+}
+
+function startTimer() {
+  clearInterval(timerRef);
+  timerSecs = 0;
+  timerRef = setInterval(() => {
+    timerSecs++;
+    const m = Math.floor(timerSecs / 60);
+    const s = timerSecs % 60;
+    $('stat-tijd').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+  }, 1000);
+}
+
+function stopTimer() { clearInterval(timerRef); }
+
+/* ══ UNDO ══ */
+function snapState() {
+  history.push(JSON.stringify({
+    stock:       state.stock.map(c => ({suit:c.suit,rank:c.rank,faceUp:c.faceUp})),
+    waste:       state.waste.map(c => ({suit:c.suit,rank:c.rank,faceUp:c.faceUp})),
+    foundations: state.foundations.map(f => f.map(c => ({suit:c.suit,rank:c.rank,faceUp:c.faceUp}))),
+    tableau:     state.tableau.map(col => col.map(c => ({suit:c.suit,rank:c.rank,faceUp:c.faceUp}))),
+    score
+  }));
+  if (history.length > 20) history.shift();
+}
+
+function undoZet() {
+  if (!history.length) { toast('Geen zet om ongedaan te maken'); return; }
+  const snap = JSON.parse(history.pop());
+  /* Herstel state */
+  const restore = arr => arr.map(c => createCard(c.suit, c.rank, c.faceUp));
+  state.stock       = restore(snap.stock);
+  state.waste       = restore(snap.waste);
+  state.foundations = snap.foundations.map(f => restore(f));
+  state.tableau     = snap.tableau.map(col => restore(col));
+  score = snap.score;
+  $('stat-score').textContent = score;
+  render();
+}
+
+/* ══ HINT ══ */
+function hintZet() {
+  /* Zoek eerste geldige zet */
+  /* 1. Waste naar foundation */
+  if (state.waste.length) {
+    const top = state.waste[state.waste.length - 1];
+    for (let f = 0; f < 4; f++) {
+      if (canMoveToFoundation(top, f)) { toast('💡 ' + top.rank + top.suit + ' → foundation'); return; }
+    }
+  }
+  /* 2. Tableau naar foundation */
+  for (let c = 0; c < 7; c++) {
+    const col = state.tableau[c];
+    if (!col.length) continue;
+    const top = col[col.length - 1];
+    if (!top.faceUp) continue;
+    for (let f = 0; f < 4; f++) {
+      if (canMoveToFoundation(top, f)) { toast('💡 ' + top.rank + top.suit + ' → foundation'); return; }
+    }
+  }
+  /* 3. Waste naar tableau */
+  if (state.waste.length) {
+    const top = state.waste[state.waste.length - 1];
+    for (let c = 0; c < 7; c++) {
+      if (canMoveToTableau(top, c)) { toast('💡 ' + top.rank + top.suit + ' → kolom ' + (c+1)); return; }
+    }
+  }
+  /* 4. Tableau naar tableau */
+  for (let c = 0; c < 7; c++) {
+    const col = state.tableau[c];
+    for (let r = 0; r < col.length; r++) {
+      if (!col[r].faceUp) continue;
+      for (let t = 0; t < 7; t++) {
+        if (t === c) continue;
+        if (canMoveToTableau(col[r], t)) {
+          toast('💡 ' + col[r].rank + col[r].suit + ' → kolom ' + (t+1)); return;
+        }
+      }
+    }
+  }
+  toast('Geen zet gevonden -- klik stock');
+}
+
+/* ══ NIEUW SPEL ══ */
+function nieuwSpel() {
+  stopTimer();
+  score = 0;
+  $('stat-score').textContent = '0';
+  $('stat-tijd').textContent = '0:00';
+  history = [];
+  deal();
+  startTimer();
+}
+
+function createCard(suit, rank, faceUp = false) {
+  return { suit, rank, color: RED.has(suit) ? 'red' : 'black', faceUp, el: null };
 }
 
 function makeEl(card) {
@@ -451,14 +617,18 @@ function revealTopTableau(col) {
 }
 
 function moveToFoundation(dragData, f) {
+  snapState();
   removeFromSource(dragData);
   state.foundations[f].push(dragData.cards[0]);
+  updateScore(10);
   checkWin();
 }
 
 function moveToTableau(dragData, col) {
+  snapState();
   removeFromSource(dragData);
   dragData.cards.forEach(c => state.tableau[col].push(c));
+  updateScore(3);
 }
 
 function flipTop(col) {
@@ -510,7 +680,7 @@ function deal() {
   });
 }
 
-function init() { updateSizes(); deal(); }
+function init() { updateSizes(); deal(); startTimer(); }
 function herInit() { updateSizes(); render(); }
 
 window.addEventListener('resize', herInit);
