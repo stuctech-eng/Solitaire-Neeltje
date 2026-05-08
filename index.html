@@ -218,6 +218,46 @@ animation: vallen linear forwards;
 to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
 }
 
+/* ══ START SCHERM ══ */
+#start-screen {
+display: flex;
+position: fixed; inset: 0; z-index: 800;
+background: linear-gradient(180deg, #0b4d3b 0%, #063126 100%);
+align-items: center; justify-content: center;
+flex-direction: column;
+gap: 0;
+}
+.start-titel {
+font-size: 36px; font-weight: 900; color: #fff;
+letter-spacing: 1px; margin-bottom: 6px;
+text-shadow: 0 2px 12px rgba(0,0,0,.4);
+}
+.start-sub {
+font-size: 13px; color: rgba(255,255,255,.4);
+margin-bottom: 48px; letter-spacing: 2px; text-transform: uppercase;
+}
+.start-btn {
+width: 220px; padding: 18px 0;
+border-radius: 20px; border: 1.5px solid rgba(255,255,255,.2);
+font-size: 17px; font-weight: 700; color: #fff;
+font-family: -apple-system, sans-serif;
+cursor: pointer; margin-bottom: 14px;
+-webkit-appearance: none;
+transition: transform .15s, opacity .15s;
+}
+.start-btn:active { transform: scale(.96); opacity: .8; }
+.start-btn.klassiek {
+background: rgba(255,255,255,.13);
+}
+.start-btn.expert {
+background: rgba(255,150,0,.22);
+border-color: rgba(255,180,0,.3);
+}
+.start-btn-lbl {
+display: block; font-size: 11px; font-weight: 500;
+color: rgba(255,255,255,.5); margin-top: 3px; letter-spacing: 1px;
+}
+
 #toast {
 position: fixed; bottom: 80px; left: 50%;
 transform: translateX(-50%);
@@ -232,6 +272,18 @@ z-index: 9999; white-space: nowrap;
 
 </head>
 <body>
+<div id="start-screen">
+  <div class="start-titel">🂡 Solitaire</div>
+  <div class="start-sub">Neeltje</div>
+  <button class="start-btn klassiek" onclick="startSpel('klassiek')">
+    Klassiek
+    <span class="start-btn-lbl">1 kaart uit stock</span>
+  </button>
+  <button class="start-btn expert" onclick="startSpel('expert')">
+    Expert
+    <span class="start-btn-lbl">3 kaarten uit stock</span>
+  </button>
+</div>
 <div id="board">
   <div id="top-row">
     <div id="slot-stock" class="slot">↺</div>
@@ -432,6 +484,14 @@ function sndWin() {
       o.start(ac.currentTime+t); o.stop(ac.currentTime+t+0.4);
     });
   } catch(e) {}
+}
+
+let niveau = 'klassiek'; // 'klassiek' of 'expert'
+
+function startSpel(gekozenNiveau) {
+  niveau = gekozenNiveau;
+  $('start-screen').style.display = 'none';
+  nieuwSpel();
 }
 
 let score = 0, timerSecs = 0, timerRef = null;
@@ -829,10 +889,13 @@ function flipTop(col) {
   sndKaartFlip(); render();
 }
 function drawFromStock() {
-  if (state.stock.length===0) {
-    while (state.waste.length) { const c=state.waste.pop(); c.faceUp=false; state.stock.push(c); }
+  if (state.stock.length === 0) {
+    while (state.waste.length) { const c = state.waste.pop(); c.faceUp = false; state.stock.push(c); }
   } else {
-    const c=state.stock.pop(); c.faceUp=true; state.waste.push(c);
+    const aantal = niveau === 'expert' ? 3 : 1;
+    for (let i = 0; i < aantal && state.stock.length > 0; i++) {
+      const c = state.stock.pop(); c.faceUp = true; state.waste.push(c);
+    }
   }
   sndStock(); render();
 }
@@ -913,7 +976,7 @@ window.addEventListener('resize', herInit);
 window.addEventListener('orientationchange', ()=>setTimeout(herInit,120));
 document.addEventListener('contextmenu', e=>e.preventDefault());
 
-updateSizes(); deal(); startTimer();
+updateSizes(); startTimer();
 </script>
 
 </body>
