@@ -9,75 +9,104 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#05261d">
 <style>
+:root {
+  --tafel-top:    #0b4d3b;
+  --tafel-bot:    #063126;
+  --tafel-glow:   rgba(0,200,120,0.10);
+  --slot-bg:      rgba(255,255,255,.06);
+  --slot-border:  rgba(255,255,255,.18);
+  --kaart-rug1:   #1a3a8a;
+  --kaart-rug2:   #2359d4;
+  --kaart-rug3:   #0b1d54;
+}
+.thema-casino {
+  --tafel-top:    #4a0a0a;
+  --tafel-bot:    #2a0505;
+  --tafel-glow:   rgba(200,40,40,0.12);
+  --slot-bg:      rgba(255,200,50,.07);
+  --slot-border:  rgba(255,200,50,.35);
+  --kaart-rug1:   #7a1a1a;
+  --kaart-rug2:   #b22222;
+  --kaart-rug3:   #3a0a0a;
+}
+.thema-nacht {
+  --tafel-top:    #0d0d2b;
+  --tafel-bot:    #060618;
+  --tafel-glow:   rgba(80,80,255,0.12);
+  --slot-bg:      rgba(100,100,255,.08);
+  --slot-border:  rgba(120,120,255,.35);
+  --kaart-rug1:   #1a0a3a;
+  --kaart-rug2:   #3a0a7a;
+  --kaart-rug3:   #0a0520;
+}
+
 *, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0; padding: 0;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
+box-sizing: border-box;
+margin: 0; padding: 0;
+-webkit-tap-highlight-color: transparent;
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+user-select: none;
 }
 html, body {
-  width: 100%;
-  height: 100dvh;
-  overflow: hidden;
-  position: fixed;
-  inset: 0;
-  touch-action: none;
-  background: #05261d;
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+width: 100%;
+height: 100dvh;
+overflow: hidden;
+position: fixed;
+inset: 0;
+touch-action: none;
+background: #05261d;
+font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 #board {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(0,200,120,0.10), transparent 50%),
-    linear-gradient(180deg, #0b4d3b 0%, #063126 100%);
+position: fixed; inset: 0; overflow: hidden;
+background:
+radial-gradient(circle at 50% 0%, var(–tafel-glow), transparent 50%),
+linear-gradient(180deg, var(–tafel-top) 0%, var(–tafel-bot) 100%);
 }
 #board::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: .04;
-  background-image: repeating-linear-gradient(
-    45deg,
-    rgba(255,255,255,.08) 0px, rgba(255,255,255,.08) 1px,
-    transparent 1px, transparent 8px
-  );
+content: "";
+position: absolute;
+inset: 0;
+pointer-events: none;
+opacity: .04;
+background-image: repeating-linear-gradient(
+45deg,
+rgba(255,255,255,.08) 0px, rgba(255,255,255,.08) 1px,
+transparent 1px, transparent 8px
+);
 }
 #top-row {
-  position: absolute;
-  left: 0; right: 0; top: 0;
-  z-index: 10;
-  padding-top: calc(env(safe-area-inset-top, 44px) + 10px);
+position: absolute;
+left: 0; right: 0; top: 0;
+z-index: 10;
+padding-top: calc(env(safe-area-inset-top, 44px) + 10px);
 }
 .slot {
-  position: absolute;
-  border-radius: 10px;
-  background: rgba(255,255,255,.06);
-  border: 1.5px dashed rgba(255,255,255,.18);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255,255,255,.25);
+position: absolute;
+border-radius: 10px;
+background: rgba(255,255,255,.06);
+border: 1.5px dashed rgba(255,255,255,.18);
+box-shadow: inset 0 2px 4px rgba(0,0,0,.3);
+display: flex;
+align-items: center;
+justify-content: center;
+color: rgba(255,255,255,.25);
 }
 .card {
-  position: absolute;
-  cursor: grab;
-  touch-action: none;
-  will-change: transform;
-  overflow: visible;
-  transition: box-shadow .15s;
-  box-shadow: 0 4px 14px rgba(0,0,0,.45), 0 1px 3px rgba(0,0,0,.3);
-  perspective: 600px;
+position: absolute;
+cursor: grab;
+touch-action: none;
+will-change: transform;
+overflow: visible;
+transition: box-shadow .15s;
+box-shadow: 0 4px 14px rgba(0,0,0,.45), 0 1px 3px rgba(0,0,0,.3);
+perspective: 600px;
 }
 .card.dragging {
-  cursor: grabbing;
-  transition: none;
-  z-index: 999 !important;
+cursor: grabbing;
+transition: none;
+z-index: 999 !important;
 }
 
 /* 3D flip laag */
@@ -275,7 +304,27 @@ display: block; font-size: 11px; font-weight: 500;
 color: rgba(255,255,255,.5); margin-top: 3px; letter-spacing: 1px;
 }
 
-#toast {
+.start-thema-rij {
+display: flex; gap: 10px; margin-bottom: 32px;
+}
+.thema-btn {
+width: 64px; height: 64px; border-radius: 16px;
+border: 2.5px solid rgba(255,255,255,.15);
+cursor: pointer; -webkit-appearance: none;
+transition: transform .15s, border-color .15s;
+display: flex; align-items: center; justify-content: center;
+font-size: 11px; font-weight: 700; color: rgba(255,255,255,.7);
+flex-direction: column; gap: 4px;
+}
+.thema-btn:active { transform: scale(.93); }
+.thema-btn.actief { border-color: rgba(255,255,255,.7); }
+.thema-btn.t-groen { background: linear-gradient(135deg, #0b4d3b, #063126); }
+.thema-btn.t-casino { background: linear-gradient(135deg, #4a0a0a, #2a0505); }
+.thema-btn.t-nacht  { background: linear-gradient(135deg, #0d0d2b, #060618); }
+.start-label {
+font-size: 10px; color: rgba(255,255,255,.35);
+text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;
+}
 position: fixed; bottom: 80px; left: 50%;
 transform: translateX(-50%);
 background: rgba(0,0,0,.88); color: #fff;
@@ -292,6 +341,13 @@ z-index: 9999; white-space: nowrap;
 <div id="start-screen">
   <div class="start-titel">🂡 Solitaire</div>
   <div class="start-sub">Neeltje</div>
+  <div class="start-label">Thema</div>
+  <div class="start-thema-rij">
+    <button class="thema-btn t-groen actief" onclick="kiesThema('groen',this)">🌿<span>Groen</span></button>
+    <button class="thema-btn t-casino"       onclick="kiesThema('casino',this)">🎰<span>Casino</span></button>
+    <button class="thema-btn t-nacht"        onclick="kiesThema('nacht',this)">🌙<span>Nacht</span></button>
+  </div>
+  <div class="start-label">Niveau</div>
   <button class="start-btn klassiek" onclick="startSpel('klassiek')">
     Klassiek
     <span class="start-btn-lbl">1 kaart uit stock</span>
@@ -509,8 +565,20 @@ function naarStartScherm() {
   $('start-screen').style.display = 'flex';
 }
 
+let thema = 'groen';
+
+function kiesThema(gekozenThema, btn) {
+  thema = gekozenThema;
+  document.querySelectorAll('.thema-btn').forEach(b => b.classList.remove('actief'));
+  btn.classList.add('actief');
+  // Pas board alvast aan voor preview
+  const board = document.getElementById('board');
+  board.className = thema === 'groen' ? '' : 'thema-' + thema;
+}
+
 function startSpel(gekozenNiveau) {
   niveau = gekozenNiveau;
+  document.getElementById('board').className = thema === 'groen' ? '' : 'thema-' + thema;
   $('start-screen').style.display = 'none';
   nieuwSpel();
 }
