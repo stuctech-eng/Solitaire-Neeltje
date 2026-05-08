@@ -923,24 +923,58 @@ function moveToTableau(dragData, col) {
   updateScore(3); sndKaartNeerleggen();
   setTimeout(() => { if (kanAutoComplete()) autoComplete(); }, 300);
 }
+let flipping = false;
+
 function flipTop(col) {
   const pile = state.tableau[col];
   if (!pile.length || pile[pile.length - 1].faceUp) return;
+  if (flipping) return;
+  flipping = true;
+
   const card = pile[pile.length - 1];
-  card.faceUp = true;
   sndKaartFlip();
 
-  if (card.el) {
-    const inner = card.el.querySelector('.card-inner');
-    inner.style.transition = 'none';
-    inner.style.transform = 'rotateY(180deg)';
-    void inner.offsetWidth;
-    inner.style.transition = 'transform 0.42s cubic-bezier(0.4, 0, 0.2, 1)';
-    inner.style.transform = 'rotateY(0deg)';
-    card.el.classList.remove('face-down');
-    card.el.classList.add('face-up');
-    setTimeout(() => { render(); }, 420);
+  // Maak tijdelijk flip element op exacte positie
+  const origEl = card.el;
+  const rect = origEl ? origEl.getBoundingClientRect() : null;
+
+  // Zet state alvast
+  card.faceUp = true;
+
+  if (rect) {
+    const fs  = Math.max(8,  Math.round(CW * 0.155));
+    const mfs = Math.max(14, Math.round(CW * 0.46));
+    const flipEl = document.createElement('div');
+    flipEl.className = 'card face-down';
+    flipEl.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;width:${CW}px;height:${CH}px;border-radius:${Math.round(CW*0.12)}px;z-index:500;pointer-events:none;perspective:600px;box-shadow:0 4px 14px rgba(0,0,0,.45);`;
+    flipEl.innerHTML = `
+      <div class="card-inner" style="transition:none;transform:rotateY(180deg);">
+        <div class="card-front">
+          <div class="c-corner ${card.color}" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>
+          <div class="c-mid ${card.color}" style="font-size:${mfs}px">${card.suit}</div>
+          <div class="c-corner bot ${card.color}" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>
+        </div>
+        <div class="card-back"></div>
+      </div>`;
+    document.body.appendChild(flipEl);
+
+    // Verberg origineel
+    if (origEl) origEl.style.visibility = 'hidden';
+
+    // Start animatie
+    requestAnimationFrame(() => {
+      const inner = flipEl.querySelector('.card-inner');
+      inner.style.transition = 'transform 0.42s cubic-bezier(0.4, 0, 0.2, 1)';
+      inner.style.transform = 'rotateY(0deg)';
+
+      setTimeout(() => {
+        flipEl.remove();
+        flipping = false;
+        render();
+      }, 430);
+    });
   } else {
+    flipping = false;
     render();
   }
 }
