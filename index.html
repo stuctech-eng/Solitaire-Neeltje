@@ -649,14 +649,31 @@ function render() {
     el.style.zIndex = i+1;
   });
 
-  if (state.waste.length>0) {
-    const top = state.waste[state.waste.length-1];
-    const el = makeEl(top);
+  if (state.waste.length > 0) {
     const wr = $('slot-waste').getBoundingClientRect();
-    el.style.left = wr.left+'px';
-    el.style.top  = wr.top+'px';
-    el.style.zIndex = 50;
-    enableDrag(el, top, 'waste', state.waste.length-1);
+    if (niveau === 'expert') {
+      // Toon max 3 bovenste waste kaarten uitgewaaierd
+      const zichtbaar = Math.min(3, state.waste.length);
+      const waaierOffset = Math.round(CW * 0.28);
+      for (let i = zichtbaar - 1; i >= 0; i--) {
+        const card = state.waste[state.waste.length - 1 - i];
+        const el = makeEl(card);
+        el.style.left   = (wr.left + i * waaierOffset) + 'px';
+        el.style.top    = wr.top + 'px';
+        el.style.zIndex = 50 + (zichtbaar - i);
+        // Alleen bovenste kaart is draggable
+        if (i === 0) {
+          enableDrag(el, card, 'waste', state.waste.length - 1);
+        }
+      }
+    } else {
+      const top = state.waste[state.waste.length - 1];
+      const el = makeEl(top);
+      el.style.left   = wr.left + 'px';
+      el.style.top    = wr.top + 'px';
+      el.style.zIndex = 50;
+      enableDrag(el, top, 'waste', state.waste.length - 1);
+    }
   }
 
   state.foundations.forEach((pile, f) => {
