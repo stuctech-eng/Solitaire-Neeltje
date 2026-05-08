@@ -57,7 +57,7 @@ transparent 1px, transparent 8px
 position: absolute;
 left: 0; right: 0; top: 0;
 z-index: 10;
-/* Hoogte wordt door JS gezet */
+padding-top: env(safe-area-inset-top, 44px);
 }
 
 /* ══ SLOTS ══ */
@@ -211,36 +211,33 @@ function updateSizes() {
   const totalW = CW * 7 + GAP * 6;
   START_X = Math.floor((W - totalW) / 2);
 
-  /* Top rij: exact 7 posities = zelfde grid als tableau
-     [Stock][Waste][leeg][♠][♥][♦][♣]
-     Geen flex, geen gap -- vaste left posities via JS */
+  /* Top padding: lees de werkelijke top-rij positie na CSS safe-area */
   const topRow = $('top-row');
-  topRow.style.padding = '';
-  topRow.style.gap = '';
-  topRow.style.display = 'block'; /* positioneer slots absoluut */
-
-  const positions = [0, 1, null, 3, 4, 5, 6]; /* null = lege plek */
+  /* Tijdelijk een dummy slot renderen om de top te meten */
+  const topPad = Math.max(50,
+    parseFloat(getComputedStyle(topRow).paddingTop) || 50
+  );
   const slotIds = ['slot-stock','slot-waste',null,'slot-f0','slot-f1','slot-f2','slot-f3'];
-  const topPad = Math.max(8, (window.safeAreaTop || 0) + 8);
+  const br      = Math.round(CW * 0.12) + 'px';
+  const slotFs  = Math.round(CW * 0.28) + 'px';
 
   slotIds.forEach((id, i) => {
     if (!id) return;
-    const slot = $(id);
-    slot.style.position = 'absolute';
-    slot.style.left = (START_X + i * (CW + GAP)) + 'px';
-    slot.style.top  = topPad + 'px';
-    slot.style.width  = CW + 'px';
-    slot.style.height = CH + 'px';
-    slot.style.borderRadius = Math.round(CW * 0.12) + 'px';
-    slot.style.fontSize     = Math.round(CW * 0.28) + 'px';
+    const s = $(id);
+    s.style.left         = (START_X + i * (CW + GAP)) + 'px';
+    s.style.top          = topPad + 'px';
+    s.style.width        = CW + 'px';
+    s.style.height       = CH + 'px';
+    s.style.borderRadius = br;
+    s.style.fontSize     = slotFs;
   });
 
-  /* Hoogte van top rij instellen */
-  topRow.style.height = (CH + topPad + 8) + 'px';
-  /* slot-gap verbergen -- niet meer nodig */
+  const topRow = $('top-row');
+  topRow.style.height = (topPad + CH + 8) + 'px';
   $('slot-gap').style.display = 'none';
 
-  TOP_H = CH + topPad + 16; /* kaardhoogte + padding + ruimte */
+  TOP_H = topPad + CH + 12;
+
 }
 
 /* ══ DECK ══ */
@@ -364,14 +361,6 @@ function herInit() {
 window.addEventListener('resize', herInit);
 window.addEventListener('orientationchange', () => setTimeout(herInit, 100));
 document.addEventListener('contextmenu', e => e.preventDefault());
-
-/* Safe area detecteren */
-const safeDiv = document.createElement('div');
-safeDiv.style.cssText = 'position:fixed;top:env(safe-area-inset-top,0);left:0;width:1px;height:1px;';
-document.body.appendChild(safeDiv);
-window.safeAreaTop = safeDiv.getBoundingClientRect().top;
-safeDiv.remove();
-
 init();
 </script>
 
