@@ -10,6 +10,7 @@
 <meta name="theme-color" content="#05261d">
 <style>
 
+/* ══ RESET ══ */
 *, *::before, *::after {
 box-sizing: border-box;
 margin: 0; padding: 0;
@@ -19,6 +20,7 @@ margin: 0; padding: 0;
 user-select: none;
 }
 
+/* ══ FULLSCREEN -- geen witte randen ══ */
 html, body {
 width: 100%;
 height: 100dvh;
@@ -30,21 +32,23 @@ background: #05261d;
 font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+/* ══ BORD ══ */
 #board {
 position: fixed;
 inset: 0;
 overflow: hidden;
 background:
-radial-gradient(circle at 50% 0%, rgba(0,200,120,0.10), transparent 50%),
+radial-gradient(circle at 50% 0%, rgba(0,200,120,0.12), transparent 50%),
 linear-gradient(180deg, #0b4d3b 0%, #063126 100%);
 }
 
+/* subtiele textuur */
 #board::after {
 content: "";
 position: absolute;
 inset: 0;
 pointer-events: none;
-opacity: .04;
+opacity: .05;
 background-image: repeating-linear-gradient(
 45deg,
 rgba(255,255,255,.08) 0px, rgba(255,255,255,.08) 1px,
@@ -52,74 +56,95 @@ transparent 1px, transparent 8px
 );
 }
 
-/* ══ TOP RIJ ══ */
+/* ══ BOVENSTE RIJ ══ */
 #top-row {
 position: absolute;
 left: 0; right: 0; top: 0;
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+padding: calc(env(safe-area-inset-top) + 10px) 10px 8px;
 z-index: 10;
-padding-top: env(safe-area-inset-top, 44px);
+}
+
+.top-left, .top-right {
+display: flex;
+gap: 8px;
 }
 
 /* ══ SLOTS ══ */
 .slot {
-position: absolute; /* JS zet left en top */
-border-radius: 10px;
+border-radius: 12px;
 background: rgba(255,255,255,.06);
-border: 1.5px dashed rgba(255,255,255,.18);
+border: 1.5px dashed rgba(255,255,255,.15);
 box-shadow: inset 0 2px 4px rgba(0,0,0,.3);
+flex-shrink: 0;
+position: relative;
 display: flex;
 align-items: center;
 justify-content: center;
-color: rgba(255,255,255,.28);
+color: rgba(255,255,255,.2);
+font-size: 1.4em;
 }
+
+/* ══ TABLEAU ══ */
+#tableau {
+position: absolute;
+left: 0; right: 0;
+display: flex;
+justify-content: center;
+align-items: flex-start;
+padding: 0;
+}
+
+/* ══ KAART ══ */
 .card {
 position: absolute;
+border-radius: 12px;
+box-shadow:
+0 4px 12px rgba(0,0,0,.4),
+0 1px 3px rgba(0,0,0,.3);
 cursor: grab;
 touch-action: none;
 will-change: transform;
-overflow: hidden;
 }
 
 /* VOORKANT */
 .card-front {
 position: absolute;
 inset: 0;
-background: linear-gradient(170deg, #ffffff 0%, #f4f4f4 100%);
-border: 1px solid rgba(0,0,0,.08);
+border-radius: 12px;
+background: linear-gradient(170deg, #ffffff, #f5f5f5);
+border: 1px solid rgba(0,0,0,.1);
 display: flex;
 flex-direction: column;
-overflow: hidden;
+justify-content: space-between;
+padding: 5px;
 }
 
 .card.face-down .card-front { display: none; }
 
-/* hoek tekst */
-.c-corner {
+.corner {
 font-weight: 800;
-line-height: 1.05;
-padding: 3px 4px;
-flex-shrink: 0;
+line-height: 1.1;
+font-size: inherit;
 }
-.c-corner.bot {
-align-self: flex-end;
-transform: rotate(180deg);
-}
+.corner.bottom { align-self: flex-end; transform: rotate(180deg); }
 
-/* midden symbool */
-.c-mid {
+.card-center {
 flex: 1;
 display: flex;
 align-items: center;
 justify-content: center;
 font-weight: 900;
-overflow: hidden;
 }
 
 /* ACHTERKANT */
 .card-back {
 position: absolute;
 inset: 0;
-background: linear-gradient(135deg, #1a3a8a 0%, #2359d4 50%, #0b1d54 100%);
+border-radius: 12px;
+background: linear-gradient(135deg, #1a3a8a, #2359d4 50%, #0b1d54);
 border: 1px solid rgba(255,255,255,.08);
 overflow: hidden;
 }
@@ -136,121 +161,92 @@ transparent 2px, transparent 10px
 content: "✦";
 position: absolute;
 left: 50%; top: 50%;
-transform: translate(-50%,-50%);
+transform: translate(-50%, -50%);
 font-size: 2em;
-color: rgba(255,255,255,.10);
+color: rgba(255,255,255,.12);
 }
 
 .card.face-up .card-back { display: none; }
 
-/* schaduwen */
-.card { box-shadow: 0 4px 14px rgba(0,0,0,.45), 0 1px 3px rgba(0,0,0,.3); }
-
+/* KLEUREN */
 .red { color: #d11d3f; }
 .black { color: #111; }
 
 </style>
 </head>
 <body>
+
 <div id="board">
-
-  <!-- TOP RIJ: stock | waste | gap | ♠ ♥ ♦ ♣ -->
-
   <div id="top-row">
-    <div id="slot-stock" class="slot">↺</div>
-    <div id="slot-waste" class="slot"></div>
-    <div id="slot-gap"></div>
-    <div id="slot-f0" class="slot">♠</div>
-    <div id="slot-f1" class="slot" style="color:rgba(220,50,50,.3)">♥</div>
-    <div id="slot-f2" class="slot" style="color:rgba(220,50,50,.3)">♦</div>
-    <div id="slot-f3" class="slot">♣</div>
+    <div class="top-left">
+      <div id="slot-stock" class="slot">↺</div>
+      <div id="slot-waste" class="slot"></div>
+    </div>
+    <div class="top-right">
+      <div class="slot">♠</div>
+      <div class="slot" style="color:rgba(255,100,100,.3)">♥</div>
+      <div class="slot" style="color:rgba(255,100,100,.3)">♦</div>
+      <div class="slot">♣</div>
+    </div>
   </div>
-
+  <div id="tableau"></div>
 </div>
 
 <script>
 'use strict';
 
+/* ══ CONSTANTEN ══ */
 const SUITS = ['♠','♥','♦','♣'];
 const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-const RED   = {'♥':true,'♦':true};
+const RED   = {'♥':1,'♦':1};
 
 /* ══ STAAT ══ */
-let CW, CH, GAP, STACK_UP, STACK_DN, TOP_H, START_X;
-let gameCards = []; /* alle kaartobjecten */
+let CW, CH, GAP, STACK_UP, STACK_DN, TOP_H;
+let deck = [];
 let columns = [[],[],[],[],[],[],[]];
-let stockCards = [];
 
-const board = document.getElementById('board');
+/* ══ HELPERS ══ */
 const $ = id => document.getElementById(id);
 
-/* ══ AFMETINGEN ══ */
+/* ══ AFMETINGEN -- responsive ══ */
 function updateSizes() {
   const W = window.innerWidth;
   const H = window.innerHeight;
   const land = W > H;
 
-  /* Kaartbreedte: 7 kaarten + 6 gaps passen altijd */
-  const margin = 10;
-  const totalSlots = 7;
-  /* Bereken optimale breedte */
-  let bestCW = 0;
-  for (let g = 4; g <= 14; g++) {
-    const w = Math.floor((W - margin * 2 - g * (totalSlots - 1)) / totalSlots);
-    const h = Math.round(w * 1.42);
-  const maxH = land ? H * 0.30 : H * 0.22;
-    if (h <= maxH && w > bestCW) { bestCW = w; GAP = g; }
+  if (land) {
+    CW = Math.floor(Math.min(W / 9, H * 0.30));
+  } else {
+    CW = Math.floor(Math.min(W / 7.6, H * 0.17));
   }
-  CW = bestCW || Math.floor((W - margin * 2) / 7.8);
-  GAP = GAP || Math.max(3, Math.floor((W - margin * 2 - CW * 7) / 6));
 
   CH       = Math.round(CW * 1.42);
-  STACK_UP = Math.round(CH * 0.27);
-  STACK_DN = Math.round(CH * 0.15);
+  GAP      = Math.max(4, Math.floor(CW * 0.10));
+  STACK_UP = Math.round(CH * 0.24);
+  STACK_DN = Math.round(CH * 0.14);
 
-  const totalW = CW * 7 + GAP * 6;
-  START_X = Math.floor((W - totalW) / 2);
-
-  /* Top padding: lees de werkelijke top-rij positie na CSS safe-area */
-  const topRow = $('top-row');
-  /* Tijdelijk een dummy slot renderen om de top te meten */
-  const topPad = Math.max(50,
-    parseFloat(getComputedStyle(topRow).paddingTop) || 50
-  );
-  const slotIds = ['slot-stock','slot-waste',null,'slot-f0','slot-f1','slot-f2','slot-f3'];
-  const br      = Math.round(CW * 0.12) + 'px';
-  const slotFs  = Math.round(CW * 0.28) + 'px';
-
-  slotIds.forEach((id, i) => {
-    if (!id) return;
-    const s = $(id);
-    s.style.left         = (START_X + i * (CW + GAP)) + 'px';
-    s.style.top          = topPad + 'px';
-    s.style.width        = CW + 'px';
-    s.style.height       = CH + 'px';
-    s.style.borderRadius = br;
-    s.style.fontSize     = slotFs;
+  /* Slots aanpassen */
+  document.querySelectorAll('.slot').forEach(s => {
+    s.style.width  = CW + 'px';
+    s.style.height = CH + 'px';
+    s.style.borderRadius = Math.round(CW * 0.13) + 'px';
   });
 
+  /* Top rij hoogte bepalen */
   const topRow = $('top-row');
-  topRow.style.height = (topPad + CH + 8) + 'px';
-  $('slot-gap').style.display = 'none';
-
-  TOP_H = topPad + CH + 12;
-
+  const safeTop = parseInt(
+    getComputedStyle(document.documentElement)
+      .getPropertyValue('--sat') || '0'
+  ) || 0;
+  TOP_H = topRow.getBoundingClientRect().bottom;
 }
 
 /* ══ DECK ══ */
 function createDeck() {
-  gameCards = [];
+  deck = [];
   for (const suit of SUITS)
     for (const rank of RANKS)
-      gameCards.push({
-        suit, rank,
-        color: RED[suit] ? 'red' : 'black',
-        faceUp: false,
-        el: null
-      });
+      deck.push({ suit, rank, color: RED[suit] ? 'red' : 'black', faceUp: false });
 }
 
 function shuffle(arr) {
@@ -261,86 +257,91 @@ function shuffle(arr) {
 }
 
 /* ══ KAART ELEMENT ══ */
-function makeCardEl(card) {
+function makeCard(data) {
   const el = document.createElement('div');
-  el.className = 'card ' + (card.faceUp ? 'face-up' : 'face-down');
-  el.style.width        = CW + 'px';
-  el.style.height       = CH + 'px';
-  el.style.borderRadius = Math.round(CW * 0.12) + 'px';
+  el.className = 'card ' + (data.faceUp ? 'face-up' : 'face-down');
+  el.style.width  = CW + 'px';
+  el.style.height = CH + 'px';
+  el.style.borderRadius = Math.round(CW * 0.13) + 'px';
 
-  const fs  = Math.max(8,  Math.round(CW * 0.17));
-  const mfs = Math.max(14, Math.round(CW * 0.48));
-  const cls = card.color;
+  const fs = Math.max(10, Math.round(CW * 0.20));
+  const cs = Math.max(18, Math.round(CW * 0.58));
+  const cls = data.color;
 
   el.innerHTML = `
     <div class="card-front">
-      <div class="c-corner ${cls}" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>
-      <div class="c-mid ${cls}" style="font-size:${mfs}px">${card.suit}</div>
-      <div class="c-corner bot ${cls}" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>
+      <div class="corner top ${cls}" style="font-size:${fs}px">${data.rank}<br>${data.suit}</div>
+      <div class="card-center ${cls}" style="font-size:${cs}px">${data.suit}</div>
+      <div class="corner bottom ${cls}" style="font-size:${fs}px">${data.rank}<br>${data.suit}</div>
     </div>
     <div class="card-back"></div>
   `;
 
-  card.el = el;
+  data.el = el;
   return el;
 }
 
 /* ══ UITDELEN ══ */
 function deal() {
-  /* Verwijder alle bestaande kaarten */
-  board.querySelectorAll('.card').forEach(e => e.remove());
+  /* Verwijder oude kaarten */
+  document.querySelectorAll('.card').forEach(e => e.remove());
   columns = [[],[],[],[],[],[],[]];
-  stockCards = [];
+
+  const totalW = CW * 7 + GAP * 6;
+  const startX = (window.innerWidth - totalW) / 2;
+  const startY = TOP_H + 10;
 
   let idx = 0;
 
   for (let col = 0; col < 7; col++) {
-    let y = TOP_H;
     for (let row = 0; row <= col; row++) {
-      const card = gameCards[idx++];
+      const card = deck[idx++];
       card.faceUp = (row === col);
 
-      const el = makeCardEl(card);
-      const x  = START_X + col * (CW + GAP);
+      const el = makeCard(card);
 
-      el.style.left   = x + 'px';
-      el.style.top    = y + 'px';
+      /* Positie */
+      const x = startX + col * (CW + GAP);
+      let y = startY;
+      for (let r = 0; r < row; r++) {
+        y += columns[col][r].faceUp ? STACK_UP : STACK_DN;
+      }
+
+      el.style.left = x + 'px';
+      el.style.top  = y + 'px';
       el.style.zIndex = row + 1;
 
       columns[col].push(card);
-      board.appendChild(el);
-
-      /* Volgende y positie */
-      y += card.faceUp ? STACK_UP : STACK_DN;
+      $('board').appendChild(el);
     }
   }
 
-  /* Stock */
-  const stockR = $('slot-stock').getBoundingClientRect();
-  while (idx < gameCards.length) {
-    const card = gameCards[idx++];
+  /* Stock kaarten */
+  const stockX = $('slot-stock').getBoundingClientRect().left;
+  const stockY = $('slot-stock').getBoundingClientRect().top;
+  while (idx < deck.length) {
+    const card = deck[idx++];
     card.faceUp = false;
-    const el = makeCardEl(card);
-    el.style.left   = stockR.left + 'px';
-    el.style.top    = stockR.top  + 'px';
+    const el = makeCard(card);
+    el.style.left = stockX + 'px';
+    el.style.top  = stockY + 'px';
     el.style.zIndex = 1;
-    stockCards.push(card);
-    board.appendChild(el);
+    $('board').appendChild(el);
   }
 }
 
 /* ══ DEAL ANIMATIE ══ */
-function dealAnimatie() {
-  const cards = board.querySelectorAll('.card');
+function dealMetAnimatie() {
+  const cards = document.querySelectorAll('.card');
   cards.forEach((k, i) => {
-    k.style.opacity   = '0';
-    k.style.transform = 'scale(0.88) translateY(-8px)';
+    k.style.opacity = '0';
+    k.style.transform = 'scale(0.85)';
     setTimeout(() => {
-      k.style.transition = 'opacity .2s ease, transform .22s ease';
-      k.style.opacity    = '1';
-      k.style.transform  = 'scale(1) translateY(0)';
-      setTimeout(() => { k.style.transition = ''; }, 240);
-    }, i * 18 + 30);
+      k.style.transition = 'opacity .2s ease, transform .25s ease';
+      k.style.opacity = '1';
+      k.style.transform = 'scale(1)';
+      setTimeout(() => { k.style.transition = ''; }, 260);
+    }, i * 20 + 40);
   });
 }
 
@@ -348,19 +349,22 @@ function dealAnimatie() {
 function init() {
   updateSizes();
   createDeck();
-  shuffle(gameCards);
+  shuffle(deck);
   deal();
-  dealAnimatie();
+  dealMetAnimatie();
 }
 
-function herInit() {
+window.addEventListener('resize', () => {
   updateSizes();
   deal();
-}
+});
 
-window.addEventListener('resize', herInit);
-window.addEventListener('orientationchange', () => setTimeout(herInit, 100));
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => { updateSizes(); deal(); }, 100);
+});
+
 document.addEventListener('contextmenu', e => e.preventDefault());
+
 init();
 </script>
 
