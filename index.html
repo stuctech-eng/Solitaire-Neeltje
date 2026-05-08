@@ -930,21 +930,16 @@ function flipTop(col) {
   card.faceUp = true;
   sndKaartFlip();
 
-  // Animatie op bestaand element
   if (card.el) {
     const inner = card.el.querySelector('.card-inner');
-    // Start vanaf face-down positie
     inner.style.transition = 'none';
     inner.style.transform = 'rotateY(180deg)';
-    void inner.offsetWidth; // force reflow
-    // Draai naar face-up
+    void inner.offsetWidth;
     inner.style.transition = 'transform 0.42s cubic-bezier(0.4, 0, 0.2, 1)';
     inner.style.transform = 'rotateY(0deg)';
     card.el.classList.remove('face-down');
     card.el.classList.add('face-up');
-    setTimeout(() => {
-      if (inner) inner.style.transition = '';
-    }, 420);
+    setTimeout(() => { render(); }, 420);
   } else {
     render();
   }
