@@ -307,7 +307,141 @@ function layoutSlots() {
   TOP_H = topPad + CH + 14;
 }
 
-/* ══ SCORE & TIMER ══ */
+/* ══ GELUID ══ */
+let AC = null;
+function getAC() {
+  if (!AC) try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  return AC;
+}
+
+function sndKaartOppakken() {
+  const ac = getAC(); if (!ac) return;
+  try {
+    /* Zacht whoosh -- ruis met filter sweep */
+    const buf = ac.createBuffer(1, ac.sampleRate * 0.12, ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    const filter = ac.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(800, ac.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(200, ac.currentTime + 0.12);
+    filter.Q.value = 0.8;
+    const gain = ac.createGain();
+    gain.gain.setValueAtTime(0.18, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.12);
+    src.connect(filter); filter.connect(gain); gain.connect(ac.destination);
+    src.start();
+  } catch(e) {}
+}
+
+function sndKaartNeerleggen() {
+  const ac = getAC(); if (!ac) return;
+  try {
+    /* Thock -- korte impuls met resonantie */
+    const buf = ac.createBuffer(1, ac.sampleRate * 0.15, ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      const t = i / ac.sampleRate;
+      data[i] = Math.exp(-t * 40) * Math.sin(2 * Math.PI * 180 * t) * 0.8
+              + Math.exp(-t * 80) * (Math.random() * 2 - 1) * 0.3;
+    }
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    const gain = ac.createGain();
+    gain.gain.setValueAtTime(0.55, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.15);
+    src.connect(gain); gain.connect(ac.destination);
+    src.start();
+  } catch(e) {}
+}
+
+function sndKaartFlip() {
+  const ac = getAC(); if (!ac) return;
+  try {
+    /* Papier flip -- ruis sweep omhoog */
+    const buf = ac.createBuffer(1, ac.sampleRate * 0.09, ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / data.length);
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    const filter = ac.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.setValueAtTime(400, ac.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(2000, ac.currentTime + 0.09);
+    const gain = ac.createGain();
+    gain.gain.setValueAtTime(0.22, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.09);
+    src.connect(filter); filter.connect(gain); gain.connect(ac.destination);
+    src.start();
+  } catch(e) {}
+}
+
+function sndFoundation() {
+  const ac = getAC(); if (!ac) return;
+  try {
+    /* Heldere pling -- twee harmonische tonen */
+    [[880, 0, 0.3], [1320, 0.04, 0.2]].forEach(([freq, delay, vol]) => {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0, ac.currentTime + delay);
+      g.gain.linearRampToValueAtTime(vol, ac.currentTime + delay + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + delay + 0.4);
+      o.connect(g); g.connect(ac.destination);
+      o.start(ac.currentTime + delay);
+      o.stop(ac.currentTime + delay + 0.4);
+    });
+  } catch(e) {}
+}
+
+function sndStock() {
+  const ac = getAC(); if (!ac) return;
+  try {
+    /* Zacht klik */
+    const buf = ac.createBuffer(1, ac.sampleRate * 0.05, ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ac.sampleRate * 0.008));
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    const gain = ac.createGain();
+    gain.gain.setValueAtTime(0.3, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.05);
+    src.connect(gain); gain.connect(ac.destination);
+    src.start();
+  } catch(e) {}
+}
+
+function sndWin() {
+  const ac = getAC(); if (!ac) return;
+  try {
+    /* Vrolijke fanfare -- oplopende akkoorden */
+    const noten = [
+      [523, 0],    /* C */
+      [659, 0.12], /* E */
+      [784, 0.24], /* G */
+      [1047,0.36], /* C hoog */
+      [784, 0.52], /* G */
+      [880, 0.60], /* A */
+      [1047,0.70], /* C hoog */
+      [1319,0.82]  /* E hoog */
+    ];
+    noten.forEach(([freq, t]) => {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = 'triangle';
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0, ac.currentTime + t);
+      g.gain.linearRampToValueAtTime(0.2, ac.currentTime + t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + t + 0.35);
+      o.connect(g); g.connect(ac.destination);
+      o.start(ac.currentTime + t);
+      o.stop(ac.currentTime + t + 0.4);
+    });
+  } catch(e) {}
+}
 let score = 0, timerSecs = 0, timerRef = null;
 let history = []; /* voor undo */
 
@@ -357,45 +491,63 @@ function undoZet() {
 
 /* ══ HINT ══ */
 function hintZet() {
-  /* Zoek eerste geldige zet */
-  /* 1. Waste naar foundation */
+  /* 1. Waste → foundation */
   if (state.waste.length) {
-    const top = state.waste[state.waste.length - 1];
+    const w = state.waste[state.waste.length - 1];
     for (let f = 0; f < 4; f++) {
-      if (canMoveToFoundation(top, f)) { toast('💡 ' + top.rank + top.suit + ' → foundation'); return; }
+      if (canMoveToFoundation(w, f)) {
+        toast('💡 ' + w.rank + w.suit + ' → foundation');
+        return;
+      }
     }
   }
-  /* 2. Tableau naar foundation */
+  /* 2. Tableau top → foundation */
   for (let c = 0; c < 7; c++) {
-    const col = state.tableau[c];
-    if (!col.length) continue;
-    const top = col[col.length - 1];
+    const pile = state.tableau[c];
+    if (!pile.length) continue;
+    const top = pile[pile.length - 1];
     if (!top.faceUp) continue;
     for (let f = 0; f < 4; f++) {
-      if (canMoveToFoundation(top, f)) { toast('💡 ' + top.rank + top.suit + ' → foundation'); return; }
+      if (canMoveToFoundation(top, f)) {
+        toast('💡 ' + top.rank + top.suit + ' → foundation');
+        return;
+      }
     }
   }
-  /* 3. Waste naar tableau */
+  /* 3. Waste → tableau */
   if (state.waste.length) {
-    const top = state.waste[state.waste.length - 1];
+    const w = state.waste[state.waste.length - 1];
     for (let c = 0; c < 7; c++) {
-      if (canMoveToTableau(top, c)) { toast('💡 ' + top.rank + top.suit + ' → kolom ' + (c+1)); return; }
+      if (canMoveToTableau(w, c)) {
+        toast('💡 ' + w.rank + w.suit + ' → kolom ' + (c + 1));
+        return;
+      }
     }
   }
-  /* 4. Tableau naar tableau */
+  /* 4. Tableau → tableau (alleen nuttige zetten) */
   for (let c = 0; c < 7; c++) {
-    const col = state.tableau[c];
-    for (let r = 0; r < col.length; r++) {
-      if (!col[r].faceUp) continue;
-      for (let t = 0; t < 7; t++) {
-        if (t === c) continue;
-        if (canMoveToTableau(col[r], t)) {
-          toast('💡 ' + col[r].rank + col[r].suit + ' → kolom ' + (t+1)); return;
+    const pile = state.tableau[c];
+    /* Zoek eerste face-up kaart */
+    const firstUp = pile.findIndex(card => card.faceUp);
+    if (firstUp < 0) continue;
+    const card = pile[firstUp];
+    for (let t = 0; t < 7; t++) {
+      if (t === c) continue;
+      if (canMoveToTableau(card, t)) {
+        /* Alleen suggereren als het een face-down kaart onthuld */
+        if (firstUp > 0 && !pile[firstUp - 1].faceUp) {
+          toast('💡 ' + card.rank + card.suit + ' → kolom ' + (t + 1));
+          return;
         }
       }
     }
   }
-  toast('Geen zet gevonden -- klik stock');
+  /* 5. Stock klikken */
+  if (state.stock.length > 0) {
+    toast('💡 Klik de stock voor een nieuwe kaart');
+    return;
+  }
+  toast('Geen zetten meer mogelijk');
 }
 
 /* ══ NIEUW SPEL ══ */
@@ -621,6 +773,7 @@ function moveToFoundation(dragData, f) {
   removeFromSource(dragData);
   state.foundations[f].push(dragData.cards[0]);
   updateScore(10);
+  sndFoundation();
   checkWin();
 }
 
@@ -629,6 +782,7 @@ function moveToTableau(dragData, col) {
   removeFromSource(dragData);
   dragData.cards.forEach(c => state.tableau[col].push(c));
   updateScore(3);
+  sndKaartNeerleggen();
 }
 
 function flipTop(col) {
