@@ -184,8 +184,65 @@ font-weight: 700;
 color: #fff;
 display: block;
 }
+
+/* ══ WIN SCHERM ══ */
+#win-screen {
+display: none;
 position: fixed;
-bottom: 20px;
+inset: 0;
+z-index: 500;
+background: rgba(0,0,0,.75);
+backdrop-filter: blur(8px);
+-webkit-backdrop-filter: blur(8px);
+align-items: center;
+justify-content: center;
+}
+#win-screen.show { display: flex; }
+.win-box {
+background: linear-gradient(160deg, #0d5540, #063126);
+border: 1.5px solid rgba(255,255,255,.15);
+border-radius: 24px;
+padding: 36px 44px;
+text-align: center;
+box-shadow: 0 24px 60px rgba(0,0,0,.6);
+animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn {
+from { transform: scale(.5); opacity: 0; }
+to   { transform: scale(1);  opacity: 1; }
+}
+.win-titel { font-size: 38px; margin-bottom: 8px; }
+.win-sub   { color: rgba(255,255,255,.6); font-size: 14px; margin-bottom: 6px; }
+.win-score { color: #fff; font-size: 28px; font-weight: 800; margin-bottom: 24px; }
+.win-btn {
+background: rgba(255,255,255,.15);
+border: 1px solid rgba(255,255,255,.25);
+border-radius: 20px;
+padding: 12px 28px;
+color: #fff;
+font-size: 15px;
+font-weight: 700;
+font-family: -apple-system, sans-serif;
+cursor: pointer;
+-webkit-appearance: none;
+}
+.win-btn:active { opacity: .7; }
+
+/* Confetti */
+.confetti {
+position: fixed;
+width: 8px; height: 12px;
+border-radius: 2px;
+top: -20px;
+z-index: 600;
+pointer-events: none;
+animation: vallen linear forwards;
+}
+@keyframes vallen {
+to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+#toast {
 left: 50%;
 transform: translateX(-50%);
 background: rgba(0,0,0,.85);
@@ -226,6 +283,18 @@ white-space: nowrap;
   </div>
   <button class="bb-btn" onclick="hintZet()">💡 Hint</button>
   <button class="bb-btn" onclick="nieuwSpel()" style="background:rgba(255,255,255,.18)">↺ Nieuw</button>
+</div>
+<div id="win-screen">
+  <div class="win-box">
+    <div class="win-titel">🎉</div>
+    <div class="win-score">Gewonnen!</div>
+    <div class="win-sub" id="win-score-txt"></div>
+    <div class="win-sub" id="win-tijd-txt"></div>
+    <br>
+    <button class="win-btn" onclick="nieuwSpel();$('win-screen').classList.remove('show')">
+      ↺ Nieuw Spel
+    </button>
+  </div>
 </div>
 <div id="toast"></div>
 
@@ -315,55 +384,121 @@ function getAC() {
   return AC;
 }
 
-function beep(freq, dur, vol, type, freqEnd) {
+function sndKaartOppakken() {
   const ac = getAC(); if (!ac) return;
   try {
-    const o = ac.createOscillator();
-    const g = ac.createGain();
-    o.type = type || 'sine';
-    o.frequency.setValueAtTime(freq, ac.currentTime);
-    if (freqEnd) o.frequency.exponentialRampToValueAtTime(freqEnd, ac.currentTime + dur);
-    g.gain.setValueAtTime(vol, ac.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
-    o.connect(g); g.connect(ac.destination);
-    o.start(); o.stop(ac.currentTime + dur);
+    const buf = ac.createBuffer(1, ac.sampleRate * 0.12, ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    const filter = ac.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(800, ac.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(200, ac.currentTime + 0.12);
+    filter.Q.value = 0.8;
+    const gain = ac.createGain();
+    gain.gain.setValueAtTime(0.18, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.12);
+    src.connect(filter); filter.connect(gain); gain.connect(ac.destination);
+    src.start();
   } catch(e) {}
 }
 
-/* Kaart neerleggen -- droog tik */
 function sndKaartNeerleggen() {
-  beep(300, 0.06, 0.3, 'sine', 120);
+  const ac = getAC(); if (!ac) return;
+  try {
+    const buf = ac.createBuffer(1, ac.sampleRate * 0.15, ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      const t = i / ac.sampleRate;
+      data[i] = Math.exp(-t * 40) * Math.sin(2 * Math.PI * 180 * t) * 0.8
+              + Math.exp(-t * 80) * (Math.random() * 2 - 1) * 0.3;
+    }
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    const gain = ac.createGain();
+    gain.gain.setValueAtTime(0.55, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.15);
+    src.connect(gain); gain.connect(ac.destination);
+    src.start();
+  } catch(e) {}
 }
 
-/* Kaart omdraaien -- oplopend tik */
 function sndKaartFlip() {
-  beep(400, 0.05, 0.2, 'sine', 800);
-  setTimeout(() => beep(800, 0.05, 0.15, 'sine', 1200), 50);
+  const ac = getAC(); if (!ac) return;
+  try {
+    const buf = ac.createBuffer(1, ac.sampleRate * 0.09, ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / data.length);
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    const filter = ac.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.setValueAtTime(400, ac.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(2000, ac.currentTime + 0.09);
+    const gain = ac.createGain();
+    gain.gain.setValueAtTime(0.22, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.09);
+    src.connect(filter); filter.connect(gain); gain.connect(ac.destination);
+    src.start();
+  } catch(e) {}
 }
 
-/* Foundation -- helder en bevredigend */
 function sndFoundation() {
-  beep(523, 0.15, 0.2, 'sine');
-  setTimeout(() => beep(784, 0.15, 0.18, 'sine'), 80);
-  setTimeout(() => beep(1047, 0.25, 0.15, 'sine'), 160);
+  const ac = getAC(); if (!ac) return;
+  try {
+    [[880, 0, 0.3], [1320, 0.04, 0.2]].forEach(([freq, delay, vol]) => {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0, ac.currentTime + delay);
+      g.gain.linearRampToValueAtTime(vol, ac.currentTime + delay + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + delay + 0.4);
+      o.connect(g); g.connect(ac.destination);
+      o.start(ac.currentTime + delay);
+      o.stop(ac.currentTime + delay + 0.4);
+    });
+  } catch(e) {}
 }
 
-/* Stock klikken */
 function sndStock() {
-  beep(250, 0.08, 0.25, 'sine', 180);
+  const ac = getAC(); if (!ac) return;
+  try {
+    const buf = ac.createBuffer(1, ac.sampleRate * 0.05, ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ac.sampleRate * 0.008));
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    const gain = ac.createGain();
+    gain.gain.setValueAtTime(0.3, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.05);
+    src.connect(gain); gain.connect(ac.destination);
+    src.start();
+  } catch(e) {}
 }
 
-/* Kaart oppakken */
-function sndKaartOppakken() {
-  beep(600, 0.04, 0.12, 'sine', 800);
-}
-
-/* Win -- vrolijke fanfare */
 function sndWin() {
-  const noten = [523,659,784,1047,784,880,1047,1319];
-  noten.forEach((f, i) => {
-    setTimeout(() => beep(f, 0.25, 0.18, 'triangle'), i * 100);
-  });
+  const ac = getAC(); if (!ac) return;
+  try {
+    const noten = [
+      [523, 0], [659, 0.12], [784, 0.24], [1047, 0.36],
+      [784, 0.52], [880, 0.60], [1047, 0.70], [1319, 0.82]
+    ];
+    noten.forEach(([freq, t]) => {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = 'triangle';
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0, ac.currentTime + t);
+      g.gain.linearRampToValueAtTime(0.2, ac.currentTime + t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + t + 0.35);
+      o.connect(g); g.connect(ac.destination);
+      o.start(ac.currentTime + t);
+      o.stop(ac.currentTime + t + 0.4);
+    });
+  } catch(e) {}
 }
 let score = 0, timerSecs = 0, timerRef = null;
 let history = []; /* voor undo */
@@ -699,6 +834,7 @@ function moveToFoundation(dragData, f) {
   updateScore(10);
   sndFoundation();
   checkWin();
+  setTimeout(() => { if (kanAutoComplete()) autoComplete(); }, 300);
 }
 
 function moveToTableau(dragData, col) {
@@ -707,6 +843,7 @@ function moveToTableau(dragData, col) {
   dragData.cards.forEach(c => state.tableau[col].push(c));
   updateScore(3);
   sndKaartNeerleggen();
+  setTimeout(() => { if (kanAutoComplete()) autoComplete(); }, 300);
 }
 
 function flipTop(col) {
@@ -728,10 +865,30 @@ function drawFromStock() {
 }
 
 function checkWin() {
-  if (state.foundations.reduce((s, f) => s + f.length, 0) === 52) {
-    stopTimer();
-    sndWin();
-    setTimeout(() => toast('🎉 Gewonnen! Score: ' + score), 300);
+  if (state.foundations.reduce((s, f) => s + f.length, 0) !== 52) return;
+  stopTimer();
+  sndWin();
+  /* Win scherm */
+  setTimeout(() => {
+    $('win-score-txt').textContent = 'Score: ' + score;
+    $('win-tijd-txt').textContent  = 'Tijd: ' + $('stat-tijd').textContent;
+    $('win-screen').classList.add('show');
+    confetti();
+  }, 600);
+}
+
+function confetti() {
+  const kleuren = ['#f59e0b','#10b981','#3b82f6','#ef4444','#8b5cf6','#ec4899','#14b8a6'];
+  for (let i = 0; i < 80; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    el.style.left            = Math.random() * 100 + 'vw';
+    el.style.background      = kleuren[i % kleuren.length];
+    el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    el.style.animationDelay  = (Math.random() * 1.5) + 's';
+    el.style.transform       = 'rotate(' + (Math.random() * 360) + 'deg)';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 5000);
   }
 }
 
@@ -763,7 +920,38 @@ function deal() {
   });
 }
 
+/* ══ AUTO-COMPLETE ══ */
 function init() { updateSizes(); deal(); startTimer(); }
+
+function kanAutoComplete() {
+  if (state.stock.length || state.waste.length) return false;
+  return state.tableau.every(col => col.every(c => c.faceUp));
+}
+
+function autoComplete() {
+  if (!kanAutoComplete()) return;
+  /* Zoek een kaart die naar foundation kan */
+  for (let c = 0; c < 7; c++) {
+    const col = state.tableau[c];
+    if (!col.length) continue;
+    const top = col[col.length - 1];
+    for (let f = 0; f < 4; f++) {
+      if (canMoveToFoundation(top, f)) {
+        col.pop();
+        state.foundations[f].push(top);
+        updateScore(10);
+        sndFoundation();
+        render();
+        /* Check win of ga door */
+        if (state.foundations.reduce((s, f2) => s + f2.length, 0) === 52) {
+          checkWin(); return;
+        }
+        setTimeout(autoComplete, 120);
+        return;
+      }
+    }
+  }
+}
 function herInit() { updateSizes(); render(); }
 
 window.addEventListener('resize', herInit);
