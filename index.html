@@ -220,18 +220,20 @@ function updateSizes() {
   const totalW = CW * 7 + GAP * 6;
   START_X = Math.floor((W - totalW) / 2);
 
-  /* Top rij: stock | waste | [flex spacer] | f0 f1 f2 f3
-     Totaal: 6 slots + 1 flex spacer -- past altijd */
+  /* Top rij layout:
+     Links: stock + waste (2 slots)
+     Rechts: 4 foundations
+     Zelfde breedte als tableau kolommen */
   const topRow = $('top-row');
   topRow.style.paddingLeft  = START_X + 'px';
   topRow.style.paddingRight = START_X + 'px';
   topRow.style.gap          = GAP + 'px';
 
-  /* Gap is een flex spacer -- geen vaste breedte */
+  /* gap spacer = precies 1 kaardbreedte + 1 GAP */
   const gap = $('slot-gap');
-  gap.style.flex      = '1';
-  gap.style.width     = '';
-  gap.style.minWidth  = Math.round(CW * 0.3) + 'px';
+  gap.style.width     = (CW + GAP) + 'px';
+  gap.style.flex      = 'none';
+  gap.style.minWidth  = '';
 
   const br = Math.round(CW * 0.12) + 'px';
   const slotFs = Math.round(CW * 0.30) + 'px';
