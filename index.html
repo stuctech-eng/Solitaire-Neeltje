@@ -305,7 +305,7 @@ z-index: 9999; white-space: nowrap;
     <span class="bb-stat-val" id="stat-tijd">0:00</span>
   </div>
   <button class="bb-btn" onclick="hintZet()">💡 Hint</button>
-  <button class="bb-btn" onclick="nieuwSpel()" style="background:rgba(255,255,255,.18)">↺ Nieuw</button>
+  <button class="bb-btn" onclick="naarStartScherm()" style="background:rgba(255,255,255,.18)">↺ Nieuw</button>
 </div>
 <div id="win-screen">
   <div class="win-box">
@@ -314,9 +314,7 @@ z-index: 9999; white-space: nowrap;
     <div class="win-sub" id="win-score-txt"></div>
     <div class="win-sub" id="win-tijd-txt"></div>
     <br>
-    <button class="win-btn" onclick="nieuwSpel();$('win-screen').classList.remove('show')">
-      ↺ Nieuw Spel
-    </button>
+    <button class="win-btn" onclick="naarStartScherm()">↺ Nieuw Spel</button>
   </div>
 </div>
 <div id="toast"></div>
@@ -487,6 +485,12 @@ function sndWin() {
 }
 
 let niveau = 'klassiek'; // 'klassiek' of 'expert'
+
+function naarStartScherm() {
+  stopTimer();
+  $('win-screen').classList.remove('show');
+  $('start-screen').style.display = 'flex';
+}
 
 function startSpel(gekozenNiveau) {
   niveau = gekozenNiveau;
