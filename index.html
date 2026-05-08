@@ -742,7 +742,7 @@ function drawFromStockSafe() {
   if (stockCooldown) return;
   stockCooldown = true;
   drawFromStock();
-  setTimeout(() => { stockCooldown = false; }, 400);
+  setTimeout(() => { stockCooldown = false; }, 600);
 }
 
 /* ══ DRAG ══ */
@@ -925,9 +925,29 @@ function moveToTableau(dragData, col) {
 }
 function flipTop(col) {
   const pile = state.tableau[col];
-  if (!pile.length || pile[pile.length-1].faceUp) return;
-  pile[pile.length-1].faceUp = true;
-  sndKaartFlip(); render();
+  if (!pile.length || pile[pile.length - 1].faceUp) return;
+  const card = pile[pile.length - 1];
+  card.faceUp = true;
+  sndKaartFlip();
+
+  // Animatie op bestaand element
+  if (card.el) {
+    const inner = card.el.querySelector('.card-inner');
+    // Start vanaf face-down positie
+    inner.style.transition = 'none';
+    inner.style.transform = 'rotateY(180deg)';
+    void inner.offsetWidth; // force reflow
+    // Draai naar face-up
+    inner.style.transition = 'transform 0.42s cubic-bezier(0.4, 0, 0.2, 1)';
+    inner.style.transform = 'rotateY(0deg)';
+    card.el.classList.remove('face-down');
+    card.el.classList.add('face-up');
+    setTimeout(() => {
+      if (inner) inner.style.transition = '';
+    }, 420);
+  } else {
+    render();
+  }
 }
 function drawFromStock() {
   if (state.stock.length === 0) {
