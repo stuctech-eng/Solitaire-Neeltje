@@ -2,259 +2,602 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
-<title>Solitaire</title>
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no"
+/>
+
+<title>Modern Solitaire</title>
 
 <style>
-/* =========================
-   RESET + MOBILE FIX
-========================= */
-html, body {
+/* =========================================
+   FULLSCREEN SAFARI FIX
+========================================= */
+html,
+body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at top, #0b3d2e, #06261d);
   overflow: hidden;
-  font-family: sans-serif;
+  position: fixed;
+  inset: 0;
   touch-action: none;
+  background: #05261d;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* SAFE BOARD */
+/* =========================================
+   BOARD
+========================================= */
 #board {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+
+  background:
+    radial-gradient(circle at top, rgba(0,255,180,0.10), transparent 40%),
+    radial-gradient(circle at bottom, rgba(0,120,255,0.08), transparent 40%),
+    linear-gradient(180deg, #0b4d3b 0%, #063126 100%);
 }
 
-/* =========================
-   CARD STYLE (MODERN)
-========================= */
+/* subtle texture */
+#board::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  opacity:.06;
+  pointer-events:none;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255,255,255,.05) 0px,
+      rgba(255,255,255,.05) 2px,
+      transparent 2px,
+      transparent 8px
+    );
+}
+
+/* =========================================
+   TOP AREA
+========================================= */
+.top-row {
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+
+  display:flex;
+  justify-content:space-between;
+
+  padding:
+    calc(env(safe-area-inset-top) + 14px)
+    14px
+    12px
+    14px;
+
+  box-sizing:border-box;
+}
+
+.top-left,
+.top-right{
+  display:flex;
+  gap:12px;
+}
+
+/* =========================================
+   SLOT PLACEHOLDERS
+========================================= */
+.slot {
+  border-radius: 14px;
+  backdrop-filter: blur(2px);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.08),
+      rgba(255,255,255,.03)
+    );
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    inset 0 -2px 4px rgba(0,0,0,.25);
+}
+
+/* =========================================
+   TABLEAU AREA
+========================================= */
+#tableau {
+  position:absolute;
+  left:0;
+  right:0;
+
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+
+  box-sizing:border-box;
+}
+
+/* columns */
+.column {
+  position:relative;
+  flex:1;
+  max-width:110px;
+}
+
+/* =========================================
+   CARD
+========================================= */
 .card {
-  width: 70px;
-  height: 100px;
-  position: absolute;
-  border-radius: 10px;
+  position:absolute;
+
+  border-radius:14px;
+
   transform-style: preserve-3d;
-  transition: transform 0.25s ease, left 0.25s ease, top 0.25s ease;
-  user-select: none;
+
+  transition:
+    transform .22s ease,
+    left .22s ease,
+    top .22s ease;
+
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.35),
+    0 3px 8px rgba(0,0,0,.25);
+
+  user-select:none;
+  -webkit-user-select:none;
+
+  touch-action:none;
+
+  cursor:grab;
 }
 
-.card-inner {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  border-radius: 10px;
+.card:active{
+  cursor:grabbing;
 }
 
-/* FRONT */
-.front {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: white;
-  border-radius: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 18px;
-  font-weight: bold;
+/* moving effect */
+.card.dragging{
+  transition:none;
+  transform:scale(1.04);
+  z-index:9999 !important;
 }
 
-/* BACK (MODERN BLUE PATTERN) */
-.back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-  background-size: 200% 200%;
-  animation: bgMove 4s ease infinite;
+/* =========================================
+   CARD INNER
+========================================= */
+.card-inner{
+  position:relative;
+  width:100%;
+  height:100%;
+  border-radius:14px;
+  overflow:hidden;
 }
 
-@keyframes bgMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* =========================================
+   CARD FRONT
+========================================= */
+.front{
+  position:absolute;
+  inset:0;
+
+  background:
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #f4f4f4 100%
+    );
+
+  border-radius:14px;
+
+  border:1px solid rgba(0,0,0,.12);
+
+  display:flex;
+  flex-direction:column;
+
+  justify-content:space-between;
+
+  padding:8px;
+
+  box-sizing:border-box;
+}
+
+.corner{
+  font-weight:800;
+  line-height:1;
+}
+
+.corner.top{
+  align-self:flex-start;
+}
+
+.corner.bottom{
+  align-self:flex-end;
+  transform:rotate(180deg);
+}
+
+.center{
+  flex:1;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  font-weight:900;
+}
+
+/* =========================================
+   MODERN CARD BACK
+========================================= */
+.back{
+  position:absolute;
+  inset:0;
+
+  border-radius:14px;
+
+  overflow:hidden;
+
+  background:
+    linear-gradient(
+      135deg,
+      #153a8a 0%,
+      #2359d4 40%,
+      #0b1d54 100%
+    );
+
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.back::before{
+  content:"";
+
+  position:absolute;
+  inset:0;
+
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255,255,255,.10) 0px,
+      rgba(255,255,255,.10) 2px,
+      transparent 2px,
+      transparent 10px
+    );
+
+  opacity:.7;
+}
+
+.back::after{
+  content:"♠";
+
+  position:absolute;
+
+  left:50%;
+  top:50%;
+
+  transform:translate(-50%,-50%);
+
+  font-size:34px;
+  color:rgba(255,255,255,.22);
 }
 
 /* flip */
-.face-down .front { display: none; }
-.face-up .back { display: none; }
+.face-down .front{ display:none; }
+.face-up .back{ display:none; }
 
-/* =========================
-   TABLEAU STACK OFFSET
-========================= */
-.stack {
-  position: absolute;
+/* colors */
+.red{
+  color:#d11d3f;
 }
 
-/* highlight drop */
-.highlight {
-  outline: 2px solid rgba(255,255,255,0.5);
+.black{
+  color:#111;
 }
 </style>
 </head>
 
 <body>
-<div id="board"></div>
+
+<div id="board">
+
+  <!-- TOP AREA -->
+  <div class="top-row">
+
+    <div class="top-left">
+      <div id="deckSlot" class="slot"></div>
+      <div id="wasteSlot" class="slot"></div>
+    </div>
+
+    <div class="top-right">
+      <div class="slot foundation"></div>
+      <div class="slot foundation"></div>
+      <div class="slot foundation"></div>
+      <div class="slot foundation"></div>
+    </div>
+
+  </div>
+
+  <!-- TABLEAU -->
+  <div id="tableau"></div>
+
+</div>
 
 <script>
-/* =========================
-   BASIC SOLITAIRE ENGINE
-========================= */
+/* =========================================
+   RESPONSIVE SIZES
+========================================= */
+let CARD_W = 82;
+let CARD_H = 118;
+let COL_GAP = 10;
+let STACK_OFFSET = 26;
 
-const board = document.getElementById("board");
-
+/* =========================================
+   GAME DATA
+========================================= */
 const suits = ["♠","♥","♦","♣"];
 const values = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+
+const board = document.getElementById("board");
+const tableau = document.getElementById("tableau");
 
 let deck = [];
 let columns = [[],[],[],[],[],[],[]];
 
+/* =========================================
+   RESIZE ENGINE
+========================================= */
+function updateSizes(){
+
+  const landscape = window.innerWidth > window.innerHeight;
+
+  if(landscape){
+
+    CARD_W = Math.min(window.innerWidth / 11, 72);
+    CARD_H = CARD_W * 1.42;
+    STACK_OFFSET = CARD_H * 0.22;
+
+  } else {
+
+    CARD_W = Math.min(window.innerWidth / 7.8, 92);
+    CARD_H = CARD_W * 1.42;
+    STACK_OFFSET = CARD_H * 0.24;
+  }
+
+  COL_GAP = CARD_W * 0.12;
+
+  document.querySelectorAll(".slot").forEach(slot=>{
+    slot.style.width = CARD_W + "px";
+    slot.style.height = CARD_H + "px";
+  });
+
+  tableau.style.top =
+    (CARD_H + 52 + envTop()) + "px";
+
+  tableau.style.padding =
+    "0 " + COL_GAP + "px";
+}
+
+function envTop(){
+  return 0;
+}
+
+/* =========================================
+   CREATE DECK
+========================================= */
 function createDeck(){
+
   deck = [];
-  for(let s of suits){
-    for(let v of values){
-      deck.push({suit:s, value:v});
+
+  for(const suit of suits){
+
+    for(const value of values){
+
+      deck.push({
+        suit,
+        value,
+        color:
+          (suit === "♥" || suit === "♦")
+          ? "red"
+          : "black"
+      });
+
     }
   }
 }
 
-/* shuffle (Fisher-Yates safe) */
-function shuffle(a){
-  for(let i=a.length-1;i>0;i--){
+/* =========================================
+   SHUFFLE
+========================================= */
+function shuffle(arr){
+
+  for(let i=arr.length-1;i>0;i--){
+
     const j = Math.floor(Math.random()*(i+1));
-    [a[i],a[j]] = [a[j],a[i]];
+
+    [arr[i],arr[j]] =
+    [arr[j],arr[i]];
   }
 }
 
-/* =========================
-   CARD CREATION
-========================= */
-function createCard(card, x, y, faceUp=false){
+/* =========================================
+   CREATE CARD
+========================================= */
+function createCard(card, x, y, faceUp){
 
   const el = document.createElement("div");
-  el.className = "card " + (faceUp ? "face-up":"face-down");
+
+  el.className =
+    "card " +
+    (faceUp ? "face-up" : "face-down");
+
+  el.style.width = CARD_W + "px";
+  el.style.height = CARD_H + "px";
 
   el.style.left = x + "px";
   el.style.top = y + "px";
 
   el.innerHTML = `
     <div class="card-inner">
-      <div class="front">${card.value}${card.suit}</div>
+
+      <div class="front">
+
+        <div class="corner top ${card.color}">
+          ${card.value}<br>${card.suit}
+        </div>
+
+        <div class="center ${card.color}">
+          ${card.suit}
+        </div>
+
+        <div class="corner bottom ${card.color}">
+          ${card.value}<br>${card.suit}
+        </div>
+
+      </div>
+
       <div class="back"></div>
+
     </div>
   `;
-
-  el.dataset.value = card.value;
-  el.dataset.suit = card.suit;
-
-  el.addEventListener("click", () => {
-    flip(el);
-  });
 
   enableDrag(el);
 
   board.appendChild(el);
+
   return el;
 }
 
-/* =========================
-   FLIP
-========================= */
-function flip(el){
-  if(el.classList.contains("face-down")){
-    el.classList.remove("face-down");
-    el.classList.add("face-up");
-  } else {
-    el.classList.remove("face-up");
-    el.classList.add("face-down");
-  }
-}
-
-/* =========================
-   DEAL TABLEAU
-========================= */
+/* =========================================
+   DEAL
+========================================= */
 function deal(){
-  let startX = 20;
-  let startY = 20;
 
-  let index = 0;
+  columns = [[],[],[],[],[],[],[]];
+
+  const totalWidth =
+    (CARD_W * 7) +
+    (COL_GAP * 6);
+
+  const startX =
+    (window.innerWidth - totalWidth) / 2;
+
+  let deckIndex = 0;
 
   for(let col=0; col<7; col++){
+
     for(let row=0; row<=col; row++){
 
-      const card = deck[index++];
-      const x = startX + col * 45;
-      const y = startY + row * 25;
+      const card = deck[deckIndex++];
 
-      const faceUp = row === col;
+      const x =
+        startX +
+        (col * (CARD_W + COL_GAP));
 
-      const el = createCard(card, x, y, faceUp);
+      const y =
+        (CARD_H + 70 + envTop()) +
+        (row * STACK_OFFSET);
+
+      const faceUp =
+        row === col;
+
+      const el =
+        createCard(card, x, y, faceUp);
+
+      el.dataset.homeX = x;
+      el.dataset.homeY = y;
+
       columns[col].push(el);
+
     }
   }
 }
 
-/* =========================
-   DRAG SYSTEM (SIMPLE + STABLE)
-========================= */
+/* =========================================
+   DRAG
+========================================= */
 let dragEl = null;
+
 let offsetX = 0;
 let offsetY = 0;
 
 function enableDrag(el){
 
-  el.addEventListener("pointerdown", (e)=>{
+  el.addEventListener("pointerdown", e=>{
 
     dragEl = el;
-    const rect = el.getBoundingClientRect();
 
-    offsetX = e.clientX - rect.left;
-    offsetY = e.clientY - rect.top;
+    const rect =
+      el.getBoundingClientRect();
 
-    el.style.zIndex = 999;
+    offsetX =
+      e.clientX - rect.left;
+
+    offsetY =
+      e.clientY - rect.top;
+
+    el.classList.add("dragging");
 
     el.setPointerCapture(e.pointerId);
   });
 
-  el.addEventListener("pointermove", (e)=>{
+  el.addEventListener("pointermove", e=>{
+
     if(!dragEl) return;
 
-    dragEl.style.left = (e.clientX - offsetX) + "px";
-    dragEl.style.top = (e.clientY - offsetY) + "px";
+    dragEl.style.left =
+      (e.clientX - offsetX) + "px";
+
+    dragEl.style.top =
+      (e.clientY - offsetY) + "px";
   });
 
   el.addEventListener("pointerup", ()=>{
-    if(dragEl){
-      dragEl.style.zIndex = 1;
-    }
+
+    if(!dragEl) return;
+
+    dragEl.classList.remove("dragging");
+
     dragEl = null;
+  });
+
+  /* TAP TO FLIP */
+  el.addEventListener("click", ()=>{
+
+    if(el.classList.contains("face-down")){
+
+      el.classList.remove("face-down");
+      el.classList.add("face-up");
+
+    }
   });
 }
 
-/* =========================
+/* =========================================
    INIT
-========================= */
+========================================= */
 function init(){
+
+  updateSizes();
+
   createDeck();
+
   shuffle(deck);
+
   deal();
 }
 
+window.addEventListener("resize", ()=>{
+
+  document.querySelectorAll(".card")
+    .forEach(el=>el.remove());
+
+  init();
+});
+
 init();
-
-/* =========================
-   LANDSCAPE FIX FORCE
-========================= */
-function resizeFix(){
-  board.style.width = window.innerWidth + "px";
-  board.style.height = window.innerHeight + "px";
-}
-
-window.addEventListener("resize", resizeFix);
-resizeFix();
 
 </script>
 </body>
