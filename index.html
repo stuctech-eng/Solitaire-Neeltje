@@ -571,14 +571,12 @@ function kiesThema(gekozenThema, btn) {
   thema = gekozenThema;
   document.querySelectorAll('.thema-btn').forEach(b => b.classList.remove('actief'));
   btn.classList.add('actief');
-  // Pas board alvast aan voor preview
-  const board = document.getElementById('board');
-  board.className = thema === 'groen' ? '' : 'thema-' + thema;
+  document.documentElement.className = thema === 'groen' ? '' : 'thema-' + thema;
 }
 
 function startSpel(gekozenNiveau) {
   niveau = gekozenNiveau;
-  document.getElementById('board').className = thema === 'groen' ? '' : 'thema-' + thema;
+  document.documentElement.className = thema === 'groen' ? '' : 'thema-' + thema;
   $('start-screen').style.display = 'none';
   nieuwSpel();
 }
