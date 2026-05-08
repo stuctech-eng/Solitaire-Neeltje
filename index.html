@@ -199,35 +199,48 @@ function updateSizes() {
   const H = window.innerHeight;
   const land = W > H;
 
-  /* Kaartbreedte: 7 kaarten + 6 gaps moeten passen, met kleine marge */
-  const maxW = Math.floor((W - 16) / 7.5);
-  const maxH = land ? Math.floor(H * 0.26) : Math.floor(H * 0.175);
-  CW = Math.min(maxW, Math.round(maxH / 1.42));
+  /* Kaartbreedte: 7 kaarten + 6 gaps passen altijd */
+  const margin = 10;
+  const totalSlots = 7;
+  /* Bereken optimale breedte */
+  let bestCW = 0;
+  for (let g = 4; g <= 14; g++) {
+    const w = Math.floor((W - margin * 2 - g * (totalSlots - 1)) / totalSlots);
+    const h = Math.round(w * 1.42);
+    const maxH = land ? H * 0.30 : H * 0.19;
+    if (h <= maxH && w > bestCW) { bestCW = w; GAP = g; }
+  }
+  CW = bestCW || Math.floor((W - margin * 2) / 7.8);
+  GAP = GAP || Math.max(3, Math.floor((W - margin * 2 - CW * 7) / 6));
 
   CH       = Math.round(CW * 1.42);
-  GAP      = Math.max(3, Math.floor((W - 16 - CW * 7) / 6));
   STACK_UP = Math.round(CH * 0.27);
   STACK_DN = Math.round(CH * 0.15);
 
-  /* Start X zodat kaarten gecentreerd zijn */
   const totalW = CW * 7 + GAP * 6;
   START_X = Math.floor((W - totalW) / 2);
 
-  /* Top rij: zelfde uitlijning als tableau */
+  /* Top rij: stock | waste | [flex spacer] | f0 f1 f2 f3
+     Totaal: 6 slots + 1 flex spacer -- past altijd */
   const topRow = $('top-row');
   topRow.style.paddingLeft  = START_X + 'px';
   topRow.style.paddingRight = START_X + 'px';
-  topRow.style.gap = GAP + 'px';
+  topRow.style.gap          = GAP + 'px';
 
-  /* Gap vult de ruimte tussen waste en foundations */
-  $('slot-gap').style.flex = '1';
+  /* Gap is een flex spacer -- geen vaste breedte */
+  const gap = $('slot-gap');
+  gap.style.flex      = '1';
+  gap.style.width     = '';
+  gap.style.minWidth  = Math.round(CW * 0.3) + 'px';
 
-  /* Alle slots: zelfde breedte als kaarten */
+  const br = Math.round(CW * 0.12) + 'px';
+  const slotFs = Math.round(CW * 0.30) + 'px';
+
   document.querySelectorAll('.slot').forEach(s => {
     s.style.width        = CW + 'px';
     s.style.height       = CH + 'px';
-    s.style.borderRadius = Math.round(CW * 0.12) + 'px';
-    s.style.fontSize     = Math.round(CW * 0.26) + 'px';
+    s.style.borderRadius = br;
+    s.style.fontSize     = slotFs;
   });
 
   TOP_H = topRow.getBoundingClientRect().bottom + 8;
@@ -261,8 +274,8 @@ function makeCardEl(card) {
   el.style.height       = CH + 'px';
   el.style.borderRadius = Math.round(CW * 0.12) + 'px';
 
-  const fs  = Math.max(7,  Math.round(CW * 0.148)); /* hoekletters */
-  const mfs = Math.max(12, Math.round(CW * 0.44));  /* midden symbool */
+  const fs  = Math.max(8,  Math.round(CW * 0.17));
+  const mfs = Math.max(14, Math.round(CW * 0.48));
   const cls = card.color;
 
   el.innerHTML = `
