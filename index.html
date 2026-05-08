@@ -747,20 +747,47 @@ function enableDrag(el, card, pile, ...pileArgs) {
     if (e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
+
     let cards = [];
     if (pile === 'waste') cards = [card];
     else if (pile === 'tableau') cards = state.tableau[pileArgs[0]].slice(pileArgs[1]);
     if (!cards.length) return;
-    const rect = el.getBoundingClientRect();
-    const clones = cards.map((c, i) => {
-      const clone = c.el.cloneNode(true);
-      clone.style.cssText = `position:fixed;width:${CW}px;height:${CH}px;z-index:${9000+i};pointer-events:none;transition:none;left:${rect.left}px;top:${rect.top + i * STACK_UP}px;box-shadow:0 16px 40px rgba(0,0,0,.6);transform:scale(1.04) rotate(1deg);border-radius:${Math.round(CW*.12)}px;`;
-      document.body.appendChild(clone);
-      return clone;
-    });
-    el.style.opacity = '0.15';
-    sndKaartOppakken();
-    drag = { cards, clones, pile, pileArgs, ox: e.clientX - rect.left, oy: e.clientY - rect.top, el };
+
+    const rect   = el.getBoundingClientRect();
+    const startX = e.clientX, startY = e.clientY;
+    let moved    = false;
+
+    const onMove = ev => {
+      if (Math.abs(ev.clientX - startX) > 6 || Math.abs(ev.clientY - startY) > 6) {
+        moved = true;
+        /* Start drag klonen */
+        if (!drag) {
+          const clones = cards.map((c, i) => {
+            const clone = c.el.cloneNode(true);
+            clone.style.cssText = `position:fixed;width:${CW}px;height:${CH}px;z-index:${9000+i};pointer-events:none;transition:none;left:${rect.left}px;top:${rect.top + i * STACK_UP}px;box-shadow:0 16px 40px rgba(0,0,0,.6);transform:scale(1.04) rotate(1deg);border-radius:${Math.round(CW*.12)}px;`;
+            document.body.appendChild(clone);
+            return clone;
+          });
+          el.style.opacity = '0.15';
+          sndKaartOppakken();
+          drag = { cards, clones, pile, pileArgs, ox: e.clientX - rect.left, oy: e.clientY - rect.top, el };
+        }
+      }
+    };
+
+    const onUp = ev => {
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+      if (!moved) {
+        /* 1x tik -- probeer naar foundation */
+        if (cards.length === 1) {
+          if (tikNaarFoundation(cards[0])) return;
+        }
+      }
+    };
+
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
   });
 }
 
@@ -837,7 +864,7 @@ function moveToFoundation(dragData, f) {
   updateScore(10);
   sndFoundation();
   checkWin();
-  setTimeout(() => { if (kanAutoComplete()) autoComplete(); }, 300);
+  setTimeout(controleerVastgelopen, 400);
 }
 
 function moveToTableau(dragData, col) {
@@ -846,7 +873,7 @@ function moveToTableau(dragData, col) {
   dragData.cards.forEach(c => state.tableau[col].push(c));
   updateScore(3);
   sndKaartNeerleggen();
-  setTimeout(() => { if (kanAutoComplete()) autoComplete(); }, 300);
+  setTimeout(controleerVastgelopen, 400);
 }
 
 function flipTop(col) {
@@ -923,8 +950,69 @@ function deal() {
   });
 }
 
-/* ══ AUTO-COMPLETE ══ */
-function init() { updateSizes(); deal(); startTimer(); }
+/* ══ VASTGELOPEN DETECTIE ══ */
+function isVastgelopen() {
+  if (state.stock.length) return false;
+  /* Waste naar foundation of tableau */
+  if (state.waste.length) {
+    const w = state.waste[state.waste.length - 1];
+    for (let f = 0; f < 4; f++) if (canMoveToFoundation(w, f)) return false;
+    for (let c = 0; c < 7; c++) if (canMoveToTableau(w, c)) return false;
+  }
+  /* Tableau naar foundation of tableau */
+  for (let c = 0; c < 7; c++) {
+    const col = state.tableau[c];
+    if (!col.length) continue;
+    const top = col[col.length - 1];
+    if (!top.faceUp) continue;
+    for (let f = 0; f < 4; f++) if (canMoveToFoundation(top, f)) return false;
+    for (let t = 0; t < 7; t++) if (t !== c && canMoveToTableau(top, t)) return false;
+  }
+  /* Nog face-down kaarten die omgedraaid kunnen worden */
+  for (let c = 0; c < 7; c++) {
+    const col = state.tableau[c];
+    if (col.length && !col[col.length - 1].faceUp) return false;
+  }
+  return true;
+}
+
+function controleerVastgelopen() {
+  const tot = state.foundations.reduce((s, f) => s + f.length, 0);
+  if (tot === 52) return;
+  if (kanAutoComplete()) { autoComplete(); return; }
+  if (isVastgelopen()) {
+    setTimeout(() => toast('⚠️ Geen zetten meer mogelijk'), 400);
+  }
+}
+
+/* ══ 1x TIK → AUTO FOUNDATION ══ */
+function tikNaarFoundation(card) {
+  for (let f = 0; f < 4; f++) {
+    if (canMoveToFoundation(card, f)) {
+      /* Verwijder uit bron */
+      if (state.waste.length && state.waste[state.waste.length - 1] === card) {
+        state.waste.pop();
+      } else {
+        for (let c = 0; c < 7; c++) {
+          const col = state.tableau[c];
+          if (col.length && col[col.length - 1] === card) {
+            col.pop();
+            revealTopTableau(c);
+            break;
+          }
+        }
+      }
+      state.foundations[f].push(card);
+      updateScore(10);
+      sndFoundation();
+      render();
+      checkWin();
+      setTimeout(controleerVastgelopen, 400);
+      return true;
+    }
+  }
+  return false;
+}
 
 function kanAutoComplete() {
   if (state.stock.length || state.waste.length) return false;
