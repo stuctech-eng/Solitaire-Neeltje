@@ -730,7 +730,7 @@ function render() {
   $('slot-stock').onclick = drawFromStockSafe;
   board.querySelectorAll('.card.face-down').forEach(el => {
     if (!el._dragEnabled) {
-      el.addEventListener('pointerdown', e => { e.stopPropagation(); drawFromStockSafe(); });
+      el.addEventListener('pointerdown', e => { e.stopPropagation(); });
     }
   });
 }
@@ -997,15 +997,19 @@ function kanAutoComplete() {
 }
 function autoComplete() {
   if (!kanAutoComplete()) return;
-  for (let c=0;c<7;c++) {
-    const col=state.tableau[c]; if (!col.length) continue;
-    const top=col[col.length-1];
-    for (let f=0;f<4;f++) {
-      if (canMoveToFoundation(top,f)) {
-        col.pop(); state.foundations[f].push(top);
-        updateScore(10); sndFoundation(); render();
-        if (state.foundations.reduce((s,f2)=>s+f2.length,0)===52) { checkWin(); return; }
-        setTimeout(autoComplete, 120); return;
+  for (let c = 0; c < 7; c++) {
+    const col = state.tableau[c]; if (!col.length) continue;
+    const top = col[col.length - 1];
+    for (let f = 0; f < 4; f++) {
+      if (canMoveToFoundation(top, f)) {
+        col.pop();
+        state.foundations[f].push(top);
+        updateScore(10);
+        sndFoundation();
+        render();
+        if (state.foundations.reduce((s, f2) => s + f2.length, 0) === 52) { checkWin(); return; }
+        setTimeout(autoComplete, 120);
+        return;
       }
     }
   }
