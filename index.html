@@ -589,16 +589,13 @@ const THEMAS = {
 function pasThemaToe(t) {
   const T = THEMAS[t];
   const bg = `radial-gradient(circle at 50% 0%, ${T.tafelGlow}, transparent 50%), linear-gradient(180deg, ${T.tafelTop} 0%, ${T.tafelBot} 100%)`;
-  // Tafel
   board.style.background = bg;
-  // Startscherm
+  document.body.style.background = T.tafelBot;
   $('start-screen').style.background = `linear-gradient(180deg, ${T.tafelTop} 0%, ${T.tafelBot} 100%)`;
-  // Slots
   document.querySelectorAll('.slot').forEach(s => {
     s.style.background = T.slotBg;
     s.style.borderColor = T.slotBorder;
   });
-  // Kaartrug via style tag
   let styleTag = document.getElementById('thema-style');
   if (!styleTag) { styleTag = document.createElement('style'); styleTag.id = 'thema-style'; document.head.appendChild(styleTag); }
   styleTag.textContent = `.card-back { background: ${T.rugGrad} !important; }`;
