@@ -252,24 +252,29 @@ function updateSizes() {
 }
 
 function layoutSlots() {
-  /* Lees de werkelijke top padding na CSS env() */
-  const topRow  = $('top-row');
-  const topPad  = parseFloat(getComputedStyle(topRow).paddingTop) || 50;
-  const br      = Math.round(CW * 0.12) + 'px';
-  const fs      = Math.round(CW * 0.28) + 'px';
+  const topRow = $('top-row');
+  const topPad = parseFloat(getComputedStyle(topRow).paddingTop) || 50;
+  const br     = Math.round(CW * 0.12) + 'px';
+  const fs     = Math.round(CW * 0.28) + 'px';
 
-  /* 7 kolom posities:
-     0=stock  1=waste  2=leeg  3=f0  4=f1  5=f2  6=f3 */
-  const slotMap = {
-    'slot-stock': 0,
-    'slot-waste': 1,
-    'slot-f0':    3,
-    'slot-f1':    4,
-    'slot-f2':    5,
-    'slot-f3':    6
-  };
+  /* Kolom posities -- zelfde grid als tableau (7 kolommen)
+     Kolom 0 = stock
+     Kolom 1 = waste
+     Kolom 2 = leeg (geen slot)
+     Kolom 3 = foundation ♠
+     Kolom 4 = foundation ♥
+     Kolom 5 = foundation ♦
+     Kolom 6 = foundation ♣                    */
+  const slotMap = [
+    ['slot-stock', 0],
+    ['slot-waste', 1],
+    ['slot-f0',    3],
+    ['slot-f1',    4],
+    ['slot-f2',    5],
+    ['slot-f3',    6],
+  ];
 
-  Object.entries(slotMap).forEach(([id, col]) => {
+  slotMap.forEach(([id, col]) => {
     const s = $(id);
     s.style.left         = (START_X + col * (CW + GAP)) + 'px';
     s.style.top          = topPad + 'px';
