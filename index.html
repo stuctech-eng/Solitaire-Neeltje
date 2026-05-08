@@ -727,10 +727,11 @@ function render() {
     });
   });
 
-  $('slot-stock').onclick = drawFromStockSafe;
+  $('slot-stock').onclick = null;
+  $('slot-stock').addEventListener('pointerdown', e => { e.stopPropagation(); drawFromStockSafe(); });
   board.querySelectorAll('.card.face-down').forEach(el => {
     if (!el._dragEnabled) {
-      el.addEventListener('pointerdown', e => { e.stopPropagation(); });
+      el.addEventListener('pointerdown', e => { e.stopPropagation(); drawFromStockSafe(); });
     }
   });
 }
