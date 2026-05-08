@@ -475,7 +475,46 @@ function undoZet() {
   render();
 }
 
+function geenZettenMeer() {
+  // Stock nog beschikbaar?
+  if (state.stock.length > 0) return false;
+  // Waste naar foundation of tableau?
+  if (state.waste.length) {
+    const w = state.waste[state.waste.length - 1];
+    for (let f = 0; f < 4; f++) if (canMoveToFoundation(w, f)) return false;
+    for (let c = 0; c < 7; c++) if (canMoveToTableau(w, c)) return false;
+  }
+  // Tableau kaarten
+  for (let c = 0; c < 7; c++) {
+    const pile = state.tableau[c];
+    const firstUp = pile.findIndex(card => card.faceUp);
+    if (firstUp < 0) continue;
+    const card = pile[firstUp];
+    for (let f = 0; f < 4; f++) if (canMoveToFoundation(pile[pile.length-1], f)) return false;
+    for (let t = 0; t < 7; t++) {
+      if (t === c) continue;
+      if (canMoveToTableau(card, t)) return false;
+    }
+  }
+  return true;
+}
+
 function hintZet() {
+  if (geenZettenMeer()) {
+    // Prominente melding
+    const el = $('toast');
+    el.textContent = '🚫 Geen zetten meer mogelijk!';
+    el.style.background = 'rgba(180,30,30,.95)';
+    el.style.fontSize = '15px';
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      el.classList.remove('show');
+      el.style.background = '';
+      el.style.fontSize = '';
+    }, 3000);
+    return;
+  }
   if (state.waste.length) {
     const w = state.waste[state.waste.length-1];
     for (let f=0;f<4;f++) if (canMoveToFoundation(w,f)) { toast('💡 '+w.rank+w.suit+' → foundation'); return; }
@@ -638,9 +677,20 @@ document.addEventListener('pointercancel', () => {
 function tryAutoFoundation(card, pile, pileArgs) {
   for (let f = 0; f < 4; f++) {
     if (canMoveToFoundation(card, f)) {
-      const dragData = { cards: [card], pile, pileArgs };
-      moveToFoundation(dragData, f);
+      snapState();
+      // Verwijder uit bron
+      if (pile === 'waste') {
+        state.waste.pop();
+      } else if (pile === 'tableau') {
+        state.tableau[pileArgs[0]].splice(pileArgs[1]);
+        revealTopTableau(pileArgs[0]);
+      }
+      state.foundations[f].push(card);
+      updateScore(10);
+      sndFoundation();
+      checkWin();
       render();
+      setTimeout(() => { if (kanAutoComplete()) autoComplete(); }, 300);
       return true;
     }
   }
