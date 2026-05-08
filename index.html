@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 
 <html lang="nl">
 <head>
@@ -56,7 +56,15 @@ transparent 1px, transparent 8px
 position: absolute;
 left: 0; right: 0; top: 0;
 z-index: 10;
-padding-top: calc(env(safe-area-inset-top, 44px) + 6px);
+}
+
+/* Meet element voor safe area */
+#safe-probe {
+position: fixed;
+top: env(safe-area-inset-top, 0px);
+left: 0; width: 1px; height: 1px;
+pointer-events: none;
+z-index: -1;
 }
 
 /* ══ SLOTS ══ */
@@ -172,6 +180,7 @@ white-space: nowrap;
 </head>
 <body>
 <div id="board">
+  <div id="safe-probe"></div>
   <div id="top-row">
     <div id="slot-stock"  class="slot">↺</div>
     <div id="slot-waste"  class="slot"></div>
