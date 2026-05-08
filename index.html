@@ -755,12 +755,11 @@ function enableDrag(el, card, pile, ...pileArgs) {
 
     const rect   = el.getBoundingClientRect();
     const startX = e.clientX, startY = e.clientY;
-    let moved    = false;
+    let wasTik   = true; /* aanname: tik totdat bewogen */
 
     const onMove = ev => {
       if (Math.abs(ev.clientX - startX) > 6 || Math.abs(ev.clientY - startY) > 6) {
-        moved = true;
-        /* Start drag klonen */
+        wasTik = false;
         if (!drag) {
           const clones = cards.map((c, i) => {
             const clone = c.el.cloneNode(true);
@@ -770,7 +769,7 @@ function enableDrag(el, card, pile, ...pileArgs) {
           });
           el.style.opacity = '0.15';
           sndKaartOppakken();
-          drag = { cards, clones, pile, pileArgs, ox: e.clientX - rect.left, oy: e.clientY - rect.top, el };
+          drag = { cards, clones, pile, pileArgs, ox: startX - rect.left, oy: startY - rect.top, el };
         }
       }
     };
@@ -778,11 +777,9 @@ function enableDrag(el, card, pile, ...pileArgs) {
     const onUp = ev => {
       document.removeEventListener('pointermove', onMove);
       document.removeEventListener('pointerup', onUp);
-      if (!moved) {
-        /* 1x tik -- probeer naar foundation */
-        if (cards.length === 1) {
-          if (tikNaarFoundation(cards[0])) return;
-        }
+      if (wasTik && !drag) {
+        /* 1x tik zonder slepen -- probeer naar foundation */
+        if (cards.length === 1) tikNaarFoundation(cards[0]);
       }
     };
 
