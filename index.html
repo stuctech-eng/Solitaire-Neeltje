@@ -69,68 +69,85 @@ html, body {
   cursor: grab;
   touch-action: none;
   will-change: transform;
-  overflow: hidden;
+  overflow: visible;
   transition: box-shadow .15s;
+  box-shadow: 0 4px 14px rgba(0,0,0,.45), 0 1px 3px rgba(0,0,0,.3);
+  perspective: 600px;
 }
 .card.dragging {
   cursor: grabbing;
   transition: none;
   z-index: 999 !important;
 }
-.card-front {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(170deg, #ffffff 0%, #f4f4f4 100%);
-  border: 1px solid rgba(0,0,0,.08);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+
+/* 3D flip laag */
+.card-inner {
+position: absolute;
+inset: 0;
+transform-style: preserve-3d;
+border-radius: inherit;
+transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.card.face-down .card-front { display: none; }
+.card.face-down .card-inner { transform: rotateY(180deg); }
+.card.face-up   .card-inner { transform: rotateY(0deg); }
+
+.card-front, .card-back {
+position: absolute;
+inset: 0;
+border-radius: inherit;
+backface-visibility: hidden;
+-webkit-backface-visibility: hidden;
+}
+
+.card-front {
+background: linear-gradient(170deg, #ffffff 0%, #f4f4f4 100%);
+border: 1px solid rgba(0,0,0,.08);
+display: flex;
+flex-direction: column;
+overflow: hidden;
+transform: rotateY(0deg);
+}
 .c-corner {
-  font-weight: 800;
-  line-height: 1.05;
-  padding: 3px 4px;
-  flex-shrink: 0;
+font-weight: 800;
+line-height: 1.05;
+padding: 3px 4px;
+flex-shrink: 0;
 }
 .c-corner.bot {
-  align-self: flex-end;
-  transform: rotate(180deg);
+align-self: flex-end;
+transform: rotate(180deg);
 }
 .c-mid {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  overflow: hidden;
+flex: 1;
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: 900;
+overflow: hidden;
 }
 .card-back {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #1a3a8a 0%, #2359d4 50%, #0b1d54 100%);
-  border: 1px solid rgba(255,255,255,.08);
-  overflow: hidden;
+background: linear-gradient(135deg, #1a3a8a 0%, #2359d4 50%, #0b1d54 100%);
+border: 1px solid rgba(255,255,255,.08);
+overflow: hidden;
+transform: rotateY(180deg);
 }
 .card-back::before {
-  content: "";
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(
-    45deg,
-    rgba(255,255,255,.07) 0, rgba(255,255,255,.07) 2px,
-    transparent 2px, transparent 10px
-  );
+content: "";
+position: absolute; inset: 0;
+background: repeating-linear-gradient(
+45deg,
+rgba(255,255,255,.07) 0, rgba(255,255,255,.07) 2px,
+transparent 2px, transparent 10px
+);
 }
 .card-back::after {
-  content: "✦";
-  position: absolute;
-  left: 50%; top: 50%;
-  transform: translate(-50%,-50%);
-  font-size: 2em;
-  color: rgba(255,255,255,.10);
+content: "✦";
+position: absolute;
+left: 50%; top: 50%;
+transform: translate(-50%,-50%);
+font-size: 2em;
+color: rgba(255,255,255,.10);
 }
-.card.face-up .card-back { display: none; }
-.card { box-shadow: 0 4px 14px rgba(0,0,0,.45), 0 1px 3px rgba(0,0,0,.3); }
 .red   { color: #d11d3f; }
 .black { color: #111; }
 
@@ -621,21 +638,23 @@ function createCard(suit, rank, faceUp=false) {
 }
 
 function makeEl(card) {
-  if (card.el) { card.el.remove(); card.el=null; }
+  if (card.el) { card.el.remove(); card.el = null; }
   const el = document.createElement('div');
-  el.className = 'card '+(card.faceUp?'face-up':'face-down');
-  el.style.width = CW+'px';
-  el.style.height = CH+'px';
-  el.style.borderRadius = Math.round(CW*0.12)+'px';
-  const fs  = Math.max(8,  Math.round(CW*0.155));
-  const mfs = Math.max(14, Math.round(CW*0.46));
+  el.className = 'card ' + (card.faceUp ? 'face-up' : 'face-down');
+  el.style.width = CW + 'px';
+  el.style.height = CH + 'px';
+  el.style.borderRadius = Math.round(CW * 0.12) + 'px';
+  const fs  = Math.max(8,  Math.round(CW * 0.155));
+  const mfs = Math.max(14, Math.round(CW * 0.46));
   el.innerHTML = `
-    <div class="card-front">
-      <div class="c-corner ${card.color}" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>
-      <div class="c-mid ${card.color}" style="font-size:${mfs}px">${card.suit}</div>
-      <div class="c-corner bot ${card.color}" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>
-    </div>
-    <div class="card-back"></div>`;
+    <div class="card-inner">
+      <div class="card-front">
+        <div class="c-corner ${card.color}" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>
+        <div class="c-mid ${card.color}" style="font-size:${mfs}px">${card.suit}</div>
+        <div class="c-corner bot ${card.color}" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>
+      </div>
+      <div class="card-back"></div>
+    </div>`;
   card.el = el;
   board.appendChild(el);
   return el;
