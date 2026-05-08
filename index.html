@@ -17,168 +17,150 @@
   -webkit-user-select: none;
   user-select: none;
 }
-
 html, body {
-width: 100%;
-height: 100dvh;
-overflow: hidden;
-position: fixed;
-inset: 0;
-touch-action: none;
-background: #05261d;
-font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  touch-action: none;
+  background: #05261d;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
-
 #board {
-position: fixed;
-inset: 0;
-overflow: hidden;
-background:
-radial-gradient(circle at 50% 0%, rgba(0,200,120,0.10), transparent 50%),
-linear-gradient(180deg, #0b4d3b 0%, #063126 100%);
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(0,200,120,0.10), transparent 50%),
+    linear-gradient(180deg, #0b4d3b 0%, #063126 100%);
 }
-
 #board::after {
-content: "";
-position: absolute;
-inset: 0;
-pointer-events: none;
-opacity: .04;
-background-image: repeating-linear-gradient(
-45deg,
-rgba(255,255,255,.08) 0px, rgba(255,255,255,.08) 1px,
-transparent 1px, transparent 8px
-);
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .04;
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255,255,255,.08) 0px, rgba(255,255,255,.08) 1px,
+    transparent 1px, transparent 8px
+  );
 }
-
-/* ══ TOP RIJ ══ */
 #top-row {
-position: absolute;
-left: 0; right: 0; top: 0;
-z-index: 10;
-padding-top: calc(env(safe-area-inset-top, 44px) + 6px);
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  z-index: 10;
+  padding-top: calc(env(safe-area-inset-top, 44px) + 6px);
 }
-
-/* ══ SLOTS ══ */
 .slot {
-position: absolute;
-border-radius: 10px;
-background: rgba(255,255,255,.06);
-border: 1.5px dashed rgba(255,255,255,.18);
-box-shadow: inset 0 2px 4px rgba(0,0,0,.3);
-display: flex;
-align-items: center;
-justify-content: center;
-color: rgba(255,255,255,.25);
+  position: absolute;
+  border-radius: 10px;
+  background: rgba(255,255,255,.06);
+  border: 1.5px dashed rgba(255,255,255,.18);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,.25);
 }
-
-/* ══ KAART ══ */
 .card {
-position: absolute;
-cursor: grab;
-touch-action: none;
-will-change: transform;
-overflow: hidden;
-transition: box-shadow .15s;
+  position: absolute;
+  cursor: grab;
+  touch-action: none;
+  will-change: transform;
+  overflow: hidden;
+  transition: box-shadow .15s;
 }
 .card.dragging {
-cursor: grabbing;
-transition: none;
-z-index: 999 !important;
+  cursor: grabbing;
+  transition: none;
+  z-index: 999 !important;
 }
-
-/* VOORKANT */
 .card-front {
-position: absolute;
-inset: 0;
-background: linear-gradient(170deg, #ffffff 0%, #f4f4f4 100%);
-border: 1px solid rgba(0,0,0,.08);
-display: flex;
-flex-direction: column;
-overflow: hidden;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(170deg, #ffffff 0%, #f4f4f4 100%);
+  border: 1px solid rgba(0,0,0,.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 .card.face-down .card-front { display: none; }
-
 .c-corner {
-font-weight: 800;
-line-height: 1.05;
-padding: 3px 4px;
-flex-shrink: 0;
+  font-weight: 800;
+  line-height: 1.05;
+  padding: 3px 4px;
+  flex-shrink: 0;
 }
 .c-corner.bot {
-align-self: flex-end;
-transform: rotate(180deg);
+  align-self: flex-end;
+  transform: rotate(180deg);
 }
 .c-mid {
-flex: 1;
-display: flex;
-align-items: center;
-justify-content: center;
-font-weight: 900;
-overflow: hidden;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  overflow: hidden;
 }
-
-/* ACHTERKANT */
 .card-back {
-position: absolute;
-inset: 0;
-background: linear-gradient(135deg, #1a3a8a 0%, #2359d4 50%, #0b1d54 100%);
-border: 1px solid rgba(255,255,255,.08);
-overflow: hidden;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #1a3a8a 0%, #2359d4 50%, #0b1d54 100%);
+  border: 1px solid rgba(255,255,255,.08);
+  overflow: hidden;
 }
 .card-back::before {
-content: "";
-position: absolute; inset: 0;
-background: repeating-linear-gradient(
-45deg,
-rgba(255,255,255,.07) 0, rgba(255,255,255,.07) 2px,
-transparent 2px, transparent 10px
-);
+  content: "";
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255,255,255,.07) 0, rgba(255,255,255,.07) 2px,
+    transparent 2px, transparent 10px
+  );
 }
 .card-back::after {
-content: "✦";
-position: absolute;
-left: 50%; top: 50%;
-transform: translate(-50%,-50%);
-font-size: 2em;
-color: rgba(255,255,255,.10);
+  content: "✦";
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%,-50%);
+  font-size: 2em;
+  color: rgba(255,255,255,.10);
 }
 .card.face-up .card-back { display: none; }
 .card { box-shadow: 0 4px 14px rgba(0,0,0,.45), 0 1px 3px rgba(0,0,0,.3); }
-
 .red   { color: #d11d3f; }
 .black { color: #111; }
-
-/* Toast */
 #toast {
-position: fixed;
-bottom: 20px;
-left: 50%;
-transform: translateX(-50%);
-background: rgba(0,0,0,.85);
-color: #fff;
-padding: 8px 20px;
-border-radius: 20px;
-font-size: 13px;
-pointer-events: none;
-opacity: 0;
-transition: opacity .3s;
-z-index: 9999;
-white-space: nowrap;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,.85);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s;
+  z-index: 9999;
+  white-space: nowrap;
 }
 #toast.show { opacity: 1; }
 </style>
-
 </head>
 <body>
 <div id="board">
   <div id="top-row">
-    <div id="slot-stock"  class="slot">↺</div>
-    <div id="slot-waste"  class="slot"></div>
-    <div id="slot-f0"     class="slot">♠</div>
-    <div id="slot-f1"     class="slot" style="color:rgba(220,50,50,.28)">♥</div>
-    <div id="slot-f2"     class="slot" style="color:rgba(220,50,50,.28)">♦</div>
-    <div id="slot-f3"     class="slot">♣</div>
+    <div id="slot-stock" class="slot">↺</div>
+    <div id="slot-waste" class="slot"></div>
+    <div id="slot-f0"    class="slot">♠</div>
+    <div id="slot-f1"    class="slot" style="color:rgba(220,50,50,.28)">♥</div>
+    <div id="slot-f2"    class="slot" style="color:rgba(220,50,50,.28)">♦</div>
+    <div id="slot-f3"    class="slot">♣</div>
   </div>
 </div>
 <div id="toast"></div>
@@ -186,33 +168,19 @@ white-space: nowrap;
 <script>
 'use strict';
 
-/* ══════════════════════════════════════════
-   CONSTANTEN
-══════════════════════════════════════════ */
 const SUITS = ['♠','♥','♦','♣'];
 const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const RED   = new Set(['♥','♦']);
 
-/* ══════════════════════════════════════════
-   STATE -- single source of truth
-   Game logic wijzigt ALLEEN state.
-   render() bepaalt ALLE posities.
-══════════════════════════════════════════ */
 const state = {
-  stock:       [],   /* kaartobjecten */
+  stock:       [],
   waste:       [],
   foundations: [[],[],[],[]],
   tableau:     [[],[],[],[],[],[],[]]
 };
 
-/* ══════════════════════════════════════════
-   LAYOUT VARIABELEN -- alleen door updateSizes gezet
-══════════════════════════════════════════ */
 let CW, CH, GAP, STACK_UP, STACK_DN, START_X, TOP_H;
 
-/* ══════════════════════════════════════════
-   HELPERS
-══════════════════════════════════════════ */
 const board = document.getElementById('board');
 const $     = id => document.getElementById(id);
 let toastTimer;
@@ -225,19 +193,15 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
 }
 
-/* ══════════════════════════════════════════
-   AFMETINGEN
-══════════════════════════════════════════ */
 function updateSizes() {
-  const W   = window.innerWidth;
-  const H   = window.innerHeight;
+  const W    = window.innerWidth;
+  const H    = window.innerHeight;
   const land = W > H;
 
-  /* Kaartbreedte: 7 kaarten + 6 gaps passen altijd */
   const maxW = Math.floor((W - 12) / 7.4);
   const maxH = land ? Math.floor(H * 0.28) : Math.floor(H * 0.20);
   CW = Math.min(maxW, Math.round(maxH / 1.42));
-  CW = Math.max(CW, 40); /* minimaal 40px */
+  CW = Math.max(CW, 40);
 
   CH       = Math.round(CW * 1.42);
   GAP      = Math.max(3, Math.floor((W - 12 - CW * 7) / 6));
@@ -247,19 +211,15 @@ function updateSizes() {
   const totalW = CW * 7 + GAP * 6;
   START_X = Math.max(6, Math.floor((W - totalW) / 2));
 
-  /* Slots positioneren */
   layoutSlots();
 }
 
 function layoutSlots() {
-  /* Lees de werkelijke top padding na CSS env() */
-  const topRow  = $('top-row');
-  const topPad  = parseFloat(getComputedStyle(topRow).paddingTop) || 50;
-  const br      = Math.round(CW * 0.12) + 'px';
-  const fs      = Math.round(CW * 0.28) + 'px';
+  const topRow = $('top-row');
+  const topPad = parseFloat(getComputedStyle(topRow).paddingTop) || 50;
+  const br     = Math.round(CW * 0.12) + 'px';
+  const fs     = Math.round(CW * 0.28) + 'px';
 
-  /* 7 kolom posities:
-     0=stock  1=waste  2=leeg  3=f0  4=f1  5=f2  6=f3 */
   const slotMap = {
     'slot-stock': 0,
     'slot-waste': 1,
@@ -283,66 +243,45 @@ function layoutSlots() {
   TOP_H = topPad + CH + 14;
 }
 
-/* ══════════════════════════════════════════
-   KAART AANMAKEN
-══════════════════════════════════════════ */
 function createCard(suit, rank) {
-  return {
-    suit,
-    rank,
-    color: RED.has(suit) ? 'red' : 'black',
-    faceUp: false,
-    el: null   /* DOM element -- alleen render() maakt/plaatst dit */
-  };
+  return { suit, rank, color: RED.has(suit) ? 'red' : 'black', faceUp: false, el: null };
 }
 
 function makeEl(card) {
   if (card.el) { card.el.remove(); card.el = null; }
-
-  const el  = document.createElement('div');
-  const cls = card.faceUp ? 'face-up' : 'face-down';
-  el.className = `card ${cls}`;
+  const el = document.createElement('div');
+  el.className = 'card ' + (card.faceUp ? 'face-up' : 'face-down');
   el.style.width        = CW + 'px';
   el.style.height       = CH + 'px';
   el.style.borderRadius = Math.round(CW * 0.12) + 'px';
-
   const fs  = Math.max(8,  Math.round(CW * 0.155));
   const mfs = Math.max(14, Math.round(CW * 0.46));
-
   el.innerHTML = `
     <div class="card-front">
       <div class="c-corner ${card.color}" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>
-      <div class="c-mid   ${card.color}" style="font-size:${mfs}px">${card.suit}</div>
+      <div class="c-mid ${card.color}" style="font-size:${mfs}px">${card.suit}</div>
       <div class="c-corner bot ${card.color}" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>
     </div>
     <div class="card-back"></div>`;
-
   card.el = el;
   board.appendChild(el);
   return el;
 }
 
-/* ══════════════════════════════════════════
-   RENDER -- ENIGE FUNCTIE die posities zet
-   Wordt aangeroepen na elke state-wijziging.
-══════════════════════════════════════════ */
 function render() {
-  /* Verwijder alle kaart-DOM elementen */
-  board.querySelectorAll('.card').forEach(e => e.remove());
   board.querySelectorAll('.card').forEach(e => e.remove());
 
-  /* ── STOCK ── */
+  /* STOCK */
   state.stock.forEach((card, i) => {
     const el = makeEl(card);
     const sr = $('slot-stock').getBoundingClientRect();
-    /* Stapeleffect: kleine offset */
     const offset = Math.min(i, 3) * 0.7;
     el.style.left   = (sr.left - offset) + 'px';
     el.style.top    = (sr.top  - offset) + 'px';
     el.style.zIndex = i + 1;
   });
 
-  /* ── WASTE ── */
+  /* WASTE */
   if (state.waste.length > 0) {
     const top = state.waste[state.waste.length - 1];
     const el  = makeEl(top);
@@ -353,7 +292,7 @@ function render() {
     enableDrag(el, top, 'waste', state.waste.length - 1);
   }
 
-  /* ── FOUNDATIONS ── */
+  /* FOUNDATIONS */
   state.foundations.forEach((pile, f) => {
     if (!pile.length) return;
     const top = pile[pile.length - 1];
@@ -364,7 +303,7 @@ function render() {
     el.style.zIndex = 20;
   });
 
-  /* ── TABLEAU ── */
+  /* TABLEAU */
   state.tableau.forEach((col, c) => {
     let y = TOP_H;
     const x = START_X + c * (CW + GAP);
@@ -373,39 +312,25 @@ function render() {
       el.style.left   = x + 'px';
       el.style.top    = y + 'px';
       el.style.zIndex = 100 + r;
-
       if (card.faceUp) {
         enableDrag(el, card, 'tableau', c, r);
       } else if (r === col.length - 1) {
-        /* Face-down bovenste kaart: klik om om te draaien */
         el.style.cursor = 'pointer';
-        el.addEventListener('pointerdown', e => {
-          e.stopPropagation();
-          flipTop(c);
-        });
+        el.addEventListener('pointerdown', e => { e.stopPropagation(); flipTop(c); });
       }
-
       y += card.faceUp ? STACK_UP : STACK_DN;
     });
   });
 
-  /* Stock klik */
   $('slot-stock').onclick = drawFromStock;
-  const stockCards = board.querySelectorAll('.card.face-down');
-  stockCards.forEach(el => {
-    /* Alleen stock kaarten reageren op klik */
+  board.querySelectorAll('.card.face-down').forEach(el => {
     if (!el._dragEnabled) {
-      el.addEventListener('pointerdown', e => {
-        e.stopPropagation();
-        drawFromStock();
-      });
+      el.addEventListener('pointerdown', e => { e.stopPropagation(); drawFromStock(); });
     }
   });
 }
 
-/* ══════════════════════════════════════════
-   DRAG & DROP -- events op document voor vrij bewegen
-══════════════════════════════════════════ */
+/* DRAG */
 let drag = null;
 
 document.addEventListener('pointermove', e => {
@@ -443,88 +368,48 @@ function enableDrag(el, card, pile, ...pileArgs) {
     if (e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
-
     let cards = [];
-    if (pile === 'waste') {
-      cards = [card];
-    } else if (pile === 'tableau') {
-      const col = pileArgs[0], row = pileArgs[1];
-      cards = state.tableau[col].slice(row);
-    }
+    if (pile === 'waste') cards = [card];
+    else if (pile === 'tableau') cards = state.tableau[pileArgs[0]].slice(pileArgs[1]);
     if (!cards.length) return;
-
     const rect = el.getBoundingClientRect();
     const clones = cards.map((c, i) => {
       const clone = c.el.cloneNode(true);
-      clone.style.cssText = `
-        position:fixed;
-        width:${CW}px;
-        height:${CH}px;
-        z-index:${9000+i};
-        pointer-events:none;
-        transition:none;
-        left:${rect.left}px;
-        top:${rect.top + i * STACK_UP}px;
-        box-shadow:0 16px 40px rgba(0,0,0,.6);
-        transform:scale(1.04) rotate(1deg);
-        border-radius:${Math.round(CW*.12)}px;
-      `;
+      clone.style.cssText = `position:fixed;width:${CW}px;height:${CH}px;z-index:${9000+i};pointer-events:none;transition:none;left:${rect.left}px;top:${rect.top + i * STACK_UP}px;box-shadow:0 16px 40px rgba(0,0,0,.6);transform:scale(1.04) rotate(1deg);border-radius:${Math.round(CW*.12)}px;`;
       document.body.appendChild(clone);
       return clone;
     });
-
     el.style.opacity = '0.15';
-    const ox = e.clientX - rect.left;
-    const oy = e.clientY - rect.top;
-    drag = { cards, clones, pile, pileArgs, ox, oy, el };
+    drag = { cards, clones, pile, pileArgs, ox: e.clientX - rect.left, oy: e.clientY - rect.top, el };
   });
 }
 
-/* ══════════════════════════════════════════
-   DROP LOGICA
-══════════════════════════════════════════ */
 function tryDrop(cx, cy, dragData) {
-  /* Check foundations */
   for (let f = 0; f < 4; f++) {
     const slot = $('slot-f' + f);
     if (hitTest(cx, cy, slot) && dragData.cards.length === 1) {
-      if (canMoveToFoundation(dragData.cards[0], f)) {
-        moveToFoundation(dragData, f);
-        return true;
-      }
+      if (canMoveToFoundation(dragData.cards[0], f)) { moveToFoundation(dragData, f); return true; }
     }
     const fPile = state.foundations[f];
     if (fPile.length && fPile[fPile.length-1].el) {
       if (hitTest(cx, cy, fPile[fPile.length-1].el) && dragData.cards.length === 1) {
-        if (canMoveToFoundation(dragData.cards[0], f)) {
-          moveToFoundation(dragData, f);
-          return true;
-        }
+        if (canMoveToFoundation(dragData.cards[0], f)) { moveToFoundation(dragData, f); return true; }
       }
     }
   }
-
-  /* Check tableau -- kijk naar welke kolom de kaart het dichtst bij is
-     EN of de y-positie in het tableau gebied valt */
-  if (cy >= TOP_H - CH) { /* ruime marge boven tableau */
-    /* Vind dichtstbijzijnde kolom op basis van cx */
-    let bestCol = -1;
-    let bestDist = Infinity;
+  if (cy >= TOP_H - CH) {
+    let bestCol = -1, bestDist = Infinity;
     for (let c = 0; c < 7; c++) {
       const colX = START_X + c * (CW + GAP);
-      const colCX = colX + CW / 2;
-      const dist = Math.abs(cx - colCX);
+      const dist = Math.abs(cx - (colX + CW / 2));
       if (dist < bestDist && cx >= colX - GAP/2 && cx <= colX + CW + GAP/2) {
-        bestDist = dist;
-        bestCol = c;
+        bestDist = dist; bestCol = c;
       }
     }
     if (bestCol >= 0 && canMoveToTableau(dragData.cards[0], bestCol)) {
-      moveToTableau(dragData, bestCol);
-      return true;
+      moveToTableau(dragData, bestCol); return true;
     }
   }
-
   return false;
 }
 
@@ -534,9 +419,6 @@ function hitTest(cx, cy, el) {
   return cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom;
 }
 
-/* ══════════════════════════════════════════
-   SPELREGELS
-══════════════════════════════════════════ */
 const rankVal = r => RANKS.indexOf(r);
 
 function canMoveToFoundation(card, f) {
@@ -551,30 +433,21 @@ function canMoveToTableau(card, col) {
   if (!pile.length) return card.rank === 'K';
   const top = pile[pile.length - 1];
   if (!top.faceUp) return false;
-  const diffColor = RED.has(card.suit) !== RED.has(top.suit);
-  return diffColor && rankVal(card.rank) === rankVal(top.rank) - 1;
+  return RED.has(card.suit) !== RED.has(top.suit) && rankVal(card.rank) === rankVal(top.rank) - 1;
 }
 
-/* ══════════════════════════════════════════
-   ZETTEN UITVOEREN -- alleen state wijzigen
-══════════════════════════════════════════ */
 function removeFromSource(dragData) {
-  const { pile, pileArgs, cards } = dragData;
-  if (pile === 'waste') {
+  if (dragData.pile === 'waste') {
     state.waste.pop();
-  } else if (pile === 'tableau') {
-    const col = pileArgs[0], row = pileArgs[1];
-    state.tableau[col].splice(row);
-    /* Draai bovenste kaart om */
-    revealTopTableau(col);
+  } else if (dragData.pile === 'tableau') {
+    state.tableau[dragData.pileArgs[0]].splice(dragData.pileArgs[1]);
+    revealTopTableau(dragData.pileArgs[0]);
   }
 }
 
 function revealTopTableau(col) {
   const pile = state.tableau[col];
-  if (pile.length && !pile[pile.length - 1].faceUp) {
-    pile[pile.length - 1].faceUp = true;
-  }
+  if (pile.length && !pile[pile.length-1].faceUp) pile[pile.length-1].faceUp = true;
 }
 
 function moveToFoundation(dragData, f) {
@@ -590,122 +463,59 @@ function moveToTableau(dragData, col) {
 
 function flipTop(col) {
   const pile = state.tableau[col];
-  if (!pile.length) return;
-  const top = pile[pile.length - 1];
-  if (top.faceUp) return;
-  top.faceUp = true;
+  if (!pile.length || pile[pile.length-1].faceUp) return;
+  pile[pile.length-1].faceUp = true;
   render();
 }
 
-/* ══════════════════════════════════════════
-   STOCK & WASTE
-══════════════════════════════════════════ */
 function drawFromStock() {
   if (state.stock.length === 0) {
-    recycleWaste();
-    return;
-  }
-  const card = state.stock.pop();
-  card.faceUp = true;
-  state.waste.push(card);
-  render();
-}
-
-function recycleWaste() {
-  if (!state.waste.length) return;
-  while (state.waste.length) {
-    const card = state.waste.pop();
-    card.faceUp = false;
-    state.stock.push(card);
+    while (state.waste.length) { const c = state.waste.pop(); c.faceUp = false; state.stock.push(c); }
+  } else {
+    const c = state.stock.pop(); c.faceUp = true; state.waste.push(c);
   }
   render();
 }
 
-/* ══════════════════════════════════════════
-   WIN
-══════════════════════════════════════════ */
 function checkWin() {
-  const total = state.foundations.reduce((s, f) => s + f.length, 0);
-  if (total === 52) {
+  if (state.foundations.reduce((s, f) => s + f.length, 0) === 52)
     setTimeout(() => toast('🎉 Gewonnen! Gefeliciteerd!'), 300);
-  }
 }
 
-/* ══════════════════════════════════════════
-   DEAL -- vult state, dan render()
-══════════════════════════════════════════ */
 function deal() {
-  /* Reset state */
-  state.stock       = [];
-  state.waste       = [];
+  state.stock = []; state.waste = [];
   state.foundations = [[],[],[],[]];
-  state.tableau     = [[],[],[],[],[],[],[]];
-
-  /* Maak deck */
+  state.tableau = [[],[],[],[],[],[],[]];
   const deck = [];
-  for (const suit of SUITS)
-    for (const rank of RANKS)
-      deck.push(createCard(suit, rank));
-
-  /* Schudden */
-  for (let i = deck.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
+  for (const suit of SUITS) for (const rank of RANKS) deck.push(createCard(suit, rank));
+  for (let i = deck.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]];
   }
-
-  /* Uitdelen naar tableau */
   let idx = 0;
-  for (let col = 0; col < 7; col++) {
+  for (let col = 0; col < 7; col++)
     for (let row = 0; row <= col; row++) {
-      const card = deck[idx++];
-      card.faceUp = (row === col);
-      state.tableau[col].push(card);
+      const card = deck[idx++]; card.faceUp = (row === col); state.tableau[col].push(card);
     }
-  }
-
-  /* Rest naar stock */
-  while (idx < deck.length) {
-    state.stock.push(deck[idx++]);
-  }
-
+  while (idx < deck.length) state.stock.push(deck[idx++]);
   render();
-  dealAnimatie();
-}
-
-/* ══════════════════════════════════════════
-   DEAL ANIMATIE
-══════════════════════════════════════════ */
-function dealAnimatie() {
-  const cards = board.querySelectorAll('.card');
-  cards.forEach((el, i) => {
-    el.style.opacity   = '0';
+  board.querySelectorAll('.card').forEach((el, i) => {
+    el.style.opacity = '0';
     el.style.transform = 'scale(0.9) translateY(-10px)';
     setTimeout(() => {
       el.style.transition = 'opacity .2s ease, transform .22s ease';
-      el.style.opacity    = '1';
-      el.style.transform  = 'scale(1) translateY(0)';
+      el.style.opacity = '1';
+      el.style.transform = 'scale(1) translateY(0)';
       setTimeout(() => { el.style.transition = ''; }, 250);
     }, i * 16 + 20);
   });
 }
 
-/* ══════════════════════════════════════════
-   INIT
-══════════════════════════════════════════ */
-function init() {
-  updateSizes();
-  deal();
-}
-
-function herInit() {
-  updateSizes();
-  render();
-}
+function init() { updateSizes(); deal(); }
+function herInit() { updateSizes(); render(); }
 
 window.addEventListener('resize', herInit);
 window.addEventListener('orientationchange', () => setTimeout(herInit, 120));
 document.addEventListener('contextmenu', e => e.preventDefault());
-
 init();
 </script>
 
