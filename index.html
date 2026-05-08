@@ -51,7 +51,7 @@ html, body {
   position: absolute;
   left: 0; right: 0; top: 0;
   z-index: 10;
-  padding-top: calc(env(safe-area-inset-top, 44px) + 6px);
+  padding-top: calc(env(safe-area-inset-top, 44px) + 10px);
 }
 .slot {
   position: absolute;
@@ -198,10 +198,10 @@ function updateSizes() {
   const H    = window.innerHeight;
   const land = W > H;
 
-  const maxW = Math.floor((W - 12) / 7.4);
-  const maxH = land ? Math.floor(H * 0.28) : Math.floor(H * 0.20);
+  const maxW = Math.floor((W - 12) / 7.6);
+  const maxH = land ? Math.floor(H * 0.26) : Math.floor(H * 0.19);
   CW = Math.min(maxW, Math.round(maxH / 1.42));
-  CW = Math.max(CW, 40);
+  CW = Math.max(CW, 38);
 
   CH       = Math.round(CW * 1.42);
   GAP      = Math.max(3, Math.floor((W - 12 - CW * 7) / 6));
