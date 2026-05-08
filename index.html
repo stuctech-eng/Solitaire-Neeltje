@@ -69,7 +69,7 @@ z-index: 10;
 
 .top-left, .top-right {
 display: flex;
-gap: 8px;
+gap: 6px;
 }
 
 /* ══ SLOTS ══ */
@@ -83,8 +83,8 @@ position: relative;
 display: flex;
 align-items: center;
 justify-content: center;
-color: rgba(255,255,255,.2);
-font-size: 1.4em;
+color: rgba(255,255,255,.25);
+font-size: 1.3em;
 }
 
 /* ══ TABLEAU ══ */
@@ -107,6 +107,7 @@ box-shadow:
 cursor: grab;
 touch-action: none;
 will-change: transform;
+overflow: hidden;
 }
 
 /* VOORKANT */
@@ -119,18 +120,23 @@ border: 1px solid rgba(0,0,0,.1);
 display: flex;
 flex-direction: column;
 justify-content: space-between;
-padding: 4px 5px;
+padding: 3px 4px;
 overflow: hidden;
+box-sizing: border-box;
 }
 
 .card.face-down .card-front { display: none; }
 
 .corner {
 font-weight: 800;
-line-height: 1.1;
-font-size: inherit;
+line-height: 1.05;
+white-space: nowrap;
+overflow: hidden;
 }
-.corner.bottom { align-self: flex-end; transform: rotate(180deg); }
+.corner.bottom {
+align-self: flex-end;
+transform: rotate(180deg);
+}
 
 .card-center {
 flex: 1;
@@ -138,6 +144,7 @@ display: flex;
 align-items: center;
 justify-content: center;
 font-weight: 900;
+overflow: hidden;
 }
 
 /* ACHTERKANT */
@@ -216,30 +223,27 @@ function updateSizes() {
   const land = W > H;
 
   if (land) {
-    CW = Math.floor(Math.min(W / 9, H * 0.30));
+    CW = Math.floor(Math.min(W / 9.5, H * 0.28));
   } else {
-    CW = Math.floor(Math.min(W / 7.6, H * 0.17));
+    CW = Math.floor(Math.min(W / 7.4, H * 0.16));
   }
 
   CH       = Math.round(CW * 1.42);
-  GAP      = Math.max(4, Math.floor(CW * 0.10));
-  STACK_UP = Math.round(CH * 0.24);
-  STACK_DN = Math.round(CH * 0.14);
+  GAP      = Math.max(3, Math.floor(CW * 0.08));
+  STACK_UP = Math.round(CH * 0.28);
+  STACK_DN = Math.round(CH * 0.15);
+
+  const br = Math.round(CW * 0.13) + 'px';
 
   /* Slots aanpassen */
   document.querySelectorAll('.slot').forEach(s => {
-    s.style.width  = CW + 'px';
-    s.style.height = CH + 'px';
-    s.style.borderRadius = Math.round(CW * 0.13) + 'px';
+    s.style.width        = CW + 'px';
+    s.style.height       = CH + 'px';
+    s.style.borderRadius = br;
+    s.style.fontSize     = Math.round(CW * 0.28) + 'px';
   });
 
-  /* Top rij hoogte bepalen */
-  const topRow = $('top-row');
-  const safeTop = parseInt(
-    getComputedStyle(document.documentElement)
-      .getPropertyValue('--sat') || '0'
-  ) || 0;
-  TOP_H = topRow.getBoundingClientRect().bottom;
+  TOP_H = $('top-row').getBoundingClientRect().bottom;
 }
 
 /* ══ DECK ══ */
@@ -265,8 +269,8 @@ function makeCard(data) {
   el.style.height = CH + 'px';
   el.style.borderRadius = Math.round(CW * 0.13) + 'px';
 
-  const fs = Math.max(8, Math.round(CW * 0.16));
-  const cs = Math.max(16, Math.round(CW * 0.50));
+  const fs = Math.max(8, Math.round(CW * 0.15));
+  const cs = Math.max(14, Math.round(CW * 0.46));
   const cls = data.color;
 
   el.innerHTML = `
