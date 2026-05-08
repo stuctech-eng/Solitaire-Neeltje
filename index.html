@@ -52,16 +52,20 @@ transparent 1px, transparent 8px
 );
 }
 
-/* ══ TOP RIJ -- 7 slots naast elkaar zoals tableau ══ */
+/* ══ TOP RIJ -- exact zelfde grid als tableau ══ */
 #top-row {
 position: absolute;
 left: 0; right: 0; top: 0;
 display: flex;
 align-items: flex-start;
 padding-top: calc(env(safe-area-inset-top) + 8px);
-padding-bottom: 8px;
+padding-bottom: 6px;
 z-index: 10;
-/* Zelfde uitlijning als tableau -- JS zet padding-left */
+}
+
+/* gap tussen waste en foundations -- 1 kaardbreedte */
+#slot-gap {
+flex-shrink: 0;
 }
 
 /* ══ SLOTS ══ */
@@ -74,15 +78,9 @@ box-shadow: inset 0 2px 4px rgba(0,0,0,.3);
 display: flex;
 align-items: center;
 justify-content: center;
-color: rgba(255,255,255,.22);
-font-size: 1.2em;
+color: rgba(255,255,255,.28);
 position: relative;
 }
-
-/* gap tussen stock/waste en foundations */
-#slot-gap { flex-shrink: 0; }
-
-/* ══ KAART ══ */
 .card {
 position: absolute;
 cursor: grab;
