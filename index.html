@@ -588,12 +588,21 @@ function render() {
     });
   });
 
-  $('slot-stock').onclick = drawFromStock;
+  $('slot-stock').onclick = drawFromStockSafe;
   board.querySelectorAll('.card.face-down').forEach(el => {
     if (!el._dragEnabled) {
-      el.addEventListener('pointerdown', e => { e.stopPropagation(); drawFromStock(); });
+      el.addEventListener('pointerdown', e => { e.stopPropagation(); drawFromStockSafe(); });
     }
   });
+}
+
+/* ══ STOCK DEBOUNCE ══ */
+let stockCooldown = false;
+function drawFromStockSafe() {
+  if (stockCooldown) return;
+  stockCooldown = true;
+  drawFromStock();
+  setTimeout(() => { stockCooldown = false; }, 400);
 }
 
 /* ══ DRAG ══ */
@@ -626,25 +635,68 @@ document.addEventListener('pointercancel', () => {
   drag = null; render();
 });
 
+function tryAutoFoundation(card, pile, pileArgs) {
+  for (let f = 0; f < 4; f++) {
+    if (canMoveToFoundation(card, f)) {
+      const dragData = { cards: [card], pile, pileArgs };
+      moveToFoundation(dragData, f);
+      render();
+      return true;
+    }
+  }
+  return false;
+}
+
 function enableDrag(el, card, pile, ...pileArgs) {
   el._dragEnabled = true;
+  let pointerMoved = false;
+  let pointerStartX, pointerStartY;
+
   el.addEventListener('pointerdown', e => {
-    if (e.button!==0) return;
+    if (e.button !== 0) return;
     e.preventDefault(); e.stopPropagation();
+    pointerMoved = false;
+    pointerStartX = e.clientX;
+    pointerStartY = e.clientY;
+
     let cards = [];
-    if (pile==='waste') cards = [card];
-    else if (pile==='tableau') cards = state.tableau[pileArgs[0]].slice(pileArgs[1]);
+    if (pile === 'waste') cards = [card];
+    else if (pile === 'tableau') cards = state.tableau[pileArgs[0]].slice(pileArgs[1]);
     if (!cards.length) return;
+
     const rect = el.getBoundingClientRect();
-    const clones = cards.map((c,i) => {
+    const clones = cards.map((c, i) => {
       const clone = c.el.cloneNode(true);
-      clone.style.cssText = `position:fixed;width:${CW}px;height:${CH}px;z-index:${9000+i};pointer-events:none;transition:none;left:${rect.left}px;top:${rect.top+i*STACK_UP}px;box-shadow:0 16px 40px rgba(0,0,0,.6);transform:scale(1.04) rotate(1deg);border-radius:${Math.round(CW*.12)}px;`;
+      clone.style.cssText = `position:fixed;width:${CW}px;height:${CH}px;z-index:${9000+i};pointer-events:none;transition:none;left:${rect.left}px;top:${rect.top+i*STACK_UP}px;box-shadow:0 16px 40px rgba(0,0,0,.6);transform:scale(1.04) rotate(1deg);border-radius:${Math.round(CW*.12)}px;opacity:0;`;
       document.body.appendChild(clone);
       return clone;
     });
-    el.style.opacity = '0.15';
-    sndKaartOppakken();
-    drag = { cards, clones, pile, pileArgs, ox: e.clientX-rect.left, oy: e.clientY-rect.top, el };
+
+    const onMove = e2 => {
+      const dx = Math.abs(e2.clientX - pointerStartX);
+      const dy = Math.abs(e2.clientY - pointerStartY);
+      if (!pointerMoved && (dx > 6 || dy > 6)) {
+        pointerMoved = true;
+        el.style.opacity = '0.15';
+        clones.forEach(c => c.style.opacity = '1');
+        sndKaartOppakken();
+        drag = { cards, clones, pile, pileArgs, ox: e.clientX - rect.left, oy: e.clientY - rect.top, el };
+      }
+    };
+
+    const onUp = e2 => {
+      el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerup', onUp);
+      if (!pointerMoved) {
+        // Klik -- probeer naar foundation
+        clones.forEach(c => c.remove());
+        el.style.opacity = '';
+        if (cards.length === 1) tryAutoFoundation(card, pile, pileArgs);
+      }
+    };
+
+    el.addEventListener('pointermove', onMove);
+    el.addEventListener('pointerup', onUp);
   });
 }
 
