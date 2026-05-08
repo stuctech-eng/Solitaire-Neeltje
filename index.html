@@ -10,7 +10,6 @@
 <meta name="theme-color" content="#05261d">
 <style>
 
-/* ══ RESET ══ */
 *, *::before, *::after {
 box-sizing: border-box;
 margin: 0; padding: 0;
@@ -20,7 +19,6 @@ margin: 0; padding: 0;
 user-select: none;
 }
 
-/* ══ FULLSCREEN -- geen witte randen ══ */
 html, body {
 width: 100%;
 height: 100dvh;
@@ -32,23 +30,21 @@ background: #05261d;
 font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* ══ BORD ══ */
 #board {
 position: fixed;
 inset: 0;
 overflow: hidden;
 background:
-radial-gradient(circle at 50% 0%, rgba(0,200,120,0.12), transparent 50%),
+radial-gradient(circle at 50% 0%, rgba(0,200,120,0.10), transparent 50%),
 linear-gradient(180deg, #0b4d3b 0%, #063126 100%);
 }
 
-/* subtiele textuur */
 #board::after {
 content: "";
 position: absolute;
 inset: 0;
 pointer-events: none;
-opacity: .05;
+opacity: .04;
 background-image: repeating-linear-gradient(
 45deg,
 rgba(255,255,255,.08) 0px, rgba(255,255,255,.08) 1px,
@@ -56,413 +52,37 @@ transparent 1px, transparent 8px
 );
 }
 
-/* ══ BOVENSTE RIJ ══ */
+/* ══ TOP RIJ -- exact zelfde grid als tableau ══ */
 #top-row {
 position: absolute;
 left: 0; right: 0; top: 0;
 display: flex;
-justify-content: space-between;
 align-items: flex-start;
-padding: calc(env(safe-area-inset-top) + 10px) 10px 8px;
+padding-top: calc(env(safe-area-inset-top) + 8px);
+padding-bottom: 6px;
 z-index: 10;
 }
 
-.top-left, .top-right {
-display: flex;
-gap: 8px;
+/* gap tussen waste en foundations -- 1 kaardbreedte */
+#slot-gap {
+flex-shrink: 0;
 }
 
 /* ══ SLOTS ══ */
 .slot {
-border-radius: 12px;
-background: rgba(255,255,255,.06);
-border: 1.5px dashed rgba(255,255,255,.15);
-box-shadow: inset 0 2px 4px rgba(0,0,0,.3);
 flex-shrink: 0;
-position: relative;
+border-radius: 10px;
+background: rgba(255,255,255,.06);
+border: 1.5px dashed rgba(255,255,255,.18);
+box-shadow: inset 0 2px 4px rgba(0,0,0,.3);
 display: flex;
 align-items: center;
 justify-content: center;
-color: rgba(255,255,255,.2);
-font-size: 1.4em;
+color: rgba(255,255,255,.28);
+position: relative;
 }
-
-/* ══ TABLEAU ══ */
-#tableau {
-position: absolute;
-left: 0; right: 0;
-display: flex;
-justify-content: center;
-align-items: flex-start;
-padding: 0;
-}
-
-/* ══ KAART ══ */
 .card {
 position: absolute;
-border-radius: 12px;
-box-shadow:
-0 4px 12px rgba(0,0,0,.4),
-0 1px 3px rgba(0,0,0,.3);
-cursor: grab;
-touch-action: none;
-will-change: transform;
-}
-
-/* VOORKANT */
-.card-front {
-position: absolute;
-inset: 0;
-border-radius: 12px;
-background: linear-gradient(170deg, #ffffff, #f5f5f5);
-border: 1px solid rgba(0,0,0,.1);
-display: flex;
-flex-direction: column;
-justify-content: space-between;
-padding: 5px;
-}
-
-.card.face-down .card-front { display: none; }
-
-.corner {
-font-weight: 800;
-line-height: 1.1;
-font-size: inherit;
-}
-.corner.bottom { align-self: flex-end; transform: rotate(180deg); }
-
-.card-center {
-flex: 1;
-display: flex;
-align-items: center;
-justify-content: center;
-font-weight: 900;
-}
-
-/* ACHTERKANT */
-.card-back {
-position: absolute;
-inset: 0;
-border-radius: 12px;
-background: linear-gradient(135deg, #1a3a8a, #2359d4 50%, #0b1d54);
-border: 1px solid rgba(255,255,255,.08);
-overflow: hidden;
-}
-.card-back::before {
-content: "";
-position: absolute; inset: 0;
-background: repeating-linear-gradient(
-45deg,
-rgba(255,255,255,.07) 0, rgba(255,255,255,.07) 2px,
-transparent 2px, transparent 10px
-);
-}
-.card-back::after {
-content: "✦";
-position: absolute;
-left: 50%; top: 50%;
-transform: translate(-50%, -50%);
-font-size: 2em;
-color: rgba(255,255,255,.12);
-}
-
-.card.face-up .card-back { display: none; }
-
-/* KLEUREN */
-.red { color: #d11d3f; }
-.black { color: #111; }
-
-</style>
-</head>
-<body>
-
-<div id="board">
-  <div id="top-row">
-    <div class="top-left">
-      <div id="slot-stock" class="slot">↺</div>
-      <div id="slot-waste" class="slot"></div>
-    </div>
-    <div class="top-right">
-      <div class="slot">♠</div>
-      <div class="slot" style="color:rgba(255,100,100,.3)">♥</div>
-      <div class="slot" style="color:rgba(255,100,100,.3)">♦</div>
-      <div class="slot">♣</div>
-    </div>
-  </div>
-  <div id="tableau"></div>
-</div>
-
-<script>
-'use strict';
-
-/* ══ CONSTANTEN ══ */
-const SUITS = ['♠','♥','♦','♣'];
-const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-const RED   = {'♥':1,'♦':1};
-
-/* ══ STAAT ══ */
-let CW, CH, GAP, STACK_UP, STACK_DN, TOP_H;
-let deck = [];
-let columns = [[],[],[],[],[],[],[]];
-
-/* ══ HELPERS ══ */
-const $ = id => document.getElementById(id);
-
-/* ══ AFMETINGEN -- responsive ══ */
-function updateSizes() {
-  const W = window.innerWidth;
-  const H = window.innerHeight;
-  const land = W > H;
-
-  if (land) {
-    CW = Math.floor(Math.min(W / 9, H * 0.30));
-  } else {
-    CW = Math.floor(Math.min(W / 7.6, H * 0.17));
-  }
-
-  CH       = Math.round(CW * 1.42);
-  GAP      = Math.max(4, Math.floor(CW * 0.10));
-  STACK_UP = Math.round(CH * 0.24);
-  STACK_DN = Math.round(CH * 0.14);
-
-  /* Slots aanpassen */
-  document.querySelectorAll('.slot').forEach(s => {
-    s.style.width  = CW + 'px';
-    s.style.height = CH + 'px';
-    s.style.borderRadius = Math.round(CW * 0.13) + 'px';
-  });
-
-  /* Top rij hoogte bepalen */
-  const topRow = $('top-row');
-  const safeTop = parseInt(
-    getComputedStyle(document.documentElement)
-      .getPropertyValue('--sat') || '0'
-  ) || 0;
-  TOP_H = topRow.getBoundingClientRect().bottom;
-}
-
-/* ══ DECK ══ */
-function createDeck() {
-  deck = [];
-  for (const suit of SUITS)
-    for (const rank of RANKS)
-      deck.push({ suit, rank, color: RED[suit] ? 'red' : 'black', faceUp: false });
-}
-
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-}
-
-/* ══ KAART ELEMENT ══ */
-function makeCard(data) {
-  const el = document.createElement('div');
-  el.className = 'card ' + (data.faceUp ? 'face-up' : 'face-down');
-  el.style.width  = CW + 'px';
-  el.style.height = CH + 'px';
-  el.style.borderRadius = Math.round(CW * 0.13) + 'px';
-
-  const fs = Math.max(10, Math.round(CW * 0.20));
-  const cs = Math.max(18, Math.round(CW * 0.58));
-  const cls = data.color;
-
-  el.innerHTML = `
-    <div class="card-front">
-      <div class="corner top ${cls}" style="font-size:${fs}px">${data.rank}<br>${data.suit}</div>
-      <div class="card-center ${cls}" style="font-size:${cs}px">${data.suit}</div>
-      <div class="corner bottom ${cls}" style="font-size:${fs}px">${data.rank}<br>${data.suit}</div>
-    </div>
-    <div class="card-back"></div>
-  `;
-
-  data.el = el;
-  return el;
-}
-
-/* ══ UITDELEN ══ */
-function deal() {
-  /* Verwijder oude kaarten */
-  document.querySelectorAll('.card').forEach(e => e.remove());
-  columns = [[],[],[],[],[],[],[]];
-
-  const totalW = CW * 7 + GAP * 6;
-  const startX = (window.innerWidth - totalW) / 2;
-  const startY = TOP_H + 10;
-
-  let idx = 0;
-
-  for (let col = 0; col < 7; col++) {
-    for (let row = 0; row <= col; row++) {
-      const card = deck[idx++];
-      card.faceUp = (row === col);
-
-      const el = makeCard(card);
-
-      /* Positie */
-      const x = startX + col * (CW + GAP);
-      let y = startY;
-      for (let r = 0; r < row; r++) {
-        y += columns[col][r].faceUp ? STACK_UP : STACK_DN;
-      }
-
-      el.style.left = x + 'px';
-      el.style.top  = y + 'px';
-      el.style.zIndex = row + 1;
-
-      columns[col].push(card);
-      $('board').appendChild(el);
-    }
-  }
-
-  /* Stock kaarten */
-  const stockX = $('slot-stock').getBoundingClientRect().left;
-  const stockY = $('slot-stock').getBoundingClientRect().top;
-  while (idx < deck.length) {
-    const card = deck[idx++];
-    card.faceUp = false;
-    const el = makeCard(card);
-    el.style.left = stockX + 'px';
-    el.style.top  = stockY + 'px';
-    el.style.zIndex = 1;
-    $('board').appendChild(el);
-  }
-}
-
-/* ══ DEAL ANIMATIE ══ */
-function dealMetAnimatie() {
-  const cards = document.querySelectorAll('.card');
-  cards.forEach((k, i) => {
-    k.style.opacity = '0';
-    k.style.transform = 'scale(0.85)';
-    setTimeout(() => {
-      k.style.transition = 'opacity .2s ease, transform .25s ease';
-      k.style.opacity = '1';
-      k.style.transform = 'scale(1)';
-      setTimeout(() => { k.style.transition = ''; }, 260);
-    }, i * 20 + 40);
-  });
-}
-
-/* ══ INIT ══ */
-function init() {
-  updateSizes();
-  createDeck();
-  shuffle(deck);
-  deal();
-  dealMetAnimatie();
-}
-
-window.addEventListener('resize', () => {
-  updateSizes();
-  deal();
-<!DOCTYPE html>
-
-<html lang="nl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Solitaire – Neeltje</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#05261d">
-<style>
-
-/* ══ RESET ══ */
-*, *::before, *::after {
-box-sizing: border-box;
-margin: 0; padding: 0;
--webkit-tap-highlight-color: transparent;
--webkit-touch-callout: none;
--webkit-user-select: none;
-user-select: none;
-}
-
-/* ══ FULLSCREEN -- geen witte randen ══ */
-html, body {
-width: 100%;
-height: 100dvh;
-overflow: hidden;
-position: fixed;
-inset: 0;
-touch-action: none;
-background: #05261d;
-font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-/* ══ BORD ══ */
-#board {
-position: fixed;
-inset: 0;
-overflow: hidden;
-background:
-radial-gradient(circle at 50% 0%, rgba(0,200,120,0.12), transparent 50%),
-linear-gradient(180deg, #0b4d3b 0%, #063126 100%);
-}
-
-/* subtiele textuur */
-#board::after {
-content: "";
-position: absolute;
-inset: 0;
-pointer-events: none;
-opacity: .05;
-background-image: repeating-linear-gradient(
-45deg,
-rgba(255,255,255,.08) 0px, rgba(255,255,255,.08) 1px,
-transparent 1px, transparent 8px
-);
-}
-
-/* ══ BOVENSTE RIJ ══ */
-#top-row {
-position: absolute;
-left: 0; right: 0; top: 0;
-display: flex;
-justify-content: space-between;
-align-items: flex-start;
-padding: calc(env(safe-area-inset-top) + 10px) 10px 8px;
-z-index: 10;
-}
-
-.top-left, .top-right {
-display: flex;
-gap: 6px;
-}
-
-/* ══ SLOTS ══ */
-.slot {
-border-radius: 12px;
-background: rgba(255,255,255,.06);
-border: 1.5px dashed rgba(255,255,255,.15);
-box-shadow: inset 0 2px 4px rgba(0,0,0,.3);
-flex-shrink: 0;
-position: relative;
-display: flex;
-align-items: center;
-justify-content: center;
-color: rgba(255,255,255,.25);
-font-size: 1.3em;
-}
-
-/* ══ TABLEAU ══ */
-#tableau {
-position: absolute;
-left: 0; right: 0;
-display: flex;
-justify-content: center;
-align-items: flex-start;
-padding: 0;
-}
-
-/* ══ KAART ══ */
-.card {
-position: absolute;
-border-radius: 12px;
-box-shadow:
-0 4px 12px rgba(0,0,0,.4),
-0 1px 3px rgba(0,0,0,.3);
 cursor: grab;
 touch-action: none;
 will-change: transform;
@@ -473,31 +93,29 @@ overflow: hidden;
 .card-front {
 position: absolute;
 inset: 0;
-border-radius: 12px;
-background: linear-gradient(170deg, #ffffff, #f5f5f5);
-border: 1px solid rgba(0,0,0,.1);
+background: linear-gradient(170deg, #ffffff 0%, #f4f4f4 100%);
+border: 1px solid rgba(0,0,0,.08);
 display: flex;
 flex-direction: column;
-justify-content: space-between;
-padding: 3px 4px;
 overflow: hidden;
-box-sizing: border-box;
 }
 
 .card.face-down .card-front { display: none; }
 
-.corner {
+/* hoek tekst */
+.c-corner {
 font-weight: 800;
 line-height: 1.05;
-white-space: nowrap;
-overflow: hidden;
+padding: 3px 4px;
+flex-shrink: 0;
 }
-.corner.bottom {
+.c-corner.bot {
 align-self: flex-end;
 transform: rotate(180deg);
 }
 
-.card-center {
+/* midden symbool */
+.c-mid {
 flex: 1;
 display: flex;
 align-items: center;
@@ -510,8 +128,7 @@ overflow: hidden;
 .card-back {
 position: absolute;
 inset: 0;
-border-radius: 12px;
-background: linear-gradient(135deg, #1a3a8a, #2359d4 50%, #0b1d54);
+background: linear-gradient(135deg, #1a3a8a 0%, #2359d4 50%, #0b1d54 100%);
 border: 1px solid rgba(255,255,255,.08);
 overflow: hidden;
 }
@@ -528,89 +145,105 @@ transparent 2px, transparent 10px
 content: "✦";
 position: absolute;
 left: 50%; top: 50%;
-transform: translate(-50%, -50%);
+transform: translate(-50%,-50%);
 font-size: 2em;
-color: rgba(255,255,255,.12);
+color: rgba(255,255,255,.10);
 }
 
 .card.face-up .card-back { display: none; }
 
-/* KLEUREN */
+/* schaduwen */
+.card { box-shadow: 0 4px 14px rgba(0,0,0,.45), 0 1px 3px rgba(0,0,0,.3); }
+
 .red { color: #d11d3f; }
 .black { color: #111; }
 
 </style>
 </head>
 <body>
-
 <div id="board">
+
+  <!-- TOP RIJ: stock | waste | gap | ♠ ♥ ♦ ♣ -->
+
   <div id="top-row">
-    <div class="top-left">
-      <div id="slot-stock" class="slot">↺</div>
-      <div id="slot-waste" class="slot"></div>
-    </div>
-    <div class="top-right">
-      <div class="slot">♠</div>
-      <div class="slot" style="color:rgba(255,100,100,.3)">♥</div>
-      <div class="slot" style="color:rgba(255,100,100,.3)">♦</div>
-      <div class="slot">♣</div>
-    </div>
+    <div id="slot-stock" class="slot">↺</div>
+    <div id="slot-waste" class="slot"></div>
+    <div id="slot-gap"></div>
+    <div id="slot-f0" class="slot">♠</div>
+    <div id="slot-f1" class="slot" style="color:rgba(220,50,50,.3)">♥</div>
+    <div id="slot-f2" class="slot" style="color:rgba(220,50,50,.3)">♦</div>
+    <div id="slot-f3" class="slot">♣</div>
   </div>
-  <div id="tableau"></div>
+
 </div>
 
 <script>
 'use strict';
 
-/* ══ CONSTANTEN ══ */
 const SUITS = ['♠','♥','♦','♣'];
 const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-const RED   = {'♥':1,'♦':1};
+const RED   = {'♥':true,'♦':true};
 
 /* ══ STAAT ══ */
-let CW, CH, GAP, STACK_UP, STACK_DN, TOP_H;
-let deck = [];
+let CW, CH, GAP, STACK_UP, STACK_DN, TOP_H, START_X;
+let gameCards = []; /* alle kaartobjecten */
 let columns = [[],[],[],[],[],[],[]];
+let stockCards = [];
 
-/* ══ HELPERS ══ */
+const board = document.getElementById('board');
 const $ = id => document.getElementById(id);
 
-/* ══ AFMETINGEN -- responsive ══ */
+/* ══ AFMETINGEN ══ */
 function updateSizes() {
   const W = window.innerWidth;
   const H = window.innerHeight;
   const land = W > H;
 
-  if (land) {
-    CW = Math.floor(Math.min(W / 9.5, H * 0.28));
-  } else {
-    CW = Math.floor(Math.min(W / 7.4, H * 0.16));
-  }
+  /* Kaartbreedte: 7 kaarten + 6 gaps moeten passen, met kleine marge */
+  const maxW = Math.floor((W - 16) / 7.5);
+  const maxH = land ? Math.floor(H * 0.26) : Math.floor(H * 0.175);
+  CW = Math.min(maxW, Math.round(maxH / 1.42));
 
   CH       = Math.round(CW * 1.42);
-  GAP      = Math.max(3, Math.floor(CW * 0.08));
-  STACK_UP = Math.round(CH * 0.28);
+  GAP      = Math.max(3, Math.floor((W - 16 - CW * 7) / 6));
+  STACK_UP = Math.round(CH * 0.27);
   STACK_DN = Math.round(CH * 0.15);
 
-  const br = Math.round(CW * 0.13) + 'px';
+  /* Start X zodat kaarten gecentreerd zijn */
+  const totalW = CW * 7 + GAP * 6;
+  START_X = Math.floor((W - totalW) / 2);
 
-  /* Slots aanpassen */
+  /* Top rij: zelfde uitlijning als tableau */
+  const topRow = $('top-row');
+  topRow.style.paddingLeft  = START_X + 'px';
+  topRow.style.paddingRight = START_X + 'px';
+  topRow.style.gap = GAP + 'px';
+
+  /* Gap vult de ruimte tussen waste en foundations */
+  $('slot-gap').style.flex = '1';
+
+  /* Alle slots: zelfde breedte als kaarten */
   document.querySelectorAll('.slot').forEach(s => {
     s.style.width        = CW + 'px';
     s.style.height       = CH + 'px';
-    s.style.borderRadius = br;
-    s.style.fontSize     = Math.round(CW * 0.28) + 'px';
+    s.style.borderRadius = Math.round(CW * 0.12) + 'px';
+    s.style.fontSize     = Math.round(CW * 0.26) + 'px';
   });
 
-  TOP_H = $('top-row').getBoundingClientRect().bottom;
+  TOP_H = topRow.getBoundingClientRect().bottom + 8;
 }
 
 /* ══ DECK ══ */
 function createDeck() {
-  deck = [];
+  gameCards = [];
   for (const suit of SUITS)
     for (const rank of RANKS)
-      deck.push({ suit, rank, color: RED[suit] ? 'red' : 'black', faceUp: false });
+      gameCards.push({
+        suit, rank,
+        color: RED[suit] ? 'red' : 'black',
+        faceUp: false,
+        el: null
+      });
 }
 
 function shuffle(arr) {
@@ -621,91 +254,86 @@ function shuffle(arr) {
 }
 
 /* ══ KAART ELEMENT ══ */
-function makeCard(data) {
+function makeCardEl(card) {
   const el = document.createElement('div');
-  el.className = 'card ' + (data.faceUp ? 'face-up' : 'face-down');
-  el.style.width  = CW + 'px';
-  el.style.height = CH + 'px';
-  el.style.borderRadius = Math.round(CW * 0.13) + 'px';
+  el.className = 'card ' + (card.faceUp ? 'face-up' : 'face-down');
+  el.style.width        = CW + 'px';
+  el.style.height       = CH + 'px';
+  el.style.borderRadius = Math.round(CW * 0.12) + 'px';
 
-  const fs = Math.max(8, Math.round(CW * 0.15));
-  const cs = Math.max(14, Math.round(CW * 0.46));
-  const cls = data.color;
+  const fs  = Math.max(7,  Math.round(CW * 0.148)); /* hoekletters */
+  const mfs = Math.max(12, Math.round(CW * 0.44));  /* midden symbool */
+  const cls = card.color;
 
   el.innerHTML = `
     <div class="card-front">
-      <div class="corner top ${cls}" style="font-size:${fs}px">${data.rank}<br>${data.suit}</div>
-      <div class="card-center ${cls}" style="font-size:${cs}px">${data.suit}</div>
-      <div class="corner bottom ${cls}" style="font-size:${fs}px">${data.rank}<br>${data.suit}</div>
+      <div class="c-corner ${cls}" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>
+      <div class="c-mid ${cls}" style="font-size:${mfs}px">${card.suit}</div>
+      <div class="c-corner bot ${cls}" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>
     </div>
     <div class="card-back"></div>
   `;
 
-  data.el = el;
+  card.el = el;
   return el;
 }
 
 /* ══ UITDELEN ══ */
 function deal() {
-  /* Verwijder oude kaarten */
-  document.querySelectorAll('.card').forEach(e => e.remove());
+  /* Verwijder alle bestaande kaarten */
+  board.querySelectorAll('.card').forEach(e => e.remove());
   columns = [[],[],[],[],[],[],[]];
-
-  const totalW = CW * 7 + GAP * 6;
-  const startX = (window.innerWidth - totalW) / 2;
-  const startY = TOP_H + 10;
+  stockCards = [];
 
   let idx = 0;
 
   for (let col = 0; col < 7; col++) {
+    let y = TOP_H;
     for (let row = 0; row <= col; row++) {
-      const card = deck[idx++];
+      const card = gameCards[idx++];
       card.faceUp = (row === col);
 
-      const el = makeCard(card);
+      const el = makeCardEl(card);
+      const x  = START_X + col * (CW + GAP);
 
-      /* Positie */
-      const x = startX + col * (CW + GAP);
-      let y = startY;
-      for (let r = 0; r < row; r++) {
-        y += columns[col][r].faceUp ? STACK_UP : STACK_DN;
-      }
-
-      el.style.left = x + 'px';
-      el.style.top  = y + 'px';
+      el.style.left   = x + 'px';
+      el.style.top    = y + 'px';
       el.style.zIndex = row + 1;
 
       columns[col].push(card);
-      $('board').appendChild(el);
+      board.appendChild(el);
+
+      /* Volgende y positie */
+      y += card.faceUp ? STACK_UP : STACK_DN;
     }
   }
 
-  /* Stock kaarten */
-  const stockX = $('slot-stock').getBoundingClientRect().left;
-  const stockY = $('slot-stock').getBoundingClientRect().top;
-  while (idx < deck.length) {
-    const card = deck[idx++];
+  /* Stock */
+  const stockR = $('slot-stock').getBoundingClientRect();
+  while (idx < gameCards.length) {
+    const card = gameCards[idx++];
     card.faceUp = false;
-    const el = makeCard(card);
-    el.style.left = stockX + 'px';
-    el.style.top  = stockY + 'px';
+    const el = makeCardEl(card);
+    el.style.left   = stockR.left + 'px';
+    el.style.top    = stockR.top  + 'px';
     el.style.zIndex = 1;
-    $('board').appendChild(el);
+    stockCards.push(card);
+    board.appendChild(el);
   }
 }
 
 /* ══ DEAL ANIMATIE ══ */
-function dealMetAnimatie() {
-  const cards = document.querySelectorAll('.card');
+function dealAnimatie() {
+  const cards = board.querySelectorAll('.card');
   cards.forEach((k, i) => {
-    k.style.opacity = '0';
-    k.style.transform = 'scale(0.85)';
+    k.style.opacity   = '0';
+    k.style.transform = 'scale(0.88) translateY(-8px)';
     setTimeout(() => {
-      k.style.transition = 'opacity .2s ease, transform .25s ease';
-      k.style.opacity = '1';
-      k.style.transform = 'scale(1)';
-      setTimeout(() => { k.style.transition = ''; }, 260);
-    }, i * 20 + 40);
+      k.style.transition = 'opacity .2s ease, transform .22s ease';
+      k.style.opacity    = '1';
+      k.style.transform  = 'scale(1) translateY(0)';
+      setTimeout(() => { k.style.transition = ''; }, 240);
+    }, i * 18 + 30);
   });
 }
 
@@ -713,32 +341,18 @@ function dealMetAnimatie() {
 function init() {
   updateSizes();
   createDeck();
-  shuffle(deck);
+  shuffle(gameCards);
   deal();
-  dealMetAnimatie();
+  dealAnimatie();
 }
 
-window.addEventListener('resize', () => {
+function herInit() {
   updateSizes();
   deal();
-});
+}
 
-window.addEventListener('orientationchange', () => {
-  setTimeout(() => { updateSizes(); deal(); }, 100);
-});
-
-document.addEventListener('contextmenu', e => e.preventDefault());
-
-init();
-</script>
-
-</body>
-</html>
-
-window.addEventListener('orientationchange', () => {
-  setTimeout(() => { updateSizes(); deal(); }, 100);
-});
-
+window.addEventListener('resize', herInit);
+window.addEventListener('orientationchange', () => setTimeout(herInit, 100));
 document.addEventListener('contextmenu', e => e.preventDefault());
 
 init();
