@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 
 <html lang="nl">
 <head>
@@ -565,19 +565,55 @@ function naarStartScherm() {
   $('start-screen').style.display = 'flex';
 }
 
+const THEMAS = {
+  groen: {
+    tafelTop: '#0b4d3b', tafelBot: '#063126',
+    tafelGlow: 'rgba(0,200,120,0.10)',
+    slotBg: 'rgba(255,255,255,.06)', slotBorder: 'rgba(255,255,255,.18)',
+    rugGrad: 'linear-gradient(135deg, #1a3a8a 0%, #2359d4 50%, #0b1d54 100%)'
+  },
+  casino: {
+    tafelTop: '#4a0a0a', tafelBot: '#2a0505',
+    tafelGlow: 'rgba(200,40,40,0.12)',
+    slotBg: 'rgba(255,200,50,.07)', slotBorder: 'rgba(255,200,50,.35)',
+    rugGrad: 'linear-gradient(135deg, #7a1a1a 0%, #b22222 50%, #3a0a0a 100%)'
+  },
+  nacht: {
+    tafelTop: '#0d0d2b', tafelBot: '#060618',
+    tafelGlow: 'rgba(80,80,255,0.12)',
+    slotBg: 'rgba(100,100,255,.08)', slotBorder: 'rgba(120,120,255,.35)',
+    rugGrad: 'linear-gradient(135deg, #1a0a3a 0%, #3a0a7a 50%, #0a0520 100%)'
+  }
+};
+
+function pasThemaToe(t) {
+  const T = THEMAS[t];
+  // Tafel
+  board.style.background = `radial-gradient(circle at 50% 0%, ${T.tafelGlow}, transparent 50%), linear-gradient(180deg, ${T.tafelTop} 0%, ${T.tafelBot} 100%)`;
+  // Slots
+  document.querySelectorAll('.slot').forEach(s => {
+    s.style.background = T.slotBg;
+    s.style.borderColor = T.slotBorder;
+  });
+  // Kaartrug via style tag
+  let styleTag = document.getElementById('thema-style');
+  if (!styleTag) { styleTag = document.createElement('style'); styleTag.id = 'thema-style'; document.head.appendChild(styleTag); }
+  styleTag.textContent = `.card-back { background: ${T.rugGrad} !important; }`;
+}
+
 let thema = 'groen';
 
 function kiesThema(gekozenThema, btn) {
   thema = gekozenThema;
   document.querySelectorAll('.thema-btn').forEach(b => b.classList.remove('actief'));
   btn.classList.add('actief');
-  document.documentElement.className = thema === 'groen' ? '' : 'thema-' + thema;
+  pasThemaToe(thema);
 }
 
 function startSpel(gekozenNiveau) {
   niveau = gekozenNiveau;
-  document.documentElement.className = thema === 'groen' ? '' : 'thema-' + thema;
   $('start-screen').style.display = 'none';
+  pasThemaToe(thema);
   nieuwSpel();
 }
 
