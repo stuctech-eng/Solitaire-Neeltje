@@ -359,12 +359,13 @@ z-index: 9999; white-space: nowrap;
 </div>
 <div id="board">
   <div id="top-row">
-    <div id="slot-stock" class="slot">↺</div>
-    <div id="slot-waste" class="slot"></div>
+    <!-- Volgorde aangepast: Foundations links (kolom 0-3), Waste en Stock rechts (kolom 5-6) -->
     <div id="slot-f0"    class="slot">♠</div>
     <div id="slot-f1"    class="slot" style="color:rgba(220,50,50,.28)">♥</div>
     <div id="slot-f2"    class="slot" style="color:rgba(220,50,50,.28)">♦</div>
     <div id="slot-f3"    class="slot">♣</div>
+    <div id="slot-waste" class="slot"></div>
+    <div id="slot-stock" class="slot">↺</div>
   </div>
 </div>
 <div id="bottom-bar">
@@ -440,9 +441,11 @@ function layoutSlots() {
   const topPad = parseFloat(getComputedStyle(topRow).paddingTop) || 50;
   const br = Math.round(CW * 0.12) + 'px';
   const fs = Math.round(CW * 0.28) + 'px';
+  
+  // Posities omgewisseld: Foundations op 0 t/m 3, Waste op 5, Stock op 6
   const slotMap = {
-    'slot-stock': 0, 'slot-waste': 1,
-    'slot-f0': 3, 'slot-f1': 4, 'slot-f2': 5, 'slot-f3': 6
+    'slot-f0': 0, 'slot-f1': 1, 'slot-f2': 2, 'slot-f3': 3,
+    'slot-waste': 5, 'slot-stock': 6
   };
   Object.entries(slotMap).forEach(([id, col]) => {
     const s = $(id);
@@ -557,7 +560,7 @@ function sndWin() {
   } catch(e) {}
 }
 
-let niveau = 'klassiek'; // 'klassiek' of 'expert'
+let niveau = 'klassiek';
 
 function naarStartScherm() {
   stopTimer();
@@ -791,6 +794,7 @@ function makeEl(card) {
 function render() {
   board.querySelectorAll('.card').forEach(e => e.remove());
 
+  // Stock naar rechts verschoven (waaiert nu subtiel naar links uit)
   state.stock.forEach((card, i) => {
     const el = makeEl(card);
     const sr = $('slot-stock').getBoundingClientRect();
@@ -804,11 +808,12 @@ function render() {
     const wr = $('slot-waste').getBoundingClientRect();
     if (niveau === 'expert') {
       const zichtbaar = Math.min(3, state.waste.length);
-      const waaierOffset = Math.round(CW * 0.28);
+      // In expert-modus waaiert de afvalstapel nu subtiel naar LINKS uit om binnen het scherm te blijven
+      const waaierOffset = Math.round(CW * 0.24);
       for (let i = zichtbaar - 1; i >= 0; i--) {
         const card = state.waste[state.waste.length - 1 - i];
         const el = makeEl(card);
-        el.style.left   = (wr.left + i * waaierOffset) + 'px';
+        el.style.left   = (wr.left - i * waaierOffset) + 'px';
         el.style.top    = wr.top + 'px';
         el.style.zIndex = 50 + (zichtbaar - i);
         if (i === 0) {
@@ -1150,4 +1155,4 @@ updateSizes(); startTimer();
 </script>
 
 </body>
-</html> 
+</html>
