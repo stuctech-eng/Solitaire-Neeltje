@@ -684,7 +684,6 @@ function geenZettenMeer() {
 
 function hintZet() {
   if (geenZettenMeer()) {
-    // Prominente melding
     const el = $('toast');
     el.textContent = '🚫 Geen zetten meer mogelijk!';
     el.style.background = 'rgba(180,30,30,.95)';
@@ -698,6 +697,47 @@ function hintZet() {
     }, 3000);
     return;
   }
+  // Waste → foundation
+  if (state.waste.length) {
+    const w = state.waste[state.waste.length - 1];
+    for (let f = 0; f < 4; f++) {
+      if (canMoveToFoundation(w, f)) { toast('💡 ' + w.rank + w.suit + ' → foundation'); return; }
+    }
+  }
+  // Tableau top → foundation
+  for (let c = 0; c < 7; c++) {
+    const pile = state.tableau[c];
+    if (!pile.length) continue;
+    const top = pile[pile.length - 1];
+    if (!top.faceUp) continue;
+    for (let f = 0; f < 4; f++) {
+      if (canMoveToFoundation(top, f)) { toast('💡 ' + top.rank + top.suit + ' → foundation'); return; }
+    }
+  }
+  // Waste → tableau
+  if (state.waste.length) {
+    const w = state.waste[state.waste.length - 1];
+    for (let c = 0; c < 7; c++) {
+      if (canMoveToTableau(w, c)) { toast('💡 ' + w.rank + w.suit + ' → kolom ' + (c + 1)); return; }
+    }
+  }
+  // Tableau → tableau
+  for (let c = 0; c < 7; c++) {
+    const pile = state.tableau[c];
+    const firstUp = pile.findIndex(card => card.faceUp);
+    if (firstUp < 0) continue;
+    const card = pile[firstUp];
+    for (let t = 0; t < 7; t++) {
+      if (t === c) continue;
+      if (canMoveToTableau(card, t) && firstUp > 0 && !pile[firstUp - 1].faceUp) {
+        toast('💡 ' + card.rank + card.suit + ' → kolom ' + (t + 1)); return;
+      }
+    }
+  }
+  // Stock
+  if (state.stock.length > 0) { toast('💡 Klik de stock voor een nieuwe kaart'); return; }
+  toast('Geen zetten meer mogelijk');
+}
   if (state.waste.length) {
     const w = state.waste[state.waste.length-1];
     for (let f=0;f<4;f++) if (canMoveToFoundation(w,f)) { toast('💡 '+w.rank+w.suit+' → foundation'); return; }
