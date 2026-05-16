@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
@@ -61,8 +60,8 @@ font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 #board {
 position: fixed; inset: 0; overflow: hidden;
 background:
-radial-gradient(circle at 50% 0%, var(–tafel-glow), transparent 50%),
-linear-gradient(180deg, var(–tafel-top) 0%, var(–tafel-bot) 100%);
+radial-gradient(circle at 50% 0%, var(--tafel-glow), transparent 50%),
+linear-gradient(180deg, var(--tafel-top) 0%, var(--tafel-bot) 100%);
 }
 #board::after {
 content: "";
@@ -325,6 +324,7 @@ flex-direction: column; gap: 4px;
 font-size: 10px; color: rgba(255,255,255,.35);
 text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;
 }
+#toast {
 position: fixed; bottom: 80px; left: 50%;
 transform: translateX(-50%);
 background: rgba(0,0,0,.88); color: #fff;
@@ -658,33 +658,36 @@ function undoZet() {
   render();
 }
 
-function geenZettenMeer() {
-  // Stock nog beschikbaar?
-  if (state.stock.length > 0) return false;
-  // Waste naar foundation of tableau?
-  if (state.waste.length) {
+function isZetMogelijk() {
+  if (state.stock.length > 0) return true;
+  
+  if (state.waste.length > 0) {
     const w = state.waste[state.waste.length - 1];
-    for (let f = 0; f < 4; f++) if (canMoveToFoundation(w, f)) return false;
-    for (let c = 0; c < 7; c++) if (canMoveToTableau(w, c)) return false;
+    for (let f = 0; f < 4; f++) if (canMoveToFoundation(w, f)) return true;
+    for (let c = 0; c < 7; c++) if (canMoveToTableau(w, c)) return true;
   }
-  // Tableau kaarten
+  
   for (let c = 0; c < 7; c++) {
     const pile = state.tableau[c];
+    if (!pile.length) continue;
+    
+    const top = pile[pile.length - 1];
+    for (let f = 0; f < 4; f++) if (canMoveToFoundation(top, f)) return true;
+    
     const firstUp = pile.findIndex(card => card.faceUp);
-    if (firstUp < 0) continue;
-    const card = pile[firstUp];
-    for (let f = 0; f < 4; f++) if (canMoveToFoundation(pile[pile.length-1], f)) return false;
-    for (let t = 0; t < 7; t++) {
-      if (t === c) continue;
-      if (canMoveToTableau(card, t)) return false;
+    if (firstUp >= 0) {
+      const card = pile[firstUp];
+      for (let t = 0; t < 7; t++) {
+        if (t === c) continue;
+        if (canMoveToTableau(card, t)) return true;
+      }
     }
   }
-  return true;
+  return false;
 }
 
 function hintZet() {
-  if (geenZettenMeer()) {
-    // Prominente melding
+  if (!isZetMogelijk()) {
     const el = $('toast');
     el.textContent = '🚫 Geen zetten meer mogelijk!';
     el.style.background = 'rgba(180,30,30,.95)';
@@ -698,33 +701,56 @@ function hintZet() {
     }, 3000);
     return;
   }
+
   if (state.waste.length) {
-    const w = state.waste[state.waste.length-1];
-    for (let f=0;f<4;f++) if (canMoveToFoundation(w,f)) { toast('💡 '+w.rank+w.suit+' → foundation'); return; }
-  }
-  for (let c=0;c<7;c++) {
-    const pile = state.tableau[c]; if (!pile.length) continue;
-    const top = pile[pile.length-1]; if (!top.faceUp) continue;
-    for (let f=0;f<4;f++) if (canMoveToFoundation(top,f)) { toast('💡 '+top.rank+top.suit+' → foundation'); return; }
-  }
-  if (state.waste.length) {
-    const w = state.waste[state.waste.length-1];
-    for (let c=0;c<7;c++) if (canMoveToTableau(w,c)) { toast('💡 '+w.rank+w.suit+' → kolom '+(c+1)); return; }
-  }
-  for (let c=0;c<7;c++) {
-    const pile = state.tableau[c];
-    const firstUp = pile.findIndex(card=>card.faceUp);
-    if (firstUp<0) continue;
-    const card = pile[firstUp];
-    for (let t=0;t<7;t++) {
-      if (t===c) continue;
-      if (canMoveToTableau(card,t) && firstUp>0 && !pile[firstUp-1].faceUp) {
-        toast('💡 '+card.rank+card.suit+' → kolom '+(t+1)); return;
+    const w = state.waste[state.waste.length - 1];
+    for (let f = 0; f < 4; f++) {
+      if (canMoveToFoundation(w, f)) { 
+        toast('💡 ' + w.rank + w.suit + ' → foundation'); 
+        return; 
       }
     }
   }
-  if (state.stock.length>0) { toast('💡 Klik de stock voor een nieuwe kaart'); return; }
-  toast('Geen zetten meer mogelijk');
+
+  for (let c = 0; c < 7; c++) {
+    const pile = state.tableau[c]; if (!pile.length) continue;
+    const top = pile[pile.length - 1]; if (!top.faceUp) continue;
+    for (let f = 0; f < 4; f++) {
+      if (canMoveToFoundation(top, f)) { 
+        toast('💡 ' + top.rank + top.suit + ' → foundation'); 
+        return; 
+      }
+    }
+  }
+
+  if (state.waste.length) {
+    const w = state.waste[state.waste.length - 1];
+    for (let c = 0; c < 7; c++) {
+      if (canMoveToTableau(w, c)) { 
+        toast('💡 ' + w.rank + w.suit + ' → kolom ' + (c + 1)); 
+        return; 
+      }
+    }
+  }
+
+  for (let c = 0; c < 7; c++) {
+    const pile = state.tableau[c];
+    const firstUp = pile.findIndex(card => card.faceUp);
+    if (firstUp < 0) continue;
+    const card = pile[firstUp];
+    for (let t = 0; t < 7; t++) {
+      if (t === c) continue;
+      if (canMoveToTableau(card, t)) {
+        toast('💡 ' + card.rank + card.suit + ' → kolom ' + (t + 1)); 
+        return;
+      }
+    }
+  }
+
+  if (state.stock.length > 0) { 
+    toast('💡 Klik de stock voor een nieuwe kaart'); 
+    return; 
+  }
 }
 
 function nieuwSpel() {
@@ -777,7 +803,6 @@ function render() {
   if (state.waste.length > 0) {
     const wr = $('slot-waste').getBoundingClientRect();
     if (niveau === 'expert') {
-      // Toon max 3 bovenste waste kaarten uitgewaaierd
       const zichtbaar = Math.min(3, state.waste.length);
       const waaierOffset = Math.round(CW * 0.28);
       for (let i = zichtbaar - 1; i >= 0; i--) {
@@ -786,7 +811,6 @@ function render() {
         el.style.left   = (wr.left + i * waaierOffset) + 'px';
         el.style.top    = wr.top + 'px';
         el.style.zIndex = 50 + (zichtbaar - i);
-        // Alleen bovenste kaart is draggable
         if (i === 0) {
           enableDrag(el, card, 'waste', state.waste.length - 1);
         }
@@ -881,7 +905,6 @@ function tryAutoFoundation(card, pile, pileArgs) {
   for (let f = 0; f < 4; f++) {
     if (canMoveToFoundation(card, f)) {
       snapState();
-      // Verwijder uit bron
       if (pile === 'waste') {
         state.waste.pop();
       } else if (pile === 'tableau') {
@@ -941,7 +964,6 @@ function enableDrag(el, card, pile, ...pileArgs) {
       el.removeEventListener('pointermove', onMove);
       el.removeEventListener('pointerup', onUp);
       if (!pointerMoved) {
-        // Klik -- probeer naar foundation
         clones.forEach(c => c.remove());
         el.style.opacity = '';
         if (cards.length === 1) tryAutoFoundation(card, pile, pileArgs);
