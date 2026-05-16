@@ -3,36 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Solitaire – Neeltje Premium</title>
+<title>Solitaire – Neeltje Ultra Premium</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#072b21">
+<meta name="theme-color" content="#030d0a">
 <style>
 :root {
-  --tafel-top:    #0a3a2f;
-  --tafel-bot:    #051c16;
-  --tafel-glow:   rgba(16,185,129,0.14);
-  --slot-bg:      rgba(255,255,255,0.03);
-  --slot-border:  rgba(255,255,255,0.12);
-  --kaart-rug:    linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-  --ui-bg:        rgba(15, 23, 42, 0.65);
-  --ui-border:    rgba(255, 255, 255, 0.08);
-}
-html.thema-casino {
-  --tafel-top:    #5c0d0d;
-  --tafel-bot:    #240505;
-  --tafel-glow:   rgba(239,68,68,0.15);
-  --slot-bg:      rgba(255,215,0,0.02);
-  --slot-border:  rgba(255,215,0,0.2);
-  --kaart-rug:    linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%);
-}
-html.thema-nacht {
-  --tafel-top:    #111827;
-  --tafel-bot:    #030712;
-  --tafel-glow:   rgba(99,102,241,0.15);
+  --tafel-top:    #051813;
+  --tafel-bot:    #010504;
+  --tafel-glow:   rgba(16,185,129,0.25);
   --slot-bg:      rgba(255,255,255,0.02);
   --slot-border:  rgba(255,255,255,0.08);
-  --kaart-rug:    linear-gradient(135deg, #311042 0%, #6366f1 100%);
+  --kaart-rug:    linear-gradient(135deg, #0052d4 0%, #4364f7 50%, #6fb1fc 100%);
+  --ui-bg:        rgba(10, 15, 26, 0.75);
+  --ui-border:    rgba(255, 255, 255, 0.08);
+  --card-shadow:  0 6px 16px rgba(0,0,0,0.45), 0 2px 4px rgba(0,0,0,0.25);
+}
+html.thema-casino {
+  --tafel-top:    #2b0404;
+  --tafel-bot:    #0a0101;
+  --tafel-glow:   rgba(239,68,68,0.25);
+  --slot-bg:      rgba(255,215,0,0.01);
+  --slot-border:  rgba(255,215,0,0.12);
+  --kaart-rug:    linear-gradient(135deg, #b21f1f 0%, #fdbb2d 100%);
+}
+html.thema-nacht {
+  --tafel-top:    #0b0f19;
+  --tafel-bot:    #020408;
+  --tafel-glow:   rgba(99,102,241,0.25);
+  --slot-bg:      rgba(255,255,255,0.01);
+  --slot-border:  rgba(255,255,255,0.05);
+  --kaart-rug:    linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
 }
 
 *, *::before, *::after {
@@ -46,15 +47,15 @@ html.thema-nacht {
 html, body {
   width: 100%; height: 100dvh;
   overflow: hidden; position: fixed; inset: 0;
-  touch-action: none; background: #051c16;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  touch-action: none; background: #010504;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #fff;
 }
 #board {
   position: fixed; inset: 0; overflow: hidden;
-  background: radial-gradient(circle at 50% 20%, var(--tafel-glow), transparent 60%),
+  background: radial-gradient(circle at 50% 25%, var(--tafel-glow), transparent 55%),
               linear-gradient(180deg, var(--tafel-top) 0%, var(--tafel-bot) 100%);
-  perspective: 1200px;
+  perspective: 1500px;
 }
 #top-row {
   position: absolute; left: 0; right: 0; top: 0; z-index: 10;
@@ -62,35 +63,41 @@ html, body {
 }
 .slot {
   position: absolute;
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--slot-bg);
-  border: 1.5px solid var(--slot-border);
-  box-shadow: inset 0 4px 12px rgba(0,0,0,0.35);
+  border: 1px solid var(--slot-border);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.6);
   display: flex; align-items: center; justify-content: center;
-  color: rgba(255,255,255,0.15); font-weight: 700;
-  pointer-events: auto; /* Zorgt dat de kliks doorkomen */
+  color: rgba(255,255,255,0.08); font-weight: 700; font-size: 1.5em;
+  pointer-events: auto;
 }
 .card {
   position: absolute; cursor: grab; touch-action: none;
   will-change: transform, left, top;
-  border-radius: 8px;
-  box-shadow: 0 3px 7px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.2);
-  transition: box-shadow 0.2s, transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  border-radius: 10px;
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.2s cubic-bezier(0.25, 1, 0.5, 1), transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* De Ultra-Premium Lift bij slepen */
+.card:active {
+  transform: scale(1.04);
+  box-shadow: 0 22px 40px rgba(0,0,0,0.6), 0 5px 15px rgba(0,0,0,0.3);
 }
 
 .card.in-motion {
-  transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
-              top 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
-              transform 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  transition: left 0.45s cubic-bezier(0.19, 1, 0.22, 1), 
+              top 0.45s cubic-bezier(0.19, 1, 0.22, 1), 
+              transform 0.45s cubic-bezier(0.19, 1, 0.22, 1) !important;
   z-index: 2500 !important;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.65) !important;
 }
 
 .card.sparkle::after {
   content: ''; position: absolute; inset: 0; border-radius: inherit;
-  background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
+  background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%);
   background-size: 200% 200%;
-  animation: shineEffect 0.5s ease-out forwards;
+  animation: shineEffect 0.45s ease-out forwards;
   pointer-events: none; z-index: 10;
 }
 @keyframes shineEffect {
@@ -111,105 +118,114 @@ html, body {
   backface-visibility: hidden; -webkit-backface-visibility: hidden;
 }
 .card-front {
-  background: linear-gradient(165deg, #ffffff 0%, #f6f6f9 100%);
-  border: 1px solid rgba(0,0,0,0.15);
+  background: #ffffff;
+  border: 1px solid rgba(255,255,255,0.9);
   display: flex; flex-direction: column; overflow: hidden;
 }
 .c-corner {
-  font-weight: 700; line-height: 1.05; padding: 2px 4px; flex-shrink: 0;
+  font-weight: 800; line-height: 1.0; padding: 4px 6px; flex-shrink: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
 }
 .c-corner.bot { align-self: flex-end; transform: rotate(180deg); }
 .c-mid {
   flex: 1; display: flex; align-items: center; justify-content: center;
-  font-weight: 800; overflow: hidden; margin-top: -2px;
+  font-weight: 800; overflow: hidden; margin-top: -4px;
 }
 .card-back {
   background: var(--kaart-rug);
-  border: 1px solid rgba(255,255,255,0.2);
-  box-shadow: inset 0 0 12px rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.25);
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.3);
   transform: rotateY(180deg); position: absolute; inset: 0; border-radius: inherit;
 }
 .card-back::after {
-  content: "✦"; position: absolute; left: 50%; top: 50%;
-  transform: translate(-50%,-50%); font-size: 1.4em; color: rgba(255,255,255,0.18);
+  content: ""; position: absolute; inset: 6px; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background-image: radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px);
+  background-size: 8px 8px;
 }
-.red   { color: #e11d48; }
-.black { color: #0f172a; }
 
-/* FIX: Recycle overlay mag NOOIT de dichte stapel blokkeren */
+/* Premium Ultra-Knal Kleuren */
+.red   { color: #ff1744; text-shadow: 0 0 1px rgba(255,23,68,0.1); }
+.black { color: #05050a; }
+
 #stock-recycle-overlay {
   position: absolute; z-index: 5;
-  background: rgba(255,255,255,0.05); border: 1.5px dashed rgba(255,255,255,0.15);
-  border-radius: 10px; display: none; align-items: center; justify-content: center;
-  font-size: 22px; color: rgba(255,255,255,0.3); pointer-events: auto; cursor: pointer;
+  background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.2);
+  border-radius: 12px; display: none; align-items: center; justify-content: center;
+  font-size: 24px; color: rgba(255,255,255,0.4); pointer-events: auto; cursor: pointer;
 }
 
 #bottom-bar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-around;
-  padding: 8px 14px;
-  padding-bottom: calc(6px + env(safe-area-inset-bottom, 8px));
+  padding: 10px 16px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 8px));
   background: var(--ui-bg);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
   border-top: 1px solid var(--ui-border);
-  gap: 8px;
+  gap: 12px;
 }
-/* Korte layout voor landschapsmodus */
 @media (orientation: landscape) {
-  #bottom-bar { padding: 4px 14px; padding-bottom: env(safe-area-inset-bottom, 4px); }
-  .bb-btn { padding: 6px 10px !important; font-size: 11px !important; }
-  .bb-stat-val { font-size: 13px !important; }
+  #bottom-bar { padding: 4px 16px; padding-bottom: env(safe-area-inset-bottom, 4px); }
+  .bb-btn { padding: 6px 12px !important; font-size: 12px !important; }
+  .bb-stat-val { font-size: 14px !important; }
 }
 
 .bb-btn {
-  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 10px; padding: 10px 12px;
-  color: #f8fafc; font-size: 13px; font-weight: 600;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 12px; padding: 11px 14px;
+  color: #fff; font-size: 13px; font-weight: 600;
   cursor: pointer; flex: 1; text-align: center;
+  transition: background 0.15s;
 }
 .bb-btn:active { background: rgba(255,255,255,0.15); transform: scale(0.97); }
 .bb-stat { text-align: center; flex: 1; }
-.bb-stat-lbl { font-size: 9px; color: rgba(241,245,249,0.4); text-transform: uppercase; letter-spacing: 1px; display: block; }
-.bb-stat-val { font-size: 15px; font-weight: 700; color: #fff; display: block; }
-.score-pop { transform: scale(1.2); color: #fbbf24 !important; }
+.bb-stat-lbl { font-size: 9px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.2px; display: block; margin-bottom: 1px; }
+.bb-stat-val { font-size: 16px; font-weight: 700; color: #fff; display: block; font-variant-numeric: tabular-nums; }
+.score-pop { transform: scale(1.25); color: #00ffcc !important; transition: transform 0.1s; }
 
 #start-screen, #win-screen {
   position: fixed; inset: 0; z-index: 800; display: flex; align-items: center; justify-content: center; flex-direction: column;
 }
-#start-screen { background: radial-gradient(circle at 50% 30%, #0a4739 0%, #031410 100%); }
-#win-screen { display: none; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 900; }
+#start-screen { background: radial-gradient(circle at 50% 30%, #051c17 0%, #000000 100%); }
+#win-screen { display: none; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 900; }
 #win-screen.show { display: flex; }
 
 .window-box {
-  background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-  border-radius: 24px; padding: 25px; text-align: center; max-width: 310px; width: 85%;
+  background: rgba(20, 25, 35, 0.7); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+  border-radius: 28px; padding: 30px; text-align: center; max-width: 320px; width: 88%;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.8);
 }
 @media (orientation: landscape) {
-  .window-box { padding: 15px; max-width: 450px; }
-  .thema-rij { margin-bottom: 10px !important; }
-  .start-sub { margin-bottom: 10px !important; }
+  .window-box { padding: 16px; max-width: 460px; }
+  .thema-rij { margin-bottom: 12px !important; }
+  .start-sub { margin-bottom: 12px !important; }
 }
 
-.start-titel { font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 2px; }
-.start-sub { font-size: 11px; color: #10b981; font-weight: 600; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px; }
-.start-label { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
-.thema-rij { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+.start-titel { font-size: 36px; font-weight: 900; letter-spacing: -1.5px; background: linear-gradient(180deg, #fff 0%, #a5b4fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.start-sub { font-size: 11px; color: #00ffcc; font-weight: 700; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 25px; text-shadow: 0 0 10px rgba(0,255,204,0.3); }
+.start-label { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
+.thema-rij { display: flex; justify-content: center; gap: 12px; margin-bottom: 25px; }
 .thema-btn {
-  width: 60px; height: 60px; border-radius: 14px; border: 2px solid rgba(255,255,255,0.1); color: #fff;
+  width: 65px; height: 65px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.05); color: #fff;
   cursor: pointer; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 11px;
+  transition: border-color 0.2s, transform 0.2s;
 }
-.thema-btn.actief { border-color: #fff; transform: scale(1.04); }
-.thema-btn.t-groen  { background: linear-gradient(135deg, #0a3a2f, #051c16); }
-.thema-btn.t-casino { background: linear-gradient(135deg, #5c0d0d, #240505); }
-.thema-btn.t-nacht  { background: linear-gradient(135deg, #111827, #030712); }
-.start-btn { width: 100%; padding: 10px; border-radius: 12px; border: none; font-size: 14px; font-weight: 700; color: #fff; cursor: pointer; margin-bottom: 8px; }
-.start-btn.klassiek { background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%); }
-.start-btn.expert { background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); }
-.start-btn-lbl { display: block; font-size: 10px; font-weight: 400; opacity: 0.8; }
+.thema-btn span { font-size: 9px; opacity: 0.6; margin-top: 2px; }
+.thema-btn.actief { border-color: #fff; transform: scale(1.06); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+.thema-btn.t-groen  { background: linear-gradient(135deg, #051c13, #010504); }
+.thema-btn.t-casino { background: linear-gradient(135deg, #2b0404, #0a0101); }
+.thema-btn.t-nacht  { background: linear-gradient(135deg, #0b0f19, #020408); }
+.start-btn { width: 100%; padding: 12px; border-radius: 14px; border: none; font-size: 15px; font-weight: 700; color: #fff; cursor: pointer; margin-bottom: 10px; transition: transform 0.1s; }
+.start-btn:active { transform: scale(0.98); }
+.start-btn.klassiek { background: linear-gradient(135deg, #0052d4 0%, #4364f7 100%); }
+.start-btn.expert { background: linear-gradient(135deg, #f59e0b 0%, #e11d48 100%); }
+.start-btn-lbl { display: block; font-size: 10px; font-weight: 400; opacity: 0.7; margin-top: 1px; }
 
 #toast {
-  position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.95); color: #fff;
-  padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 9999;
+  position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%); background: rgba(10, 15, 25, 0.95); color: #fff;
+  padding: 10px 24px; border-radius: 24px; font-size: 13px; font-weight: 600; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 9999;
+  border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 15px 30px rgba(0,0,0,0.5);
 }
 #toast.show { opacity: 1; }
 .confetti { position: fixed; width: 8px; height: 12px; top: -20px; z-index: 950; pointer-events: none; animation: dropConfetti linear forwards; }
@@ -221,15 +237,15 @@ html, body {
 <div id="start-screen">
   <div class="window-box">
     <div class="start-titel">🂡 Solitaire</div>
-    <div class="start-sub">Premium</div>
+    <div class="start-sub">Ultra Premium</div>
     <div class="start-label">Kies Tafelstijl</div>
     <div class="thema-rij">
-      <button class="thema-btn t-groen actief" onclick="kiesThema('groen',this)">🌿<span>Tafel</span></button>
-      <button class="thema-btn t-casino"       onclick="kiesThema('casino',this)">🎰<span>Casino</span></button>
-      <button class="thema-btn t-nacht"        onclick="kiesThema('nacht',this)">🌙<span>Nacht</span></button>
+      <button class="thema-btn t-groen actief" onclick="kiesThema('groen',this)">🌿<span>Lounge</span></button>
+      <button class="thema-btn t-casino"       onclick="kiesThema('casino',this)">🎰<span>Neon Red</span></button>
+      <button class="thema-btn t-nacht"        onclick="kiesThema('nacht',this)">🌙<span>Cyber</span></button>
     </div>
     <div class="start-label">Spelmodus</div>
-    <div style="display: flex; gap: 10px;">
+    <div style="display: flex; gap: 12px;">
       <button class="start-btn klassiek" onclick="startSpel('klassiek')">Klassiek<span class="start-btn-lbl">1 kaart</span></button>
       <button class="start-btn expert" onclick="startSpel('expert')">Expert<span class="start-btn-lbl">3 kaarten</span></button>
     </div>
@@ -239,8 +255,8 @@ html, body {
 <div id="board">
   <div id="top-row">
     <div id="slot-f0"    class="slot">♠</div>
-    <div id="slot-f1"    class="slot" style="color:rgba(225,29,72,0.2)">♥</div>
-    <div id="slot-f2"    class="slot" style="color:rgba(225,29,72,0.2)">♦</div>
+    <div id="slot-f1"    class="slot" style="color:rgba(255,23,68,0.15)">♥</div>
+    <div id="slot-f2"    class="slot" style="color:rgba(255,23,68,0.15)">♦</div>
     <div id="slot-f3"    class="slot">♣</div>
     <div id="slot-waste" class="slot"></div>
     <div id="slot-stock" class="slot">↺</div>
@@ -253,14 +269,14 @@ html, body {
   <div class="bb-stat"><span class="bb-stat-lbl">Score</span><span class="bb-stat-val" id="stat-score">0</span></div>
   <div class="bb-stat"><span class="bb-stat-lbl">Tijd</span><span class="bb-stat-val" id="stat-tijd">0:00</span></div>
   <button class="bb-btn" onclick="hintZet()">💡 Hint</button>
-  <button class="bb-btn" onclick="naarStartScherm()" style="background:rgba(255,255,255,0.14)">🏠 Menu</button>
+  <button class="bb-btn" onclick="naarStartScherm()" style="background:rgba(255,255,255,0.12)">🏠 Menu</button>
 </div>
 
 <div id="win-screen">
   <div class="window-box">
-    <div style="font-size: 38px; margin-bottom: 10px;">🏆</div>
-    <h2 style="font-size: 22px; margin-bottom: 6px;">Gefeliciteerd!</h2>
-    <div style="font-size: 14px; color:rgba(255,255,255,0.6); margin-bottom: 20px;" id="win-stats-txt"></div>
+    <div style="font-size: 42px; margin-bottom: 12px; filter: drop-shadow(0 0 10px gold)">🏆</div>
+    <h2 style="font-size: 24px; margin-bottom: 8px; font-weight:800;">Goud Behaald!</h2>
+    <div style="font-size: 15px; color:rgba(255,255,255,0.6); margin-bottom: 22px; line-height:1.4;" id="win-stats-txt"></div>
     <button class="start-btn klassiek" style="margin-bottom:0;" onclick="naarStartScherm()">Nieuw Spel</button>
   </div>
 </div>
@@ -287,22 +303,18 @@ function toast(msg) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
 }
 
-// FIX & LANDSCHAP OPTIMALISATIE: Dynamische schaling op basis van rotatie
 function updateSizes() {
   const W = window.innerWidth, H = window.innerHeight;
   const isLandscape = W > H;
 
-  // Maximaal mogelijke breedte per kaart berekenen
   const maxW = Math.floor((W - 14) / 7.2); 
-  // In landschap mag de kaart niet te hoog zijn i.v.m. de onderkant van het scherm
-  const maxH = isLandscape ? Math.floor(H * 0.18) : Math.floor(H * 0.20); 
+  const maxH = isLandscape ? Math.floor(H * 0.19) : Math.floor(H * 0.21); 
   
-  CW = Math.max(40, Math.min(maxW, Math.round(maxH / 1.4))); 
+  CW = Math.max(42, Math.min(maxW, Math.round(maxH / 1.4))); 
   CH = Math.round(CW * 1.4);
   GAP = Math.floor((W - (CW * 7)) / 8);
   if (GAP < 2) GAP = 2;
   
-  // LANDSCHAP VERBETERING: Maak de stapelafstanden compacter als het scherm plat ligt
   STACK_UP = isLandscape ? Math.round(CH * 0.16) : Math.round(CH * 0.24);
   STACK_DN = isLandscape ? Math.round(CH * 0.08) : Math.round(CH * 0.11);
   START_X = Math.floor((W - (CW * 7 + GAP * 6)) / 2);
@@ -310,7 +322,6 @@ function updateSizes() {
   const topRow = $('top-row');
   const topPad = parseFloat(getComputedStyle(topRow).paddingTop) || 25;
   
-  // Posities slots inrichten
   ['slot-f0', 'slot-f1', 'slot-f2', 'slot-f3', 'slot-waste', 'slot-stock'].forEach((id, idx) => {
     const col = idx <= 3 ? idx : (idx === 4 ? 5 : 6);
     const s = $(id);
@@ -318,14 +329,13 @@ function updateSizes() {
     s.style.top = topPad + 'px'; s.style.width = CW + 'px'; s.style.height = CH + 'px';
   });
   
-  // FIX: Reset de overlay perfect over de stock-positie heen
   const rec = $('stock-recycle-overlay');
   const stockRect = $('slot-stock').getBoundingClientRect();
   rec.style.left = stockRect.left + 'px'; rec.style.top = stockRect.top + 'px';
   rec.style.width = CW + 'px'; rec.style.height = CH + 'px';
 
   topRow.style.height = (topPad + CH + 5) + 'px';
-  TOP_H = topPad + CH + 10;
+  TOP_H = topPad + CH + 12;
 }
 
 let AC = null;
@@ -337,12 +347,12 @@ function playSound(type) {
     const osc = AC.createOscillator(), gain = AC.createGain();
     osc.connect(gain); gain.connect(AC.destination);
     if (type === 'click' || type === 'flip') {
-      osc.type = 'sine'; osc.frequency.setValueAtTime(type==='click'?550:350, AC.currentTime);
-      gain.gain.setValueAtTime(0.03, AC.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 0.05);
-      osc.start(); osc.stop(AC.currentTime + 0.06);
+      osc.type = 'sine'; osc.frequency.setValueAtTime(type==='click'?580:380, AC.currentTime);
+      gain.gain.setValueAtTime(0.02, AC.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 0.04);
+      osc.start(); osc.stop(AC.currentTime + 0.05);
     } else if (type === 'foundation') {
-      osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, AC.currentTime); osc.frequency.setValueAtTime(659.25, AC.currentTime + 0.05);
-      gain.gain.setValueAtTime(0.08, AC.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 0.2);
+      osc.type = 'sine'; osc.frequency.setValueAtTime(587.33, AC.currentTime); osc.frequency.setValueAtTime(783.99, AC.currentTime + 0.06);
+      gain.gain.setValueAtTime(0.06, AC.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 0.18);
       osc.start(); osc.stop(AC.currentTime + 0.2);
     }
   } catch(e){}
@@ -379,7 +389,7 @@ function buildCardElement(card) {
   if (card.el) card.el.remove();
   const el = document.createElement('div'); el.className = `card ${card.faceUp?'face-up':'face-down'}`;
   el.style.width = CW + 'px'; el.style.height = CH + 'px';
-  const fs = Math.max(9, Math.round(CW * 0.18)), mfs = Math.max(16, Math.round(CW * 0.42));
+  const fs = Math.max(10, Math.round(CW * 0.20)), mfs = Math.max(18, Math.round(CW * 0.46));
   el.innerHTML = `
     <div class="card-inner">
       <div class="card-front">
@@ -396,22 +406,19 @@ function render() {
   if (isAnimating) return;
   board.querySelectorAll('.card:not(.in-motion)').forEach(e => e.remove());
 
-  // Render dichte stapel (Stock)
   state.stock.forEach((card, i) => {
     const el = buildCardElement(card); const r = $('slot-stock').getBoundingClientRect();
     el.style.left = r.left + 'px'; el.style.top = r.top + 'px'; el.style.zIndex = i + 1;
-    // FIX: Klikken op de bovenste kaart van de dichte stapel trekt direct een kaart
     if(i === state.stock.length - 1) {
       el.addEventListener('pointerdown', e => { e.stopPropagation(); executeStockDraw(); });
     }
   });
 
-  // Render open stapel (Waste)
   if (state.waste.length > 0) {
     const r = $('slot-waste').getBoundingClientRect();
     if (niveau === 'expert') {
       const showCount = Math.min(3, state.waste.length);
-      const step = Math.round(CW * 0.22);
+      const step = Math.round(CW * 0.24);
       for (let i = showCount - 1; i >= 0; i--) {
         const card = state.waste[state.waste.length - 1 - i]; const el = buildCardElement(card);
         el.style.left = (r.left + (showCount - 1 - i) * step) + 'px'; el.style.top = r.top + 'px'; el.style.zIndex = 50 + (showCount - i);
@@ -424,7 +431,6 @@ function render() {
     }
   }
 
-  // Render eindstapels (Foundations)
   state.foundations.forEach((pile, fIdx) => {
     if (!pile.length) return;
     const topCard = pile[pile.length - 1]; const el = buildCardElement(topCard);
@@ -433,7 +439,6 @@ function render() {
     bindDragAndTap(el, topCard, 'foundation', fIdx);
   });
 
-  // Render speelveld (Tableau)
   state.tableau.forEach((col, cIdx) => {
     let curY = TOP_H; const curX = START_X + cIdx * (CW + GAP);
     col.forEach((card, rIdx) => {
@@ -447,7 +452,6 @@ function render() {
     });
   });
 
-  // FIX: Toon de herstartknop ALLEEN als de dichte stapel echt leeg is
   const overlay = $('stock-recycle-overlay');
   if (state.stock.length === 0 && state.waste.length > 0) {
     overlay.style.display = 'flex';
@@ -456,7 +460,6 @@ function render() {
   }
 }
 
-// FIX: Toewijzing van triggers op slots stabiel gemaakt
 $('slot-stock').onpointerdown = e => { e.stopPropagation(); executeStockDraw(); };
 $('stock-recycle-overlay').onpointerdown = e => { e.stopPropagation(); executeStockDraw(); };
 
@@ -477,7 +480,7 @@ function executeStockDraw() {
 
   const stockRect = $('slot-stock').getBoundingClientRect();
   const wasteRect = $('slot-waste').getBoundingClientRect();
-  const step = Math.round(CW * 0.22);
+  const step = Math.round(CW * 0.24);
 
   processCards.forEach((card, idx) => {
     card.faceUp = true; state.waste.push(card);
@@ -492,10 +495,10 @@ function executeStockDraw() {
       const targetX = niveau === 'expert' ? (wasteRect.left + idx * step) : wasteRect.left;
       animEl.style.left = targetX + 'px'; animEl.style.top = wasteRect.top + 'px';
       playSound('flip');
-    }, idx * 60);
+    }, idx * 50);
   });
 
-  setTimeout(() => { isAnimating = false; render(); }, 400 + (drawAmount * 60));
+  setTimeout(() => { isAnimating = false; render(); }, 350 + (drawAmount * 50));
 }
 
 let activeDrag = null;
@@ -508,7 +511,6 @@ function bindDragAndTap(el, card, location, ...args) {
     e.preventDefault(); e.stopPropagation();
 
     const nu = Date.now();
-    // WATERDICHTE DOUBLE-TAP FIX (Werkt overal direct)
     if (nu - lastTapTime < 260 && lastTapCard === card) {
       lastTapTime = 0; lastTapCard = null;
       triggerSmartMove(card, location, args);
@@ -527,7 +529,7 @@ function bindDragAndTap(el, card, location, ...args) {
 
     const clones = subStack.map((c, idx) => {
       const clone = c.el.cloneNode(true);
-      clone.style.cssText = `position:fixed; width:${CW}px; height:${CH}px; z-index:${10000+idx}; pointer-events:none; left:${rect.left}px; top:${rect.top + idx * STACK_UP}px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); transform: scale(1.02); opacity:0;`;
+      clone.style.cssText = `position:fixed; width:${CW}px; height:${CH}px; z-index:${10000+idx}; pointer-events:none; left:${rect.left}px; top:${rect.top + idx * STACK_UP}px; box-shadow: 0 25px 45px rgba(0,0,0,0.55); transform: scale(1.04); opacity:0; transition: transform 0.1s;`;
       document.body.appendChild(clone); return clone;
     });
 
@@ -659,21 +661,80 @@ function checkWinCondition() {
     $('win-screen').classList.add('show');
     for (let i = 0; i < 40; i++) {
       const c = document.createElement('div'); c.className = 'confetti'; c.style.left = Math.random() * 100 + 'vw';
-      c.style.background = ['#fbbf24','#34d399','#60a5fa','#f87171'][i%4];
-      c.style.animationDuration = (1.5 + Math.random() * 1.5) + 's'; c.style.animationDelay = Math.random() * 0.8 + 's';
+      c.style.background = ['#00ffcc','#4364f7','#ff1744','#fbbf24'][i%4];
+      c.style.animationDuration = (1.4 + Math.random() * 1.4) + 's'; c.style.animationDelay = Math.random() * 0.6 + 's';
       document.body.appendChild(c); setTimeout(() => c.remove(), 3500);
     }
   }, 400);
 }
 
+// PREMIUM OPTIE 1: De cinematische Waaier-animatie bij het uitdelen
+function animeerWaaierUitdelen(volgordeLijst) {
+  isAnimating = true;
+  board.querySelectorAll('.card').forEach(e => e.remove());
+
+  const stockRect = $('slot-stock').getBoundingClientRect();
+  
+  volgordeLijst.forEach((item, index) => {
+    const card = item.card;
+    const animEl = buildCardElement(card);
+    animEl.className = 'card face-down in-motion';
+    animEl.style.left = stockRect.left + 'px';
+    animEl.style.top = stockRect.top + 'px';
+    animEl.style.zIndex = 500 + index;
+    animEl.getBoundingClientRect(); // Forceer layout-trigger voor CSS transitie
+
+    setTimeout(() => {
+      animEl.style.left = item.tx + 'px';
+      animEl.style.top = item.ty + 'px';
+      playSound('click');
+    }, index * 25); // Razendsnelle, vloeiende opeenvolging (waaier-effect)
+
+    setTimeout(() => {
+      if (card.faceUp) {
+        animEl.classList.remove('face-down');
+        animEl.classList.add('face-up');
+        playSound('flip');
+      }
+    }, (volgordeLijst.length * 25) + 150);
+  });
+
+  setTimeout(() => {
+    isAnimating = false;
+    render();
+    startTimer();
+  }, (volgordeLijst.length * 25) + 550);
+}
+
 function nieuwSpel() {
   stopTimer(); score = 0; $('stat-score').textContent = '0'; $('stat-tijd').textContent = '0:00'; history = [];
   state = { stock: [], waste: [], foundations: [[],[],[],[]], tableau: [[],[],[],[],[],[],[]] };
+  
   const deck = []; SUITS.forEach(s => RANKS.forEach(r => deck.push(createCard(s, r))));
   for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
-  let idx = 0; for (let c = 0; c < 7; c++) { for (let r = 0; r <= c; r++) { const card = deck[idx++]; card.faceUp = (r === c); state.tableau[c].push(card); } }
+  
+  updateSizes();
+
+  let idx = 0;
+  const animatieLijst = [];
+
+  // Bereken de posities van de tableau kaarten voor de animatie
+  for (let c = 0; c < 7; c++) {
+    let curY = TOP_H;
+    const curX = START_X + c * (CW + GAP);
+    for (let r = 0; r <= c; r++) {
+      const card = deck[idx++];
+      card.faceUp = (r === c);
+      state.tableau[c].push(card);
+      animatieLijst.push({ card, tx: curX, ty: curY });
+      curY += card.faceUp ? STACK_UP : STACK_DN;
+    }
+  }
+  
   while (idx < deck.length) state.stock.push(deck[idx++]);
-  updateSizes(); render(); startTimer();
+
+  // Start de premium uitdeel-waaier!
+  animeerWaaierUitdelen(animatieLijst);
 }
 
 function herInit() { updateSizes(); render(); }
