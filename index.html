@@ -14,7 +14,6 @@
   --tafel-glow:   rgba(16,185,129,0.14);
   --slot-bg:      rgba(255,255,255,0.03);
   --slot-border:  rgba(255,255,255,0.12);
-  --slot-glow:    0 0 0px transparent;
   --kaart-rug:    linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
   --ui-bg:        rgba(15, 23, 42, 0.65);
   --ui-border:    rgba(255, 255, 255, 0.08);
@@ -59,46 +58,39 @@ html, body {
 }
 #top-row {
   position: absolute; left: 0; right: 0; top: 0; z-index: 10;
-  padding-top: calc(env(safe-area-inset-top, 44px) + 16px);
+  padding-top: calc(env(safe-area-inset-top, 20px) + 5px);
 }
 .slot {
   position: absolute;
-  border-radius: 14px;
+  border-radius: 10px;
   background: var(--slot-bg);
   border: 1.5px solid var(--slot-border);
   box-shadow: inset 0 4px 12px rgba(0,0,0,0.35);
   display: flex; align-items: center; justify-content: center;
   color: rgba(255,255,255,0.15); font-weight: 700;
-  transition: border-color 0.3s, background 0.3s;
+  pointer-events: auto; /* Zorgt dat de kliks doorkomen */
 }
 .card {
   position: absolute; cursor: grab; touch-action: none;
-  will-change: transform, left, top, opacity;
-  overflow: visible;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.15);
-  perspective: 1000px;
+  will-change: transform, left, top;
+  border-radius: 8px;
+  box-shadow: 0 3px 7px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.2);
   transition: box-shadow 0.2s, transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
-.card:active {
-  transform: scale(1.03);
-  box-shadow: 0 14px 28px rgba(0,0,0,0.35), 0 10px 10px rgba(0,0,0,0.25);
-}
 
-/* APPLE QUALITY TRANSITION ENGINE */
 .card.in-motion {
-  transition: left 0.55s cubic-bezier(0.22, 1, 0.36, 1), 
-              top 0.55s cubic-bezier(0.22, 1, 0.36, 1), 
-              box-shadow 0.55s, opacity 0.3s !important;
-  z-index: 1000 !important;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.45) !important;
+  transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
+              top 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
+              transform 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  z-index: 2500 !important;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
 }
 
 .card.sparkle::after {
   content: ''; position: absolute; inset: 0; border-radius: inherit;
-  background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.7) 50%, transparent 100%);
+  background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
   background-size: 200% 200%;
-  animation: shineEffect 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation: shineEffect 0.5s ease-out forwards;
   pointer-events: none; z-index: 10;
 }
 @keyframes shineEffect {
@@ -109,160 +101,139 @@ html, body {
 .card-inner {
   position: absolute; inset: 0;
   transform-style: preserve-3d; border-radius: inherit;
-  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 .card.face-down .card-inner { transform: rotateY(180deg); }
 .card.face-up   .card-inner { transform: rotateY(0deg); }
-
-.card.in-motion .card-inner {
-  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) !important;
-}
 
 .card-front, .card-back {
   position: absolute; inset: 0; border-radius: inherit;
   backface-visibility: hidden; -webkit-backface-visibility: hidden;
 }
-
 .card-front {
-  background: linear-gradient(165deg, #ffffff 0%, #f9f9fb 100%);
-  border: 1px solid rgba(0,0,0,0.12);
+  background: linear-gradient(165deg, #ffffff 0%, #f6f6f9 100%);
+  border: 1px solid rgba(0,0,0,0.15);
   display: flex; flex-direction: column; overflow: hidden;
 }
 .c-corner {
-  font-weight: 700; line-height: 1.1; padding: 5px 6px; flex-shrink: 0;
+  font-weight: 700; line-height: 1.05; padding: 2px 4px; flex-shrink: 0;
 }
 .c-corner.bot { align-self: flex-end; transform: rotate(180deg); }
 .c-mid {
   flex: 1; display: flex; align-items: center; justify-content: center;
-  font-weight: 800; overflow: hidden;
+  font-weight: 800; overflow: hidden; margin-top: -2px;
 }
 .card-back {
   background: var(--kaart-rug);
-  border: 1px solid rgba(255,255,255,0.15);
-  box-shadow: inset 0 0 15px rgba(0,0,0,0.2);
-  overflow: hidden; transform: rotateY(180deg);
-}
-.card-back::before {
-  content: ""; position: absolute; inset: 3px;
-  border: 1px solid rgba(255,255,255,0.08); border-radius: 9px;
-  background: repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 8px);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: inset 0 0 12px rgba(0,0,0,0.25);
+  transform: rotateY(180deg); position: absolute; inset: 0; border-radius: inherit;
 }
 .card-back::after {
   content: "✦"; position: absolute; left: 50%; top: 50%;
-  transform: translate(-50%,-50%); font-size: 1.8em; color: rgba(255,255,255,0.15);
+  transform: translate(-50%,-50%); font-size: 1.4em; color: rgba(255,255,255,0.18);
 }
 .red   { color: #e11d48; }
 .black { color: #0f172a; }
 
-/* DOCK STYLING WINDOWS QUALITY */
+/* FIX: Recycle overlay mag NOOIT de dichte stapel blokkeren */
+#stock-recycle-overlay {
+  position: absolute; z-index: 5;
+  background: rgba(255,255,255,0.05); border: 1.5px dashed rgba(255,255,255,0.15);
+  border-radius: 10px; display: none; align-items: center; justify-content: center;
+  font-size: 22px; color: rgba(255,255,255,0.3); pointer-events: auto; cursor: pointer;
+}
+
 #bottom-bar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-around;
-  padding: 12px 16px;
-  padding-bottom: calc(12px + env(safe-area-inset-bottom, 12px));
+  padding: 8px 14px;
+  padding-bottom: calc(6px + env(safe-area-inset-bottom, 8px));
   background: var(--ui-bg);
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid var(--ui-border);
-  gap: 10px;
+  gap: 8px;
 }
+/* Korte layout voor landschapsmodus */
+@media (orientation: landscape) {
+  #bottom-bar { padding: 4px 14px; padding-bottom: env(safe-area-inset-bottom, 4px); }
+  .bb-btn { padding: 6px 10px !important; font-size: 11px !important; }
+  .bb-stat-val { font-size: 13px !important; }
+}
+
 .bb-btn {
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 14px; padding: 10px 14px;
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px; padding: 10px 12px;
   color: #f8fafc; font-size: 13px; font-weight: 600;
   cursor: pointer; flex: 1; text-align: center;
-  transition: background 0.2s, transform 0.1s;
 }
 .bb-btn:active { background: rgba(255,255,255,0.15); transform: scale(0.97); }
 .bb-stat { text-align: center; flex: 1; }
-.bb-stat-lbl {
-  font-size: 10px; color: rgba(241,245,249,0.4);
-  text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px;
-}
-.bb-stat-val { 
-  font-size: 16px; font-weight: 700; color: #fff; display: block;
-  transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.score-pop { transform: scale(1.25); color: #fbbf24 !important; }
+.bb-stat-lbl { font-size: 9px; color: rgba(241,245,249,0.4); text-transform: uppercase; letter-spacing: 1px; display: block; }
+.bb-stat-val { font-size: 15px; font-weight: 700; color: #fff; display: block; }
+.score-pop { transform: scale(1.2); color: #fbbf24 !important; }
 
-/* APP STORE START & WINNING SCREENS */
 #start-screen, #win-screen {
-  position: fixed; inset: 0; z-index: 800;
-  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  position: fixed; inset: 0; z-index: 800; display: flex; align-items: center; justify-content: center; flex-direction: column;
 }
 #start-screen { background: radial-gradient(circle at 50% 30%, #0a4739 0%, #031410 100%); }
-#win-screen {
-  display: none; background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  z-index: 900;
-}
+#win-screen { display: none; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 900; }
 #win-screen.show { display: flex; }
 
 .window-box {
-  background: rgba(30, 41, 59, 0.7);
-  border: 1px solid rgba(255,255,255,0.1);
-  backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-  border-radius: 28px; padding: 40px; text-align: center;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  max-width: 320px; width: 85%;
-  animation: appStorePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+  border-radius: 24px; padding: 25px; text-align: center; max-width: 310px; width: 85%;
 }
-@keyframes appStorePop {
-  from { transform: scale(0.8); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+@media (orientation: landscape) {
+  .window-box { padding: 15px; max-width: 450px; }
+  .thema-rij { margin-bottom: 10px !important; }
+  .start-sub { margin-bottom: 10px !important; }
 }
 
-.start-titel { font-size: 42px; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px; text-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-.start-sub { font-size: 12px; color: #10b981; font-weight: 600; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 40px; }
-.start-label { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px; }
-
-.thema-rij { display: flex; gap: 12px; margin-bottom: 40px; }
+.start-titel { font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 2px; }
+.start-sub { font-size: 11px; color: #10b981; font-weight: 600; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px; }
+.start-label { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+.thema-rij { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
 .thema-btn {
-  width: 70px; height: 70px; border-radius: 18px; border: 2px solid rgba(255,255,255,0.1);
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.8); flex-direction: column; gap: 4px;
-  transition: border-color 0.2s, transform 0.2s;
+  width: 60px; height: 60px; border-radius: 14px; border: 2px solid rgba(255,255,255,0.1); color: #fff;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 11px;
 }
-.thema-btn.actief { border-color: #fff; transform: scale(1.04); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.thema-btn.actief { border-color: #fff; transform: scale(1.04); }
 .thema-btn.t-groen  { background: linear-gradient(135deg, #0a3a2f, #051c16); }
 .thema-btn.t-casino { background: linear-gradient(135deg, #5c0d0d, #240505); }
 .thema-btn.t-nacht  { background: linear-gradient(135deg, #111827, #030712); }
-
-.start-btn {
-  width: 240px; padding: 16px; border-radius: 16px; border: none;
-  font-size: 16px; font-weight: 700; color: #fff; cursor: pointer; margin-bottom: 12px;
-  transition: transform 0.1s, opacity 0.2s;
-}
-.start-btn.klassiek { background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
-.start-btn.expert { background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 4px 12px rgba(217,119,6,0.3); }
-.start-btn:active { transform: scale(0.96); opacity: 0.9; }
-.start-btn-lbl { display: block; font-size: 11px; font-weight: 400; opacity: 0.75; margin-top: 2px; }
+.start-btn { width: 100%; padding: 10px; border-radius: 12px; border: none; font-size: 14px; font-weight: 700; color: #fff; cursor: pointer; margin-bottom: 8px; }
+.start-btn.klassiek { background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%); }
+.start-btn.expert { background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); }
+.start-btn-lbl { display: block; font-size: 10px; font-weight: 400; opacity: 0.8; }
 
 #toast {
-  position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%);
-  background: rgba(15, 23, 42, 0.9); color: #fff; padding: 10px 24px;
-  border-radius: 24px; font-size: 13px; font-weight: 600; pointer-events: none;
-  opacity: 0; transition: opacity 0.25s; z-index: 9999; border: 1px solid rgba(255,255,255,0.05);
+  position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.95); color: #fff;
+  padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 9999;
 }
 #toast.show { opacity: 1; }
-.confetti { position: fixed; width: 8px; height: 12px; border-radius: 2px; top: -20px; z-index: 950; pointer-events: none; animation: dropConfetti linear forwards; }
+.confetti { position: fixed; width: 8px; height: 12px; top: -20px; z-index: 950; pointer-events: none; animation: dropConfetti linear forwards; }
 @keyframes dropConfetti { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
 </style>
 </head>
 <body>
 
 <div id="start-screen">
-  <div class="start-titel">🂡 Solitaire</div>
-  <div class="start-sub">Premium</div>
-  <div class="start-label">Kies Tafelstijl</div>
-  <div class="thema-rij">
-    <button class="thema-btn t-groen actief" onclick="kiesThema('groen',this)">🌿<span>Tafel</span></button>
-    <button class="thema-btn t-casino"       onclick="kiesThema('casino',this)">🎰<span>Casino</span></button>
-    <button class="thema-btn t-nacht"        onclick="kiesThema('nacht',this)">🌙<span>Nacht</span></button>
+  <div class="window-box">
+    <div class="start-titel">🂡 Solitaire</div>
+    <div class="start-sub">Premium</div>
+    <div class="start-label">Kies Tafelstijl</div>
+    <div class="thema-rij">
+      <button class="thema-btn t-groen actief" onclick="kiesThema('groen',this)">🌿<span>Tafel</span></button>
+      <button class="thema-btn t-casino"       onclick="kiesThema('casino',this)">🎰<span>Casino</span></button>
+      <button class="thema-btn t-nacht"        onclick="kiesThema('nacht',this)">🌙<span>Nacht</span></button>
+    </div>
+    <div class="start-label">Spelmodus</div>
+    <div style="display: flex; gap: 10px;">
+      <button class="start-btn klassiek" onclick="startSpel('klassiek')">Klassiek<span class="start-btn-lbl">1 kaart</span></button>
+      <button class="start-btn expert" onclick="startSpel('expert')">Expert<span class="start-btn-lbl">3 kaarten</span></button>
+    </div>
   </div>
-  <div class="start-label">Spelmodus</div>
-  <button class="start-btn klassiek" onclick="startSpel('klassiek')">Klassiek<span class="start-btn-lbl">1 kaart per beurt</span></button>
-  <button class="start-btn expert" onclick="startSpel('expert')">Expert<span class="start-btn-lbl">3 kaarten per beurt</span></button>
 </div>
 
 <div id="board">
@@ -274,28 +245,23 @@ html, body {
     <div id="slot-waste" class="slot"></div>
     <div id="slot-stock" class="slot">↺</div>
   </div>
+  <div id="stock-recycle-overlay">↺</div>
 </div>
 
 <div id="bottom-bar">
   <button class="bb-btn" onclick="undoZet()">↩ Undo</button>
-  <div class="bb-stat">
-    <span class="bb-stat-lbl">Score</span>
-    <span class="bb-stat-val" id="stat-score">0</span>
-  </div>
-  <div class="bb-stat">
-    <span class="bb-stat-lbl">Tijd</span>
-    <span class="bb-stat-val" id="stat-tijd">0:00</span>
-  </div>
+  <div class="bb-stat"><span class="bb-stat-lbl">Score</span><span class="bb-stat-val" id="stat-score">0</span></div>
+  <div class="bb-stat"><span class="bb-stat-lbl">Tijd</span><span class="bb-stat-val" id="stat-tijd">0:00</span></div>
   <button class="bb-btn" onclick="hintZet()">💡 Hint</button>
   <button class="bb-btn" onclick="naarStartScherm()" style="background:rgba(255,255,255,0.14)">🏠 Menu</button>
 </div>
 
 <div id="win-screen">
   <div class="window-box">
-    <div style="font-size: 42px; margin-bottom: 10px;">🏆</div>
-    <h2 style="font-size: 24px; margin-bottom: 6px;">Gefeliciteerd!</h2>
+    <div style="font-size: 38px; margin-bottom: 10px;">🏆</div>
+    <h2 style="font-size: 22px; margin-bottom: 6px;">Gefeliciteerd!</h2>
     <div style="font-size: 14px; color:rgba(255,255,255,0.6); margin-bottom: 20px;" id="win-stats-txt"></div>
-    <button class="start-btn klassiek" style="width:100%; margin-bottom:0;" onclick="naarStartScherm()">Nieuw Spel</button>
+    <button class="start-btn klassiek" style="margin-bottom:0;" onclick="naarStartScherm()">Nieuw Spel</button>
   </div>
 </div>
 
@@ -318,69 +284,74 @@ const $ = id => document.getElementById(id);
 
 function toast(msg) {
   const el = $('toast'); el.textContent = msg; el.classList.add('show');
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
 }
 
+// FIX & LANDSCHAP OPTIMALISATIE: Dynamische schaling op basis van rotatie
 function updateSizes() {
   const W = window.innerWidth, H = window.innerHeight;
-  const land = W > H;
-  const maxW = Math.floor((W - 24) / 7.5);
-  const maxH = land ? Math.floor(H * 0.25) : Math.floor(H * 0.185);
-  CW = Math.max(38, Math.min(maxW, Math.round(maxH / 1.4)));
+  const isLandscape = W > H;
+
+  // Maximaal mogelijke breedte per kaart berekenen
+  const maxW = Math.floor((W - 14) / 7.2); 
+  // In landschap mag de kaart niet te hoog zijn i.v.m. de onderkant van het scherm
+  const maxH = isLandscape ? Math.floor(H * 0.18) : Math.floor(H * 0.20); 
+  
+  CW = Math.max(40, Math.min(maxW, Math.round(maxH / 1.4))); 
   CH = Math.round(CW * 1.4);
-  GAP = Math.max(4, Math.floor((W - 16 - CW * 7) / 6));
-  STACK_UP = Math.round(CH * 0.28);
-  STACK_DN = Math.round(CH * 0.14);
-  START_X = Math.max(8, Math.floor((W - (CW * 7 + GAP * 6)) / 2));
+  GAP = Math.floor((W - (CW * 7)) / 8);
+  if (GAP < 2) GAP = 2;
+  
+  // LANDSCHAP VERBETERING: Maak de stapelafstanden compacter als het scherm plat ligt
+  STACK_UP = isLandscape ? Math.round(CH * 0.16) : Math.round(CH * 0.24);
+  STACK_DN = isLandscape ? Math.round(CH * 0.08) : Math.round(CH * 0.11);
+  START_X = Math.floor((W - (CW * 7 + GAP * 6)) / 2);
   
   const topRow = $('top-row');
-  const topPad = parseFloat(getComputedStyle(topRow).paddingTop) || 50;
-  const br = Math.round(CW * 0.14) + 'px';
+  const topPad = parseFloat(getComputedStyle(topRow).paddingTop) || 25;
   
+  // Posities slots inrichten
   ['slot-f0', 'slot-f1', 'slot-f2', 'slot-f3', 'slot-waste', 'slot-stock'].forEach((id, idx) => {
     const col = idx <= 3 ? idx : (idx === 4 ? 5 : 6);
     const s = $(id);
     s.style.left = (START_X + col * (CW + GAP)) + 'px';
     s.style.top = topPad + 'px'; s.style.width = CW + 'px'; s.style.height = CH + 'px';
-    s.style.borderRadius = br; s.style.fontSize = Math.round(CW * 0.3) + 'px';
   });
-  topRow.style.height = (topPad + CH + 12) + 'px';
-  TOP_H = topPad + CH + 16;
+  
+  // FIX: Reset de overlay perfect over de stock-positie heen
+  const rec = $('stock-recycle-overlay');
+  const stockRect = $('slot-stock').getBoundingClientRect();
+  rec.style.left = stockRect.left + 'px'; rec.style.top = stockRect.top + 'px';
+  rec.style.width = CW + 'px'; rec.style.height = CH + 'px';
+
+  topRow.style.height = (topPad + CH + 5) + 'px';
+  TOP_H = topPad + CH + 10;
 }
 
-/* AUDIO ENGINE */
 let AC = null;
-function getAC() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} } if (AC && AC.state === 'suspended') AC.resume(); return AC; }
 function playSound(type) {
-  const ac = getAC(); if (!ac) return;
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  if (!AC) return;
   try {
-    const osc = ac.createOscillator(), gain = ac.createGain();
-    osc.connect(gain); gain.connect(ac.destination);
-    if (type === 'click') {
-      osc.type = 'sine'; osc.frequency.setValueAtTime(600, ac.currentTime);
-      gain.gain.setValueAtTime(0.05, ac.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.05);
-      osc.start(); osc.stop(ac.currentTime + 0.05);
-    } else if (type === 'flip') {
-      osc.type = 'triangle'; osc.frequency.setValueAtTime(350, ac.currentTime); osc.frequency.exponentialRampToValueAtTime(150, ac.currentTime + 0.08);
-      gain.gain.setValueAtTime(0.1, ac.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.08);
-      osc.start(); osc.stop(ac.currentTime + 0.08);
+    const osc = AC.createOscillator(), gain = AC.createGain();
+    osc.connect(gain); gain.connect(AC.destination);
+    if (type === 'click' || type === 'flip') {
+      osc.type = 'sine'; osc.frequency.setValueAtTime(type==='click'?550:350, AC.currentTime);
+      gain.gain.setValueAtTime(0.03, AC.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 0.05);
+      osc.start(); osc.stop(AC.currentTime + 0.06);
     } else if (type === 'foundation') {
-      osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, ac.currentTime); osc.frequency.setValueAtTime(659.25, ac.currentTime + 0.06);
-      gain.gain.setValueAtTime(0.15, ac.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.3);
-      osc.start(); osc.stop(ac.currentTime + 0.3);
+      osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, AC.currentTime); osc.frequency.setValueAtTime(659.25, AC.currentTime + 0.05);
+      gain.gain.setValueAtTime(0.08, AC.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 0.2);
+      osc.start(); osc.stop(AC.currentTime + 0.2);
     }
   } catch(e){}
 }
 
-function kiesThema(t, btn) {
-  thema = t; document.querySelectorAll('.thema-btn').forEach(b => b.classList.remove('actief'));
-  btn.classList.add('actief'); document.documentElement.className = 'thema-' + t;
-}
-
+function kiesThema(t, btn) { thema = t; document.querySelectorAll('.thema-btn').forEach(b => b.classList.remove('actief')); btn.classList.add('actief'); document.documentElement.className = 'thema-' + t; }
 function startSpel(m) { niveau = m; $('start-screen').style.display = 'none'; nieuwSpel(); }
 function naarStartScherm() { stopTimer(); $('win-screen').classList.remove('show'); $('start-screen').style.display = 'flex'; }
-
-function updateScore(d) { score = Math.max(0, score + d); const el = $('stat-score'); el.textContent = score; if (d > 0) { el.classList.add('score-pop'); setTimeout(() => el.classList.remove('score-pop'), 160); } }
+function updateScore(d) { score = Math.max(0, score + d); const el = $('stat-score'); el.textContent = score; if (d > 0) { el.classList.add('score-pop'); setTimeout(() => el.classList.remove('score-pop'), 150); } }
 function startTimer() { clearInterval(timerRef); timerSecs = 0; timerRef = setInterval(() => { timerSecs++; const m = Math.floor(timerSecs/60), s = timerSecs%60; $('stat-tijd').textContent = `${m}:${s<10?'0':''}${s}`; }, 1000); }
 function stopTimer() { clearInterval(timerRef); }
 
@@ -390,7 +361,7 @@ function snapState() {
     foundations: state.foundations.map(f=>f.map(c=>({suit:c.suit,rank:c.rank,faceUp:c.faceUp}))),
     tableau: state.tableau.map(col=>col.map(c=>({suit:c.suit,rank:c.rank,faceUp:c.faceUp}))), score
   }));
-  if (history.length > 25) history.shift();
+  if (history.length > 30) history.shift();
 }
 
 function undoZet() {
@@ -407,8 +378,8 @@ function createCard(suit, rank, faceUp = false) { return { suit, rank, color: RE
 function buildCardElement(card) {
   if (card.el) card.el.remove();
   const el = document.createElement('div'); el.className = `card ${card.faceUp?'face-up':'face-down'}`;
-  el.style.width = CW + 'px'; el.style.height = CH + 'px'; el.style.borderRadius = Math.round(CW * 0.14) + 'px';
-  const fs = Math.max(9, Math.round(CW * 0.16)), mfs = Math.max(16, Math.round(CW * 0.45));
+  el.style.width = CW + 'px'; el.style.height = CH + 'px';
+  const fs = Math.max(9, Math.round(CW * 0.18)), mfs = Math.max(16, Math.round(CW * 0.42));
   el.innerHTML = `
     <div class="card-inner">
       <div class="card-front">
@@ -422,48 +393,53 @@ function buildCardElement(card) {
 }
 
 function render() {
-  if (isAnimating) return; // Essentiële beveiliging tegen flikkering tijdens transities
+  if (isAnimating) return;
   board.querySelectorAll('.card:not(.in-motion)').forEach(e => e.remove());
 
-  // Stock Render
+  // Render dichte stapel (Stock)
   state.stock.forEach((card, i) => {
     const el = buildCardElement(card); const r = $('slot-stock').getBoundingClientRect();
-    el.style.left = (r.left - Math.min(i, 3) * 0.5) + 'px'; el.style.top = (r.top - Math.min(i, 3) * 0.5) + 'px'; el.style.zIndex = i + 1;
+    el.style.left = r.left + 'px'; el.style.top = r.top + 'px'; el.style.zIndex = i + 1;
+    // FIX: Klikken op de bovenste kaart van de dichte stapel trekt direct een kaart
+    if(i === state.stock.length - 1) {
+      el.addEventListener('pointerdown', e => { e.stopPropagation(); executeStockDraw(); });
+    }
   });
 
-  // Waste Render
+  // Render open stapel (Waste)
   if (state.waste.length > 0) {
     const r = $('slot-waste').getBoundingClientRect();
     if (niveau === 'expert') {
       const showCount = Math.min(3, state.waste.length);
-      const step = Math.round(CW * 0.25);
+      const step = Math.round(CW * 0.22);
       for (let i = showCount - 1; i >= 0; i--) {
         const card = state.waste[state.waste.length - 1 - i]; const el = buildCardElement(card);
-        el.style.left = (r.left - i * step) + 'px'; el.style.top = r.top + 'px'; el.style.zIndex = 50 + (showCount - i);
-        if (i === 0) bindDragEvent(el, card, 'waste', state.waste.length - 1);
+        el.style.left = (r.left + (showCount - 1 - i) * step) + 'px'; el.style.top = r.top + 'px'; el.style.zIndex = 50 + (showCount - i);
+        if (i === 0) bindDragAndTap(el, card, 'waste', state.waste.length - 1);
       }
     } else {
       const topCard = state.waste[state.waste.length - 1]; const el = buildCardElement(topCard);
       el.style.left = r.left + 'px'; el.style.top = r.top + 'px'; el.style.zIndex = 60;
-      bindDragEvent(el, topCard, 'waste', state.waste.length - 1);
+      bindDragAndTap(el, topCard, 'waste', state.waste.length - 1);
     }
   }
 
-  // Foundations Render
+  // Render eindstapels (Foundations)
   state.foundations.forEach((pile, fIdx) => {
     if (!pile.length) return;
     const topCard = pile[pile.length - 1]; const el = buildCardElement(topCard);
     const r = $('slot-f' + fIdx).getBoundingClientRect();
     el.style.left = r.left + 'px'; el.style.top = r.top + 'px'; el.style.zIndex = 40;
+    bindDragAndTap(el, topCard, 'foundation', fIdx);
   });
 
-  // Tableau Render
+  // Render speelveld (Tableau)
   state.tableau.forEach((col, cIdx) => {
     let curY = TOP_H; const curX = START_X + cIdx * (CW + GAP);
     col.forEach((card, rIdx) => {
       const el = buildCardElement(card); el.style.left = curX + 'px'; el.style.top = curY + 'px'; el.style.zIndex = 100 + rIdx;
       if (card.faceUp) {
-        bindDragEvent(el, card, 'tableau', cIdx, rIdx);
+        bindDragAndTap(el, card, 'tableau', cIdx, rIdx);
       } else if (rIdx === col.length - 1) {
         el.style.cursor = 'pointer'; el.addEventListener('pointerdown', e => { e.stopPropagation(); flipTopCard(cIdx); });
       }
@@ -471,15 +447,18 @@ function render() {
     });
   });
 
-  resetStockTrigger();
+  // FIX: Toon de herstartknop ALLEEN als de dichte stapel echt leeg is
+  const overlay = $('stock-recycle-overlay');
+  if (state.stock.length === 0 && state.waste.length > 0) {
+    overlay.style.display = 'flex';
+  } else {
+    overlay.style.display = 'none';
+  }
 }
 
-function resetStockTrigger() {
-  $('slot-stock').onpointerdown = e => { e.stopPropagation(); executeStockDraw(); };
-  board.querySelectorAll('.card.face-down').forEach(el => {
-    if (!el._dragBound) el.onpointerdown = e => { e.stopPropagation(); executeStockDraw(); };
-  });
-}
+// FIX: Toewijzing van triggers op slots stabiel gemaakt
+$('slot-stock').onpointerdown = e => { e.stopPropagation(); executeStockDraw(); };
+$('stock-recycle-overlay').onpointerdown = e => { e.stopPropagation(); executeStockDraw(); };
 
 function executeStockDraw() {
   if (isAnimating) return;
@@ -488,118 +467,135 @@ function executeStockDraw() {
   if (state.stock.length === 0) {
     if (!state.waste.length) return;
     while (state.waste.length) { const c = state.waste.pop(); c.faceUp = false; state.stock.push(c); }
-    playSound('click'); render(); return;
+    state.stock.reverse(); playSound('click'); render(); return;
   }
 
   isAnimating = true;
   const drawAmount = niveau === 'expert' ? Math.min(3, state.stock.length) : 1;
   const processCards = [];
-
   for (let i = 0; i < drawAmount; i++) { processCards.push(state.stock.pop()); }
 
   const stockRect = $('slot-stock').getBoundingClientRect();
   const wasteRect = $('slot-waste').getBoundingClientRect();
-  const step = Math.round(CW * 0.25);
+  const step = Math.round(CW * 0.22);
 
-  // Maak de visuele animatie-elementen los van de data-stroom
   processCards.forEach((card, idx) => {
-    card.faceUp = true;
-    state.waste.push(card); // Zet ze direct logisch in het array
-
+    card.faceUp = true; state.waste.push(card);
     const animEl = buildCardElement(card);
     animEl.className = 'card face-down in-motion';
-    animEl.style.left = stockRect.left + 'px';
-    animEl.style.top = stockRect.top + 'px';
+    animEl.style.left = stockRect.left + 'px'; animEl.style.top = stockRect.top + 'px';
     animEl.style.zIndex = 2000 + idx;
-
-    animEl.getBoundingClientRect(); // Forceer herberekening layout
+    animEl.getBoundingClientRect();
 
     setTimeout(() => {
-      animEl.classList.remove('face-down');
-      animEl.classList.add('face-up');
-      const targetX = niveau === 'expert' ? (wasteRect.left - (drawAmount - 1 - idx) * step) : wasteRect.left;
-      animEl.style.left = targetX + 'px';
-      animEl.style.top = wasteRect.top + 'px';
+      animEl.classList.remove('face-down'); animEl.classList.add('face-up');
+      const targetX = niveau === 'expert' ? (wasteRect.left + idx * step) : wasteRect.left;
+      animEl.style.left = targetX + 'px'; animEl.style.top = wasteRect.top + 'px';
       playSound('flip');
-    }, idx * 100);
+    }, idx * 60);
   });
 
-  setTimeout(() => {
-    isAnimating = false;
-    render(); // Synchroniseer definitief met het bord
-  }, 550 + (drawAmount * 100));
+  setTimeout(() => { isAnimating = false; render(); }, 400 + (drawAmount * 60));
 }
 
-/* SLEEP EN GEBAREN CONTROLS */
 let activeDrag = null;
+let lastTapTime = 0;
+let lastTapCard = null;
 
-document.addEventListener('pointermove', e => {
-  if (!activeDrag) return; e.preventDefault();
-  const targetX = e.clientX - activeDrag.offsetX, targetY = e.clientY - activeDrag.offsetY;
-  activeDrag.clones.forEach((clone, idx) => {
-    clone.style.left = targetX + 'px'; clone.style.top = (targetY + idx * STACK_UP) + 'px';
-  });
-}, { passive: false });
-
-document.addEventListener('pointerup', e => {
-  if (!activeDrag) return;
-  activeDrag.sourceEl.style.opacity = ''; activeDrag.clones.forEach(c => c.remove());
-  const dropSuccess = evaluateDropLocation(e.clientX, e.clientY, activeDrag);
-  if (!dropSuccess && activeDrag.hasMoved) toast('Ongeldige zet');
-  activeDrag = null; render();
-});
-
-function bindDragEvent(el, card, location, ...args) {
-  el._dragBound = true; let dragTriggered = false; let startX, startY;
+function bindDragAndTap(el, card, location, ...args) {
   el.addEventListener('pointerdown', e => {
-    if (e.button !== 0 || isAnimating) return; e.preventDefault(); e.stopPropagation();
-    dragTriggered = false; startX = e.clientX; startY = e.clientY;
+    if (e.button !== 0 || isAnimating) return;
+    e.preventDefault(); e.stopPropagation();
+
+    const nu = Date.now();
+    // WATERDICHTE DOUBLE-TAP FIX (Werkt overal direct)
+    if (nu - lastTapTime < 260 && lastTapCard === card) {
+      lastTapTime = 0; lastTapCard = null;
+      triggerSmartMove(card, location, args);
+      return;
+    }
+    lastTapTime = nu; lastTapCard = card;
 
     let subStack = [];
-    if (location === 'waste') subStack = [card];
+    if (location === 'waste' || location === 'foundation') subStack = [card];
     else if (location === 'tableau') subStack = state.tableau[args[0]].slice(args[1]);
     if (!subStack.length) return;
 
     const rect = el.getBoundingClientRect();
+    let dragTriggered = false;
+    const startX = e.clientX, startY = e.clientY;
+
     const clones = subStack.map((c, idx) => {
       const clone = c.el.cloneNode(true);
-      clone.style.cssText = `position:fixed; width:${CW}px; height:${CH}px; z-index:${10000+idx}; pointer-events:none; left:${rect.left}px; top:${rect.top + idx * STACK_UP}px; box-shadow: 0 30px 60px rgba(0,0,0,0.4); transform: scale(1.04); opacity:0; border-radius:${Math.round(CW*0.14)}px;`;
+      clone.style.cssText = `position:fixed; width:${CW}px; height:${CH}px; z-index:${10000+idx}; pointer-events:none; left:${rect.left}px; top:${rect.top + idx * STACK_UP}px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); transform: scale(1.02); opacity:0;`;
       document.body.appendChild(clone); return clone;
     });
 
     activeDrag = { subStack, clones, location, args, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top, sourceEl: el, hasMoved: false };
 
     const moveHandler = e2 => {
-      if (!dragTriggered && (Math.abs(e2.clientX - startX) > 5 || Math.abs(e2.clientY - startY) > 5)) {
+      if (!dragTriggered && (Math.abs(e2.clientX - startX) > 6 || Math.abs(e2.clientY - startY) > 6)) {
         dragTriggered = true; activeDrag.hasMoved = true;
-        el.style.opacity = '0.1'; clones.forEach(c => c.style.opacity = '1');
+        el.style.opacity = '0.15'; clones.forEach(c => c.style.opacity = '1');
+      }
+      if (dragTriggered) {
+        const tx = e2.clientX - activeDrag.offsetX, ty = e2.clientY - activeDrag.offsetY;
+        clones.forEach((clone, idx) => { clone.style.left = tx + 'px'; clone.style.top = (ty + idx * STACK_UP) + 'px'; });
       }
     };
-    const upHandler = () => { el.removeEventListener('pointermove', moveHandler); el.removeEventListener('pointerup', upHandler); if (!dragTriggered) { clones.forEach(c => c.remove()); el.style.opacity = ''; triggerDoubleTapAction(card, location, args); } };
-    el.addEventListener('pointermove', moveHandler); el.addEventListener('pointerup', upHandler);
+
+    const upHandler = e2 => {
+      window.removeEventListener('pointermove', moveHandler); window.removeEventListener('pointerup', upHandler);
+      if (!activeDrag) return;
+      el.style.opacity = ''; clones.forEach(c => c.remove());
+      
+      if (activeDrag.hasMoved) {
+        const dropSuccess = evaluateDropLocation(e2.clientX, e2.clientY, activeDrag);
+        if (!dropSuccess) toast('Ongeldige zet');
+        activeDrag = null; render();
+      }
+    };
+
+    window.addEventListener('pointermove', moveHandler);
+    window.addEventListener('pointerup', upHandler);
   });
 }
 
-function triggerDoubleTapAction(card, location, args) {
+function triggerSmartMove(card, location, args) {
   for (let f = 0; f < 4; f++) {
     if (canMoveToFoundation(card, f)) {
-      snapState();
-      if (location === 'waste') state.waste.pop();
-      else { state.tableau[args[0]].splice(args[1]); revealTopTableau(args[0]); }
+      snapState(); executeCardRemoval(location, args);
       state.foundations[f].push(card); updateScore(10); playSound('foundation');
       setTimeout(() => { if (card.el) card.el.classList.add('sparkle'); }, 30);
       checkWinCondition(); render(); triggerAutoCompleteCheck(); return;
     }
   }
+  for (let c = 0; c < 7; c++) {
+    if (location === 'tableau' && args[0] === c) continue;
+    if (canMoveToTableau(card, c)) {
+      snapState();
+      let subStack = (location === 'tableau') ? state.tableau[args[0]].slice(args[1]) : [card];
+      executeCardRemoval(location, args);
+      subStack.forEach(cardItem => state.tableau[c].push(cardItem));
+      updateScore(3); playSound('click');
+      render(); triggerAutoCompleteCheck(); return;
+    }
+  }
+  toast('Geen geldige plek vrij');
+}
+
+function executeCardRemoval(location, args) {
+  if (location === 'waste') state.waste.pop();
+  else if (location === 'foundation') state.foundations[args[0]].pop();
+  else if (location === 'tableau') { state.tableau[args[0]].splice(args[1]); revealTopTableau(args[0]); }
 }
 
 function evaluateDropLocation(cx, cy, drag) {
-  if (!drag.hasMoved) return false;
   for (let f = 0; f < 4; f++) {
     const slot = $('slot-f' + f);
     if ((hitTest(cx, cy, slot) || (state.foundations[f].length && hitTest(cx, cy, state.foundations[f][state.foundations[f].length - 1].el))) && drag.subStack.length === 1) {
       if (canMoveToFoundation(drag.subStack[0], f)) {
-        snapState(); if (drag.location === 'waste') state.waste.pop(); else { state.tableau[drag.args[0]].splice(drag.args[1]); revealTopTableau(drag.args[0]); }
+        snapState(); executeCardRemoval(drag.location, drag.args);
         state.foundations[f].push(drag.subStack[0]); updateScore(10); playSound('foundation'); checkWinCondition(); triggerAutoCompleteCheck(); return true;
       }
     }
@@ -611,8 +607,8 @@ function evaluateDropLocation(cx, cy, drag) {
       if (d < minDst && cx >= colX - GAP / 2 && cx <= colX + CW + GAP / 2) { minDst = d; bestCol = c; }
     }
     if (bestCol >= 0 && canMoveToTableau(drag.subStack[0], bestCol)) {
-      snapState(); if (drag.location === 'waste') state.waste.pop(); else { state.tableau[drag.args[0]].splice(drag.args[1]); revealTopTableau(drag.args[0]); }
-      drag.subStack.forEach(c => state.tableau[bestCol].push(c)); updateScore(3); triggerAutoCompleteCheck(); return true;
+      snapState(); executeCardRemoval(drag.location, drag.args);
+      drag.subStack.forEach(c => state.tableau[bestCol].push(c)); updateScore(3); playSound('click'); triggerAutoCompleteCheck(); return true;
     }
   }
   return false;
@@ -622,7 +618,6 @@ function hitTest(cx, cy, el) { if (!el) return false; const r = el.getBoundingCl
 function canMoveToFoundation(card, f) { const p = state.foundations[f]; if (!p.length) return card.rank === 'A'; return card.suit === p[p.length - 1].suit && RANKS.indexOf(card.rank) === RANKS.indexOf(p[p.length - 1].rank) + 1; }
 function canMoveToTableau(card, c) { const p = state.tableau[c]; if (!p.length) return card.rank === 'K'; return RED.has(card.suit) !== RED.has(p[p.length - 1].suit) && RANKS.indexOf(card.rank) === RANKS.indexOf(p[p.length - 1].rank) - 1; }
 function revealTopTableau(c) { const p = state.tableau[c]; if (p.length && !p[p.length - 1].faceUp) { p[p.length - 1].faceUp = true; playSound('flip'); } }
-
 function flipTopCard(c) { if (isAnimating) return; const p = state.tableau[c]; if (p.length && !p[p.length - 1].faceUp) { p[p.length - 1].faceUp = true; playSound('flip'); render(); } }
 
 function isZetMogelijk() {
@@ -633,13 +628,13 @@ function isZetMogelijk() {
 }
 
 function hintZet() {
-  if (!isZetMogelijk()) { toast('🚫 Geen geldige zetten meer beschikbaar.'); return; }
+  if (!isZetMogelijk()) { toast('🚫 Geen zetten meer beschikbaar.'); return; }
   if (state.waste.length) {
     const w = state.waste[state.waste.length - 1];
-    for (let f = 0; f < 4; f++) if (canMoveToFoundation(w, f)) { toast(`💡 Tip: Verplaats ${w.rank}${w.suit} naar eindstapel.`); return; }
-    for (let c = 0; c < 7; c++) if (canMoveToTableau(w, c)) { toast(`💡 Tip: Leg ${w.rank}${w.suit} op kolom ${c + 1}.`); return; }
+    for (let f = 0; f < 4; f++) if (canMoveToFoundation(w, f)) { toast(`💡 Tip: Tik dubbel op ${w.rank}${w.suit}.`); return; }
+    for (let c = 0; c < 7; c++) if (canMoveToTableau(w, c)) { toast(`💡 Tip: Sleep ${w.rank}${w.suit} naar kolom ${c + 1}.`); return; }
   }
-  toast('💡 Tip: Trek een nieuwe kaart van de stapel.');
+  toast('💡 Tip: Neem een kaart van de stapel.');
 }
 
 function triggerAutoCompleteCheck() { setTimeout(() => { if (!state.stock.length && !state.waste.length && state.tableau.every(col => col.every(c => c.faceUp))) executeAutoComplete(); }, 250); }
@@ -650,7 +645,7 @@ function executeAutoComplete() {
       if (canMoveToFoundation(card, f)) {
         col.pop(); state.foundations[f].push(card); updateScore(10); playSound('foundation'); render();
         if (state.foundations.reduce((s, f2) => s + f2.length, 0) === 52) { checkWinCondition(); return; }
-        setTimeout(executeAutoComplete, 100); return;
+        setTimeout(executeAutoComplete, 80); return;
       }
     }
   }
@@ -662,13 +657,13 @@ function checkWinCondition() {
   setTimeout(() => {
     $('win-stats-txt').innerHTML = `Score: <b>${score}</b><br>Tijd: <b>${$('stat-tijd').textContent}</b>`;
     $('win-screen').classList.add('show');
-    for (let i = 0; i < 70; i++) {
+    for (let i = 0; i < 40; i++) {
       const c = document.createElement('div'); c.className = 'confetti'; c.style.left = Math.random() * 100 + 'vw';
-      c.style.background = ['#fbbf24','#34d399','#60a5fa','#f87171','#f472b6'][i%5];
-      c.style.animationDuration = (1.5 + Math.random() * 2) + 's'; c.style.animationDelay = Math.random() * 1 + 's';
-      document.body.appendChild(c); setTimeout(() => c.remove(), 4000);
+      c.style.background = ['#fbbf24','#34d399','#60a5fa','#f87171'][i%4];
+      c.style.animationDuration = (1.5 + Math.random() * 1.5) + 's'; c.style.animationDelay = Math.random() * 0.8 + 's';
+      document.body.appendChild(c); setTimeout(() => c.remove(), 3500);
     }
-  }, 500);
+  }, 400);
 }
 
 function nieuwSpel() {
@@ -678,7 +673,7 @@ function nieuwSpel() {
   for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
   let idx = 0; for (let c = 0; c < 7; c++) { for (let r = 0; r <= c; r++) { const card = deck[idx++]; card.faceUp = (r === c); state.tableau[c].push(card); } }
   while (idx < deck.length) state.stock.push(deck[idx++]);
-  render(); startTimer();
+  updateSizes(); render(); startTimer();
 }
 
 function herInit() { updateSizes(); render(); }
