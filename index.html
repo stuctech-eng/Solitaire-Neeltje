@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Solitaire – Neeltje</title>
+<title>Solitaire – Neeltje Premium</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#05261d">
@@ -62,6 +62,7 @@ position: fixed; inset: 0; overflow: hidden;
 background:
 radial-gradient(circle at 50% 0%, var(--tafel-glow), transparent 50%),
 linear-gradient(180deg, var(--tafel-top) 0%, var(--tafel-bot) 100%);
+perspective: 1000px;
 }
 #board::after {
 content: "";
@@ -96,16 +97,37 @@ color: rgba(255,255,255,.25);
 position: absolute;
 cursor: grab;
 touch-action: none;
-will-change: transform;
+will-change: transform, left, top;
 overflow: visible;
-transition: box-shadow .15s;
-box-shadow: 0 4px 14px rgba(0,0,0,.45), 0 1px 3px rgba(0,0,0,.3);
+transition: box-shadow .15s, transform .2s ease;
+box-shadow: 0 4px 12px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.2);
 perspective: 600px;
 }
-.card.dragging {
-cursor: grabbing;
-transition: none;
-z-index: 999 !important;
+.card:active {
+  transform: scale(1.02);
+}
+
+/* RUSTIGE ANIMATIE (0.8s) */
+.card.flipping {
+transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1), top 0.8s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.8s !important;
+z-index: 500 !important;
+box-shadow: 0 16px 34px rgba(0,0,0,.4), 0 8px 15px rgba(0,0,0,.3);
+}
+
+/* FEATURE: Sparkle / Shine effect voor Foundation */
+.card.sparkle::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%);
+  background-size: 200% 200%;
+  animation: shineEffect 0.7s ease-out forwards;
+  pointer-events: none;
+  z-index: 10;
+}
+@keyframes shineEffect {
+  0% { background-position: -200% -200%; opacity: 1; }
+  100% { background-position: 200% 200%; opacity: 0; }
 }
 
 /* 3D flip laag */
@@ -114,10 +136,14 @@ position: absolute;
 inset: 0;
 transform-style: preserve-3d;
 border-radius: inherit;
-transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+transition: transform 0.78s cubic-bezier(0.25, 1, 0.5, 1);
 }
 .card.face-down .card-inner { transform: rotateY(180deg); }
 .card.face-up   .card-inner { transform: rotateY(0deg); }
+
+.card.flipping .card-inner {
+transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
 
 .card-front, .card-back {
 position: absolute;
@@ -215,7 +241,16 @@ text-align: center;
 font-size: 9px; color: rgba(255,255,255,.4);
 text-transform: uppercase; letter-spacing: 1px; display: block;
 }
-.bb-stat-val { font-size: 16px; font-weight: 700; color: #fff; display: block; }
+.bb-stat-val { 
+  font-size: 16px; font-weight: 700; color: #fff; display: block;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+/* FEATURE: Score pop animatie klasse */
+.score-pop {
+  transform: scale(1.3);
+  color: #f59e0b !important;
+}
 
 #win-screen {
 display: none;
@@ -240,8 +275,8 @@ from { transform: scale(.5); opacity: 0; }
 to   { transform: scale(1);  opacity: 1; }
 }
 .win-titel { font-size: 38px; margin-bottom: 8px; }
-.win-sub   { color: rgba(255,255,255,.6); font-size: 14px; margin-bottom: 6px; }
 .win-score { color: #fff; font-size: 28px; font-weight: 800; margin-bottom: 24px; }
+.win-sub   { color: rgba(255,255,255,.6); font-size: 14px; margin-bottom: 6px; }
 .win-btn {
 background: rgba(255,255,255,.15);
 border: 1px solid rgba(255,255,255,.25);
@@ -263,7 +298,6 @@ animation: vallen linear forwards;
 to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
 }
 
-/* ══ START SCHERM ══ */
 #start-screen {
 display: flex;
 position: fixed; inset: 0; z-index: 800;
@@ -359,7 +393,6 @@ z-index: 9999; white-space: nowrap;
 </div>
 <div id="board">
   <div id="top-row">
-    <!-- Volgorde aangepast: Foundations links (kolom 0-3), Waste en Stock rechts (kolom 5-6) -->
     <div id="slot-f0"    class="slot">♠</div>
     <div id="slot-f1"    class="slot" style="color:rgba(220,50,50,.28)">♥</div>
     <div id="slot-f2"    class="slot" style="color:rgba(220,50,50,.28)">♦</div>
@@ -442,7 +475,6 @@ function layoutSlots() {
   const br = Math.round(CW * 0.12) + 'px';
   const fs = Math.round(CW * 0.28) + 'px';
   
-  // Posities omgewisseld: Foundations op 0 t/m 3, Waste op 5, Stock op 6
   const slotMap = {
     'slot-f0': 0, 'slot-f1': 1, 'slot-f2': 2, 'slot-f3': 3,
     'slot-waste': 5, 'slot-stock': 6
@@ -625,8 +657,15 @@ let history = [];
 
 function updateScore(delta) {
   score = Math.max(0, score + delta);
-  $('stat-score').textContent = score;
+  const scoreEl = $('stat-score');
+  scoreEl.textContent = score;
+  
+  if (delta > 0) {
+    scoreEl.classList.add('score-pop');
+    setTimeout(() => scoreEl.classList.remove('score-pop'), 150);
+  }
 }
+
 function startTimer() {
   clearInterval(timerRef); timerSecs = 0;
   timerRef = setInterval(() => {
@@ -649,6 +688,7 @@ function snapState() {
 }
 
 function undoZet() {
+  if (isAnimating) return;
   if (!history.length) { toast('Geen zet om ongedaan te maken'); return; }
   const snap = JSON.parse(history.pop());
   const restore = arr => arr.map(c => createCard(c.suit, c.rank, c.faceUp));
@@ -792,9 +832,11 @@ function makeEl(card) {
 }
 
 function render() {
+  if (isAnimating) return;
+
   board.querySelectorAll('.card').forEach(e => e.remove());
 
-  // Stock naar rechts verschoven (waaiert nu subtiel naar links uit)
+  // Stock
   state.stock.forEach((card, i) => {
     const el = makeEl(card);
     const sr = $('slot-stock').getBoundingClientRect();
@@ -804,11 +846,11 @@ function render() {
     el.style.zIndex = i+1;
   });
 
+  // Waste
   if (state.waste.length > 0) {
     const wr = $('slot-waste').getBoundingClientRect();
     if (niveau === 'expert') {
       const zichtbaar = Math.min(3, state.waste.length);
-      // In expert-modus waaiert de afvalstapel nu subtiel naar LINKS uit om binnen het scherm te blijven
       const waaierOffset = Math.round(CW * 0.24);
       for (let i = zichtbaar - 1; i >= 0; i--) {
         const card = state.waste[state.waste.length - 1 - i];
@@ -830,6 +872,7 @@ function render() {
     }
   }
 
+  // Foundations
   state.foundations.forEach((pile, f) => {
     if (!pile.length) return;
     const top = pile[pile.length-1];
@@ -840,6 +883,7 @@ function render() {
     el.style.zIndex = 20;
   });
 
+  // Tableau
   state.tableau.forEach((col, c) => {
     let y = TOP_H;
     const x = START_X + c*(CW+GAP);
@@ -858,6 +902,10 @@ function render() {
     });
   });
 
+  resetStockEvent();
+}
+
+function resetStockEvent() {
   $('slot-stock').onclick = null;
   $('slot-stock').addEventListener('pointerdown', e => { e.stopPropagation(); drawFromStockSafe(); });
   board.querySelectorAll('.card.face-down').forEach(el => {
@@ -867,16 +915,91 @@ function render() {
   });
 }
 
-/* ══ STOCK DEBOUNCE ══ */
 let stockCooldown = false;
+let isAnimating = false;
+
 function drawFromStockSafe() {
-  if (stockCooldown) return;
+  if (stockCooldown || isAnimating) return;
   stockCooldown = true;
-  drawFromStock();
-  setTimeout(() => { stockCooldown = false; }, 600);
+  drawFromStockAnimated();
+  setTimeout(() => { stockCooldown = false; }, 900);
 }
 
-/* ══ DRAG ══ */
+/* KRACHTIGE FIX: Kaartdata direct updaten en direct vloeiend animeren */
+function drawFromStockAnimated() {
+  if (state.stock.length === 0) {
+    if (state.waste.length === 0) return;
+    snapState();
+    while (state.waste.length) {
+      const c = state.waste.pop();
+      c.faceUp = false;
+      state.stock.push(c);
+    }
+    sndStock();
+    render();
+    return;
+  }
+
+  snapState();
+  isAnimating = true;
+
+  const aantal = niveau === 'expert' ? Math.min(3, state.stock.length) : 1;
+  const kaartenOmTeDraaien = [];
+  
+  // 1. Haal kaarten direct logisch uit de stock
+  for (let i = 0; i < aantal; i++) {
+    kaartenOmTeDraaien.push(state.stock.pop());
+  }
+
+  const sr = $('slot-stock').getBoundingClientRect();
+  const wr = $('slot-waste').getBoundingClientRect();
+  const waaierOffset = Math.round(CW * 0.24);
+
+  // 2. Zet ze direct in de waste array zodat render() ze herkent
+  kaartenOmTeDraaien.forEach((card) => {
+    card.faceUp = true;
+    state.waste.push(card);
+  });
+
+  // 3. Bouw het bord direct logisch op via render()
+  render();
+
+  // 4. Forceer nu de visuele CSS transitie vanaf de startpositie (stock)
+  kaartenOmTeDraaien.forEach((card, index) => {
+    const el = card.el;
+    if (!el) return;
+
+    // Zet de getrokken kaarten visueel direct even handmatig 'terug' op de stock
+    el.classList.remove('face-up');
+    el.classList.add('face-down', 'flipping');
+    el.style.left = sr.left + 'px';
+    el.style.top = sr.top + 'px';
+    el.style.zIndex = 500 + index;
+
+    // Forceer de browser om deze herberekening direct te verwerken
+    el.getBoundingClientRect();
+
+    // Start direct de vloeiende animatie naar de daadwerkelijke eindbestemming (waste-slot)
+    setTimeout(() => {
+      el.classList.remove('face-down');
+      el.classList.add('face-up');
+      
+      const eindX = niveau === 'expert' ? (wr.left - (aantal - 1 - index) * waaierOffset) : wr.left;
+      el.style.left = eindX + 'px';
+      el.style.top = wr.top + 'px';
+      
+      sndKaartFlip();
+    }, index * 150); // Lichte stapsgewijze vertraging bij expert modus (3 kaarten)
+  });
+
+  // Heft de animatie-lock op zodra de CSS-transitie van 0.8s klaar is
+  setTimeout(() => {
+    isAnimating = false;
+    render(); // Eind-render om interacties/drags correct te binden
+  }, 850 + (aantal * 150));
+}
+
+/* ══ DRAG & TOUCH CONTROLS ══ */
 let drag = null;
 
 document.addEventListener('pointermove', e => {
@@ -894,7 +1017,7 @@ document.addEventListener('pointerup', e => {
   drag.el.style.opacity = '';
   drag.clones.forEach(c => c.remove());
   const dropped = tryDrop(e.clientX, e.clientY, drag);
-  if (!dropped) toast('Ongeldige zet');
+  if (!dropped && drag.pointerMoved) toast('Ongeldige zet');
   drag = null;
   render();
 });
@@ -907,25 +1030,61 @@ document.addEventListener('pointercancel', () => {
 });
 
 function tryAutoFoundation(card, pile, pileArgs) {
+  if (isAnimating) return false;
+  
   for (let f = 0; f < 4; f++) {
     if (canMoveToFoundation(card, f)) {
       snapState();
+      executeMoveToFoundation(card, pile, pileArgs, f);
+      return true;
+    }
+  }
+  
+  for (let c = 0; c < 7; c++) {
+    if (pile === 'tableau' && pileArgs[0] === c) continue; 
+    if (canMoveToTableau(card, c)) {
+      snapState();
+      
+      let cardsToMove = [];
       if (pile === 'waste') {
-        state.waste.pop();
+        cardsToMove = [state.waste.pop()];
       } else if (pile === 'tableau') {
-        state.tableau[pileArgs[0]].splice(pileArgs[1]);
+        cardsToMove = state.tableau[pileArgs[0]].splice(pileArgs[1]);
         revealTopTableau(pileArgs[0]);
       }
-      state.foundations[f].push(card);
-      updateScore(10);
-      sndFoundation();
-      checkWin();
+      
+      cardsToMove.forEach(c => state.tableau[col].push(c));
+      updateScore(3); 
+      sndKaartNeerleggen();
       render();
       setTimeout(() => { if (kanAutoComplete()) autoComplete(); }, 300);
       return true;
     }
   }
+  
   return false;
+}
+
+function executeMoveToFoundation(card, pile, pileArgs, f) {
+  if (pile === 'waste') {
+    state.waste.pop();
+  } else if (pile === 'tableau') {
+    state.tableau[pileArgs[0]].splice(pileArgs[1]);
+    revealTopTableau(pileArgs[0]);
+  }
+  state.foundations[f].push(card);
+  updateScore(10);
+  sndFoundation();
+  
+  setTimeout(() => {
+    if (card.el) {
+      card.el.classList.add('sparkle');
+    }
+  }, 50);
+  
+  checkWin();
+  render();
+  setTimeout(() => { if (kanAutoComplete()) autoComplete(); }, 300);
 }
 
 function enableDrag(el, card, pile, ...pileArgs) {
@@ -934,7 +1093,7 @@ function enableDrag(el, card, pile, ...pileArgs) {
   let pointerStartX, pointerStartY;
 
   el.addEventListener('pointerdown', e => {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || isAnimating) return;
     e.preventDefault(); e.stopPropagation();
     pointerMoved = false;
     pointerStartX = e.clientX;
@@ -946,22 +1105,25 @@ function enableDrag(el, card, pile, ...pileArgs) {
     if (!cards.length) return;
 
     const rect = el.getBoundingClientRect();
+    
     const clones = cards.map((c, i) => {
       const clone = c.el.cloneNode(true);
-      clone.style.cssText = `position:fixed;width:${CW}px;height:${CH}px;z-index:${9000+i};pointer-events:none;transition:none;left:${rect.left}px;top:${rect.top+i*STACK_UP}px;box-shadow:0 16px 40px rgba(0,0,0,.6);transform:scale(1.04) rotate(1deg);border-radius:${Math.round(CW*.12)}px;opacity:0;`;
+      clone.style.cssText = `position:fixed;width:${CW}px;height:${CH}px;z-index:${9000+i};pointer-events:none;transition:none;left:${rect.left}px;top:${rect.top+i*STACK_UP}px;box-shadow: 0 25px 50px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.3);transform:scale(1.05) rotate(0.5deg);border-radius:${Math.round(CW*.12)}px;opacity:0;`;
       document.body.appendChild(clone);
       return clone;
     });
+
+    drag = { cards, clones, pile, pileArgs, ox: e.clientX - rect.left, oy: e.clientY - rect.top, el, pointerMoved: false };
 
     const onMove = e2 => {
       const dx = Math.abs(e2.clientX - pointerStartX);
       const dy = Math.abs(e2.clientY - pointerStartY);
       if (!pointerMoved && (dx > 6 || dy > 6)) {
         pointerMoved = true;
+        drag.pointerMoved = true;
         el.style.opacity = '0.15';
         clones.forEach(c => c.style.opacity = '1');
         sndKaartOppakken();
-        drag = { cards, clones, pile, pileArgs, ox: e.clientX - rect.left, oy: e.clientY - rect.top, el };
       }
     };
 
@@ -971,7 +1133,7 @@ function enableDrag(el, card, pile, ...pileArgs) {
       if (!pointerMoved) {
         clones.forEach(c => c.remove());
         el.style.opacity = '';
-        if (cards.length === 1) tryAutoFoundation(card, pile, pileArgs);
+        tryAutoFoundation(card, pile, pileArgs);
       }
     };
 
@@ -981,6 +1143,8 @@ function enableDrag(el, card, pile, ...pileArgs) {
 }
 
 function tryDrop(cx, cy, dragData) {
+  if (!dragData.pointerMoved) return false; 
+  
   for (let f=0;f<4;f++) {
     const slot = $('slot-f'+f);
     if (hitTest(cx,cy,slot) && dragData.cards.length===1) {
@@ -1040,9 +1204,17 @@ function revealTopTableau(col) {
 }
 function moveToFoundation(dragData, f) {
   snapState();
+  const card = dragData.cards[0];
   removeFromSource(dragData);
-  state.foundations[f].push(dragData.cards[0]);
-  updateScore(10); sndFoundation(); checkWin();
+  state.foundations[f].push(card);
+  updateScore(10); sndFoundation(); 
+  
+  setTimeout(() => {
+    if (card.el) card.el.classList.add('sparkle');
+  }, 50);
+  
+  checkWin();
+  render();
   setTimeout(() => { if (kanAutoComplete()) autoComplete(); }, 300);
 }
 function moveToTableau(dragData, col) {
@@ -1053,23 +1225,14 @@ function moveToTableau(dragData, col) {
   setTimeout(() => { if (kanAutoComplete()) autoComplete(); }, 300);
 }
 function flipTop(col) {
+  if (isAnimating) return;
   const pile = state.tableau[col];
   if (!pile.length || pile[pile.length - 1].faceUp) return;
   pile[pile.length - 1].faceUp = true;
   sndKaartFlip();
   render();
 }
-function drawFromStock() {
-  if (state.stock.length === 0) {
-    while (state.waste.length) { const c = state.waste.pop(); c.faceUp = false; state.stock.push(c); }
-  } else {
-    const aantal = niveau === 'expert' ? 3 : 1;
-    for (let i = 0; i < aantal && state.stock.length > 0; i++) {
-      const c = state.stock.pop(); c.faceUp = true; state.waste.push(c);
-    }
-  }
-  sndStock(); render();
-}
+
 function checkWin() {
   if (state.foundations.reduce((s,f)=>s+f.length,0)!==52) return;
   stopTimer(); sndWin();
@@ -1082,7 +1245,7 @@ function checkWin() {
 }
 function confetti() {
   const kleuren = ['#f59e0b','#10b981','#3b82f6','#ef4444','#8b5cf6','#ec4899','#14b8a6'];
-  for (let i=0;i<80;i++) {
+  for (let i=0; i<80; i++) {
     const el = document.createElement('div');
     el.className = 'confetti';
     el.style.left = Math.random()*100+'vw';
@@ -1127,7 +1290,7 @@ function kanAutoComplete() {
   return state.tableau.every(col=>col.every(c=>c.faceUp));
 }
 function autoComplete() {
-  if (!kanAutoComplete()) return;
+  if (!kanAutoComplete() || isAnimating) return;
   for (let c = 0; c < 7; c++) {
     const col = state.tableau[c]; if (!col.length) continue;
     const top = col[col.length - 1];
