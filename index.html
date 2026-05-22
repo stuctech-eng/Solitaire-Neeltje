@@ -374,13 +374,14 @@ function render() {
   if (isAnimating) return;
   board.querySelectorAll('.card').forEach(e=>e.remove());
 
-  // Stock
+  // Stock -- listener op slot, niet op kaarten
+  $('slot-stock').onpointerdown = e => { e.stopPropagation(); executeStockDraw(); };
   state.stock.forEach((card,i)=>{
     const el=buildCardEl(card);
     const r=$('slot-stock').getBoundingClientRect();
     el.style.left=r.left+'px'; el.style.top=r.top+'px'; el.style.zIndex=i+1;
+    el.addEventListener('pointerdown', e=>{ e.stopPropagation(); executeStockDraw(); });
   });
-  $('slot-stock').onpointerdown=e=>{ e.stopPropagation(); executeStockDraw(); };
 
   // Waste
   if (state.waste.length>0) {
