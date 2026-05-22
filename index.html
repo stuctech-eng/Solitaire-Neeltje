@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Solitaire – Neeltje Ultra Premium</title>
+<title>Solitaire – Neeltje</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#030d0a">
@@ -37,35 +37,31 @@ html.thema-nacht {
 }
 
 *, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0; padding: 0;
+  box-sizing: border-box; margin: 0; padding: 0;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
+  -webkit-user-select: none; user-select: none;
 }
 html, body {
   width: 100%; height: 100dvh;
   overflow: hidden; position: fixed; inset: 0;
   touch-action: none; background: #010504;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  color: #fff; font-size: 16px;
+  -webkit-text-size-adjust: 100%;
 }
 #board {
   position: fixed; inset: 0; overflow: hidden;
   background: radial-gradient(circle at 50% 25%, var(--tafel-glow), transparent 55%),
               linear-gradient(180deg, var(--tafel-top) 0%, var(--tafel-bot) 100%);
-  perspective: 1500px;
 }
 #top-row {
   position: absolute; left: 0; right: 0; top: 0; z-index: 10;
   padding-top: calc(env(safe-area-inset-top, 20px) + 5px);
 }
 .slot {
-  position: absolute;
-  border-radius: 12px;
-  background: var(--slot-bg);
-  border: 1px solid var(--slot-border);
+  position: absolute; border-radius: 12px;
+  background: var(--slot-bg); border: 1px solid var(--slot-border);
   box-shadow: inset 0 2px 8px rgba(0,0,0,0.6);
   display: flex; align-items: center; justify-content: center;
   color: rgba(255,255,255,0.08); font-weight: 700; font-size: 1.5em;
@@ -73,26 +69,17 @@ html, body {
 }
 .card {
   position: absolute; cursor: grab; touch-action: none;
-  will-change: transform, left, top;
-  border-radius: 10px;
+  will-change: transform, left, top; border-radius: 10px;
   box-shadow: var(--card-shadow);
-  transition: box-shadow 0.2s cubic-bezier(0.25, 1, 0.5, 1), transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: box-shadow 0.2s;
 }
-
-/* De Ultra-Premium Lift bij slepen */
-.card:active {
-  transform: scale(1.04);
-  box-shadow: 0 22px 40px rgba(0,0,0,0.6), 0 5px 15px rgba(0,0,0,0.3);
-}
-
 .card.in-motion {
-  transition: left 0.45s cubic-bezier(0.19, 1, 0.22, 1), 
-              top 0.45s cubic-bezier(0.19, 1, 0.22, 1), 
-              transform 0.45s cubic-bezier(0.19, 1, 0.22, 1) !important;
+  transition: left 0.45s cubic-bezier(0.19,1,0.22,1),
+              top 0.45s cubic-bezier(0.19,1,0.22,1),
+              transform 0.45s cubic-bezier(0.19,1,0.22,1) !important;
   z-index: 2500 !important;
   box-shadow: 0 25px 50px rgba(0,0,0,0.65) !important;
 }
-
 .card.sparkle::after {
   content: ''; position: absolute; inset: 0; border-radius: inherit;
   background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%);
@@ -101,41 +88,31 @@ html, body {
   pointer-events: none; z-index: 10;
 }
 @keyframes shineEffect {
-  0% { background-position: -200% -200%; opacity: 1; }
-  100% { background-position: 200% 200%; opacity: 0; }
+  0%   { background-position: -200% -200%; opacity: 1; }
+  100% { background-position:  200%  200%; opacity: 0; }
 }
-
 .card-inner {
   position: absolute; inset: 0;
   transform-style: preserve-3d; border-radius: inherit;
-  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: transform 0.4s cubic-bezier(0.25,1,0.5,1);
 }
 .card.face-down .card-inner { transform: rotateY(180deg); }
 .card.face-up   .card-inner { transform: rotateY(0deg); }
-
 .card-front, .card-back {
   position: absolute; inset: 0; border-radius: inherit;
   backface-visibility: hidden; -webkit-backface-visibility: hidden;
 }
 .card-front {
-  background: #ffffff;
-  border: 1px solid rgba(255,255,255,0.9);
+  background: #ffffff; border: 1px solid rgba(255,255,255,0.9);
   display: flex; flex-direction: column; overflow: hidden;
 }
-.c-corner {
-  font-weight: 800; line-height: 1.0; padding: 4px 6px; flex-shrink: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-}
+.c-corner { font-weight: 800; line-height: 1.0; padding: 4px 6px; flex-shrink: 0; }
 .c-corner.bot { align-self: flex-end; transform: rotate(180deg); }
-.c-mid {
-  flex: 1; display: flex; align-items: center; justify-content: center;
-  font-weight: 800; overflow: hidden; margin-top: -4px;
-}
+.c-mid { flex: 1; display: flex; align-items: center; justify-content: center; font-weight: 800; overflow: hidden; }
 .card-back {
   background: var(--kaart-rug);
   border: 1px solid rgba(255,255,255,0.25);
-  box-shadow: inset 0 0 15px rgba(0,0,0,0.3);
-  transform: rotateY(180deg); position: absolute; inset: 0; border-radius: inherit;
+  transform: rotateY(180deg);
 }
 .card-back::after {
   content: ""; position: absolute; inset: 6px; border-radius: 6px;
@@ -143,17 +120,8 @@ html, body {
   background-image: radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px);
   background-size: 8px 8px;
 }
-
-/* Premium Ultra-Knal Kleuren */
-.red   { color: #ff1744; text-shadow: 0 0 1px rgba(255,23,68,0.1); }
+.red   { color: #ff1744; }
 .black { color: #05050a; }
-
-#stock-recycle-overlay {
-  position: absolute; z-index: 5;
-  background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.2);
-  border-radius: 12px; display: none; align-items: center; justify-content: center;
-  font-size: 24px; color: rgba(255,255,255,0.4); pointer-events: auto; cursor: pointer;
-}
 
 #bottom-bar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
@@ -162,37 +130,34 @@ html, body {
   padding-bottom: calc(8px + env(safe-area-inset-bottom, 8px));
   background: var(--ui-bg);
   backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-  border-top: 1px solid var(--ui-border);
-  gap: 12px;
+  border-top: 1px solid var(--ui-border); gap: 12px;
 }
 @media (orientation: landscape) {
   #bottom-bar { padding: 4px 16px; padding-bottom: env(safe-area-inset-bottom, 4px); }
   .bb-btn { padding: 6px 12px !important; font-size: 12px !important; }
   .bb-stat-val { font-size: 14px !important; }
 }
-
 .bb-btn {
   background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.04);
-  border-radius: 12px; padding: 11px 14px;
-  color: #fff; font-size: 13px; font-weight: 600;
+  border-radius: 12px; padding: 11px 14px; color: #fff; font-size: 13px; font-weight: 600;
   cursor: pointer; flex: 1; text-align: center;
-  transition: background 0.15s;
 }
 .bb-btn:active { background: rgba(255,255,255,0.15); transform: scale(0.97); }
 .bb-stat { text-align: center; flex: 1; }
 .bb-stat-lbl { font-size: 9px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.2px; display: block; margin-bottom: 1px; }
-.bb-stat-val { font-size: 16px; font-weight: 700; color: #fff; display: block; font-variant-numeric: tabular-nums; }
-.score-pop { transform: scale(1.25); color: #00ffcc !important; transition: transform 0.1s; }
+.bb-stat-val { font-size: 16px; font-weight: 700; color: #fff; display: block; }
 
 #start-screen, #win-screen {
-  position: fixed; inset: 0; z-index: 800; display: flex; align-items: center; justify-content: center; flex-direction: column;
+  position: fixed; inset: 0; z-index: 800;
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
 }
-#start-screen { background: radial-gradient(circle at 50% 30%, #051c17 0%, #000000 100%); }
-#win-screen { display: none; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 900; }
+#start-screen { background: radial-gradient(circle at 50% 30%, #051c17 0%, #000 100%); }
+#win-screen { display: none; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 900; }
 #win-screen.show { display: flex; }
 
 .window-box {
-  background: rgba(20, 25, 35, 0.7); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+  background: rgba(20,25,35,0.7); border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
   border-radius: 28px; padding: 30px; text-align: center; max-width: 320px; width: 88%;
   box-shadow: 0 30px 70px rgba(0,0,0,0.8);
 }
@@ -201,14 +166,13 @@ html, body {
   .thema-rij { margin-bottom: 12px !important; }
   .start-sub { margin-bottom: 12px !important; }
 }
-
-.start-titel { font-size: 36px; font-weight: 900; letter-spacing: -1.5px; background: linear-gradient(180deg, #fff 0%, #a5b4fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.start-sub { font-size: 11px; color: #00ffcc; font-weight: 700; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 25px; text-shadow: 0 0 10px rgba(0,255,204,0.3); }
+.start-titel { font-size: 36px; font-weight: 900; letter-spacing: -1.5px; background: linear-gradient(180deg,#fff 0%,#a5b4fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.start-sub { font-size: 11px; color: #00ffcc; font-weight: 700; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 25px; }
 .start-label { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
 .thema-rij { display: flex; justify-content: center; gap: 12px; margin-bottom: 25px; }
 .thema-btn {
   width: 65px; height: 65px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.05); color: #fff;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 11px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 20px;
   transition: border-color 0.2s, transform 0.2s;
 }
 .thema-btn span { font-size: 9px; opacity: 0.6; margin-top: 2px; }
@@ -216,16 +180,17 @@ html, body {
 .thema-btn.t-groen  { background: linear-gradient(135deg, #051c13, #010504); }
 .thema-btn.t-casino { background: linear-gradient(135deg, #2b0404, #0a0101); }
 .thema-btn.t-nacht  { background: linear-gradient(135deg, #0b0f19, #020408); }
-.start-btn { width: 100%; padding: 12px; border-radius: 14px; border: none; font-size: 15px; font-weight: 700; color: #fff; cursor: pointer; margin-bottom: 10px; transition: transform 0.1s; }
+.start-btn { width: 100%; padding: 12px; border-radius: 14px; border: none; font-size: 15px; font-weight: 700; color: #fff; cursor: pointer; margin-bottom: 10px; }
 .start-btn:active { transform: scale(0.98); }
 .start-btn.klassiek { background: linear-gradient(135deg, #0052d4 0%, #4364f7 100%); }
-.start-btn.expert { background: linear-gradient(135deg, #f59e0b 0%, #e11d48 100%); }
+.start-btn.expert   { background: linear-gradient(135deg, #f59e0b 0%, #e11d48 100%); }
 .start-btn-lbl { display: block; font-size: 10px; font-weight: 400; opacity: 0.7; margin-top: 1px; }
 
 #toast {
-  position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%); background: rgba(10, 15, 25, 0.95); color: #fff;
-  padding: 10px 24px; border-radius: 24px; font-size: 13px; font-weight: 600; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 9999;
-  border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+  position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%);
+  background: rgba(10,15,25,0.95); color: #fff; padding: 10px 24px; border-radius: 24px;
+  font-size: 13px; font-weight: 600; pointer-events: none; opacity: 0; transition: opacity 0.2s;
+  z-index: 9999; border: 1px solid rgba(255,255,255,0.08); white-space: nowrap;
 }
 #toast.show { opacity: 1; }
 .confetti { position: fixed; width: 8px; height: 12px; top: -20px; z-index: 950; pointer-events: none; animation: dropConfetti linear forwards; }
@@ -237,18 +202,16 @@ html, body {
 <div id="start-screen">
   <div class="window-box">
     <div class="start-titel">🂡 Solitaire</div>
-    <div class="start-sub">Ultra Premium</div>
-    <div class="start-label">Kies Tafelstijl</div>
+    <div class="start-sub">Neeltje</div>
+    <div class="start-label">Tafelstijl</div>
     <div class="thema-rij">
       <button class="thema-btn t-groen actief" onclick="kiesThema('groen',this)">🌿<span>Lounge</span></button>
-      <button class="thema-btn t-casino"       onclick="kiesThema('casino',this)">🎰<span>Neon Red</span></button>
+      <button class="thema-btn t-casino"       onclick="kiesThema('casino',this)">🎰<span>Casino</span></button>
       <button class="thema-btn t-nacht"        onclick="kiesThema('nacht',this)">🌙<span>Cyber</span></button>
     </div>
     <div class="start-label">Spelmodus</div>
-    <div style="display: flex; gap: 12px;">
-      <button class="start-btn klassiek" onclick="startSpel('klassiek')">Klassiek<span class="start-btn-lbl">1 kaart</span></button>
-      <button class="start-btn expert" onclick="startSpel('expert')">Expert<span class="start-btn-lbl">3 kaarten</span></button>
-    </div>
+    <button class="start-btn klassiek" onclick="startSpel('klassiek')">Klassiek<span class="start-btn-lbl">1 kaart uit stock</span></button>
+    <button class="start-btn expert"   onclick="startSpel('expert')">Expert<span class="start-btn-lbl">3 kaarten uit stock</span></button>
   </div>
 </div>
 
@@ -261,7 +224,6 @@ html, body {
     <div id="slot-waste" class="slot"></div>
     <div id="slot-stock" class="slot">↺</div>
   </div>
-  <div id="stock-recycle-overlay">↺</div>
 </div>
 
 <div id="bottom-bar">
@@ -269,14 +231,14 @@ html, body {
   <div class="bb-stat"><span class="bb-stat-lbl">Score</span><span class="bb-stat-val" id="stat-score">0</span></div>
   <div class="bb-stat"><span class="bb-stat-lbl">Tijd</span><span class="bb-stat-val" id="stat-tijd">0:00</span></div>
   <button class="bb-btn" onclick="hintZet()">💡 Hint</button>
-  <button class="bb-btn" onclick="naarStartScherm()" style="background:rgba(255,255,255,0.12)">🏠 Menu</button>
+  <button class="bb-btn" onclick="naarStartScherm()">🏠 Menu</button>
 </div>
 
 <div id="win-screen">
   <div class="window-box">
-    <div style="font-size: 42px; margin-bottom: 12px; filter: drop-shadow(0 0 10px gold)">🏆</div>
-    <h2 style="font-size: 24px; margin-bottom: 8px; font-weight:800;">Goud Behaald!</h2>
-    <div style="font-size: 15px; color:rgba(255,255,255,0.6); margin-bottom: 22px; line-height:1.4;" id="win-stats-txt"></div>
+    <div style="font-size:42px;margin-bottom:12px;">🏆</div>
+    <h2 style="font-size:24px;margin-bottom:8px;font-weight:800;">Gewonnen!</h2>
+    <div style="font-size:15px;color:rgba(255,255,255,0.6);margin-bottom:22px;line-height:1.4;" id="win-stats-txt"></div>
     <button class="start-btn klassiek" style="margin-bottom:0;" onclick="naarStartScherm()">Nieuw Spel</button>
   </div>
 </div>
@@ -290,107 +252,112 @@ const SUITS = ['♠','♥','♦','♣'];
 const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const RED   = new Set(['♥','♦']);
 
-let state = { stock: [], waste: [], foundations: [[],[],[],[]], tableau: [[],[],[],[],[],[],[]] };
+let state = { stock:[], waste:[], foundations:[[],[],[],[]], tableau:[[],[],[],[],[],[],[]] };
 let CW, CH, GAP, STACK_UP, STACK_DN, START_X, TOP_H;
-let score = 0, timerSecs = 0, timerRef = null, history = [];
-let niveau = 'klassiek', thema = 'groen', isAnimating = false, toastTimer;
+let score=0, timerSecs=0, timerRef=null, history=[];
+let niveau='klassiek', thema='groen', isAnimating=false, toastTimer;
 
 const board = document.getElementById('board');
 const $ = id => document.getElementById(id);
 
 function toast(msg) {
-  const el = $('toast'); el.textContent = msg; el.classList.add('show');
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+  const el=$('toast'); el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),2000);
 }
 
 function updateSizes() {
-  const W = window.innerWidth, H = window.innerHeight;
-  const isLandscape = W > H;
-
-  const maxW = Math.floor((W - 14) / 7.2); 
-  const maxH = isLandscape ? Math.floor(H * 0.19) : Math.floor(H * 0.21); 
-  
-  CW = Math.max(42, Math.min(maxW, Math.round(maxH / 1.4))); 
-  CH = Math.round(CW * 1.4);
-  GAP = Math.floor((W - (CW * 7)) / 8);
-  if (GAP < 2) GAP = 2;
-  
-  STACK_UP = isLandscape ? Math.round(CH * 0.16) : Math.round(CH * 0.24);
-  STACK_DN = isLandscape ? Math.round(CH * 0.08) : Math.round(CH * 0.11);
-  START_X = Math.floor((W - (CW * 7 + GAP * 6)) / 2);
-  
-  const topRow = $('top-row');
-  const topPad = parseFloat(getComputedStyle(topRow).paddingTop) || 25;
-  
-  ['slot-f0', 'slot-f1', 'slot-f2', 'slot-f3', 'slot-waste', 'slot-stock'].forEach((id, idx) => {
-    const col = idx <= 3 ? idx : (idx === 4 ? 5 : 6);
-    const s = $(id);
-    s.style.left = (START_X + col * (CW + GAP)) + 'px';
-    s.style.top = topPad + 'px'; s.style.width = CW + 'px'; s.style.height = CH + 'px';
+  const W=window.innerWidth, H=window.innerHeight, land=W>H;
+  const maxW=Math.floor((W-14)/7.2);
+  const maxH=land?Math.floor(H*0.19):Math.floor(H*0.21);
+  CW=Math.max(42,Math.min(maxW,Math.round(maxH/1.4)));
+  CH=Math.round(CW*1.4);
+  GAP=Math.max(2,Math.floor((W-(CW*7))/8));
+  STACK_UP=land?Math.round(CH*0.16):Math.round(CH*0.24);
+  STACK_DN=land?Math.round(CH*0.08):Math.round(CH*0.11);
+  START_X=Math.floor((W-(CW*7+GAP*6))/2);
+  const topRow=$('top-row');
+  const topPad=parseFloat(getComputedStyle(topRow).paddingTop)||25;
+  ['slot-f0','slot-f1','slot-f2','slot-f3','slot-waste','slot-stock'].forEach((id,idx)=>{
+    const col=[0,1,2,3,5,6][idx];
+    const s=$(id);
+    s.style.left=(START_X+col*(CW+GAP))+'px';
+    s.style.top=topPad+'px'; s.style.width=CW+'px'; s.style.height=CH+'px';
   });
-  
-  const rec = $('stock-recycle-overlay');
-  const stockRect = $('slot-stock').getBoundingClientRect();
-  rec.style.left = stockRect.left + 'px'; rec.style.top = stockRect.top + 'px';
-  rec.style.width = CW + 'px'; rec.style.height = CH + 'px';
-
-  topRow.style.height = (topPad + CH + 5) + 'px';
-  TOP_H = topPad + CH + 12;
+  topRow.style.height=(topPad+CH+5)+'px';
+  TOP_H=topPad+CH+12;
 }
 
-let AC = null;
+/* ══ GELUID ══ */
+let AC=null;
 function playSound(type) {
-  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
-  if (AC && AC.state === 'suspended') AC.resume();
+  if (!AC) try { AC=new(window.AudioContext||window.webkitAudioContext)(); } catch(e){}
+  if (AC&&AC.state==='suspended') AC.resume();
   if (!AC) return;
   try {
-    const osc = AC.createOscillator(), gain = AC.createGain();
-    osc.connect(gain); gain.connect(AC.destination);
-    if (type === 'click' || type === 'flip') {
-      osc.type = 'sine'; osc.frequency.setValueAtTime(type==='click'?580:380, AC.currentTime);
-      gain.gain.setValueAtTime(0.02, AC.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 0.04);
-      osc.start(); osc.stop(AC.currentTime + 0.05);
-    } else if (type === 'foundation') {
-      osc.type = 'sine'; osc.frequency.setValueAtTime(587.33, AC.currentTime); osc.frequency.setValueAtTime(783.99, AC.currentTime + 0.06);
-      gain.gain.setValueAtTime(0.06, AC.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 0.18);
-      osc.start(); osc.stop(AC.currentTime + 0.2);
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.connect(g); g.connect(AC.destination);
+    if (type==='click'||type==='flip') {
+      o.type='sine'; o.frequency.setValueAtTime(type==='click'?580:380,AC.currentTime);
+      g.gain.setValueAtTime(0.02,AC.currentTime); g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+0.04);
+      o.start(); o.stop(AC.currentTime+0.05);
+    } else if (type==='foundation') {
+      o.type='sine'; o.frequency.setValueAtTime(587,AC.currentTime); o.frequency.setValueAtTime(784,AC.currentTime+0.06);
+      g.gain.setValueAtTime(0.06,AC.currentTime); g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+0.18);
+      o.start(); o.stop(AC.currentTime+0.2);
     }
   } catch(e){}
 }
 
-function kiesThema(t, btn) { thema = t; document.querySelectorAll('.thema-btn').forEach(b => b.classList.remove('actief')); btn.classList.add('actief'); document.documentElement.className = 'thema-' + t; }
-function startSpel(m) { niveau = m; $('start-screen').style.display = 'none'; nieuwSpel(); }
-function naarStartScherm() { stopTimer(); $('win-screen').classList.remove('show'); $('start-screen').style.display = 'flex'; }
-function updateScore(d) { score = Math.max(0, score + d); const el = $('stat-score'); el.textContent = score; if (d > 0) { el.classList.add('score-pop'); setTimeout(() => el.classList.remove('score-pop'), 150); } }
-function startTimer() { clearInterval(timerRef); timerSecs = 0; timerRef = setInterval(() => { timerSecs++; const m = Math.floor(timerSecs/60), s = timerSecs%60; $('stat-tijd').textContent = `${m}:${s<10?'0':''}${s}`; }, 1000); }
+/* ══ THEMA ══ */
+function kiesThema(t,btn) {
+  thema=t;
+  document.querySelectorAll('.thema-btn').forEach(b=>b.classList.remove('actief'));
+  btn.classList.add('actief');
+  document.documentElement.className = t==='groen' ? '' : 'thema-'+t;
+}
+
+/* ══ SPEL START ══ */
+function startSpel(m) { niveau=m; $('start-screen').style.display='none'; nieuwSpel(); }
+function naarStartScherm() { stopTimer(); $('win-screen').classList.remove('show'); $('start-screen').style.display='flex'; }
+
+/* ══ SCORE / TIMER ══ */
+function updateScore(d) { score=Math.max(0,score+d); $('stat-score').textContent=score; }
+function startTimer() {
+  clearInterval(timerRef); timerSecs=0;
+  timerRef=setInterval(()=>{ timerSecs++; const m=Math.floor(timerSecs/60),s=timerSecs%60; $('stat-tijd').textContent=m+':'+(s<10?'0':'')+s; },1000);
+}
 function stopTimer() { clearInterval(timerRef); }
 
+/* ══ UNDO ══ */
 function snapState() {
   history.push(JSON.stringify({
-    stock: state.stock.map(c=>({suit:c.suit,rank:c.rank,faceUp:c.faceUp})), waste: state.waste.map(c=>({suit:c.suit,rank:c.rank,faceUp:c.faceUp})),
-    foundations: state.foundations.map(f=>f.map(c=>({suit:c.suit,rank:c.rank,faceUp:c.faceUp}))),
-    tableau: state.tableau.map(col=>col.map(c=>({suit:c.suit,rank:c.rank,faceUp:c.faceUp}))), score
+    stock:state.stock.map(c=>({suit:c.suit,rank:c.rank,faceUp:c.faceUp})),
+    waste:state.waste.map(c=>({suit:c.suit,rank:c.rank,faceUp:c.faceUp})),
+    foundations:state.foundations.map(f=>f.map(c=>({suit:c.suit,rank:c.rank,faceUp:c.faceUp}))),
+    tableau:state.tableau.map(col=>col.map(c=>({suit:c.suit,rank:c.rank,faceUp:c.faceUp}))),
+    score
   }));
-  if (history.length > 30) history.shift();
+  if (history.length>30) history.shift();
 }
-
 function undoZet() {
-  if (isAnimating || !history.length) return;
-  const snap = JSON.parse(history.pop());
-  const rstr = a => a.map(c => createCard(c.suit, c.rank, c.faceUp));
-  state.stock = rstr(snap.stock); state.waste = rstr(snap.waste);
-  state.foundations = snap.foundations.map(f => rstr(f)); state.tableau = snap.tableau.map(col => rstr(col));
-  score = snap.score; $('stat-score').textContent = score; render();
+  if (isAnimating||!history.length) { toast('Geen zet om ongedaan te maken'); return; }
+  const snap=JSON.parse(history.pop());
+  const rstr=a=>a.map(c=>createCard(c.suit,c.rank,c.faceUp));
+  state.stock=rstr(snap.stock); state.waste=rstr(snap.waste);
+  state.foundations=snap.foundations.map(f=>rstr(f));
+  state.tableau=snap.tableau.map(col=>rstr(col));
+  score=snap.score; $('stat-score').textContent=score; render();
 }
 
-function createCard(suit, rank, faceUp = false) { return { suit, rank, color: RED.has(suit)?'red':'black', faceUp, el: null }; }
+function createCard(suit,rank,faceUp=false) { return {suit,rank,color:RED.has(suit)?'red':'black',faceUp,el:null}; }
 
-function buildCardElement(card) {
+function buildCardEl(card) {
   if (card.el) card.el.remove();
-  const el = document.createElement('div'); el.className = `card ${card.faceUp?'face-up':'face-down'}`;
-  el.style.width = CW + 'px'; el.style.height = CH + 'px';
-  const fs = Math.max(10, Math.round(CW * 0.20)), mfs = Math.max(18, Math.round(CW * 0.46));
-  el.innerHTML = `
+  const el=document.createElement('div');
+  el.className='card '+(card.faceUp?'face-up':'face-down');
+  el.style.width=CW+'px'; el.style.height=CH+'px';
+  const fs=Math.max(10,Math.round(CW*0.20)), mfs=Math.max(18,Math.round(CW*0.46));
+  el.innerHTML=`
     <div class="card-inner">
       <div class="card-front">
         <div class="c-corner ${card.color}" style="font-size:${fs}px">${card.rank}<br>${card.suit}</div>
@@ -399,348 +366,289 @@ function buildCardElement(card) {
       </div>
       <div class="card-back"></div>
     </div>`;
-  card.el = el; board.appendChild(el); return el;
+  card.el=el; board.appendChild(el); return el;
 }
 
+/* ══ RENDER ══ */
 function render() {
   if (isAnimating) return;
-  board.querySelectorAll('.card:not(.in-motion)').forEach(e => e.remove());
+  board.querySelectorAll('.card').forEach(e=>e.remove());
 
-  state.stock.forEach((card, i) => {
-    const el = buildCardElement(card); const r = $('slot-stock').getBoundingClientRect();
-    el.style.left = r.left + 'px'; el.style.top = r.top + 'px'; el.style.zIndex = i + 1;
-    if(i === state.stock.length - 1) {
-      el.addEventListener('pointerdown', e => { e.stopPropagation(); executeStockDraw(); });
-    }
+  // Stock
+  state.stock.forEach((card,i)=>{
+    const el=buildCardEl(card);
+    const r=$('slot-stock').getBoundingClientRect();
+    el.style.left=r.left+'px'; el.style.top=r.top+'px'; el.style.zIndex=i+1;
   });
+  $('slot-stock').onpointerdown=e=>{ e.stopPropagation(); executeStockDraw(); };
 
-  if (state.waste.length > 0) {
-    const r = $('slot-waste').getBoundingClientRect();
-    if (niveau === 'expert') {
-      const showCount = Math.min(3, state.waste.length);
-      const step = Math.round(CW * 0.24);
-      for (let i = showCount - 1; i >= 0; i--) {
-        const card = state.waste[state.waste.length - 1 - i]; const el = buildCardElement(card);
-        el.style.left = (r.left + (showCount - 1 - i) * step) + 'px'; el.style.top = r.top + 'px'; el.style.zIndex = 50 + (showCount - i);
-        if (i === 0) bindDragAndTap(el, card, 'waste', state.waste.length - 1);
+  // Waste
+  if (state.waste.length>0) {
+    const r=$('slot-waste').getBoundingClientRect();
+    if (niveau==='expert') {
+      const show=Math.min(3,state.waste.length);
+      const step=Math.round(CW*0.24);
+      for (let i=0;i<show;i++) {
+        // i=0 is oudste zichtbare, i=show-1 is bovenste (meest rechts)
+        const card=state.waste[state.waste.length-show+i];
+        const el=buildCardEl(card);
+        el.style.left=(r.left+i*step)+'px';
+        el.style.top=r.top+'px';
+        el.style.zIndex=50+i;
+        if (i===show-1) bindDragAndTap(el,card,'waste',state.waste.length-1);
       }
     } else {
-      const topCard = state.waste[state.waste.length - 1]; const el = buildCardElement(topCard);
-      el.style.left = r.left + 'px'; el.style.top = r.top + 'px'; el.style.zIndex = 60;
-      bindDragAndTap(el, topCard, 'waste', state.waste.length - 1);
+      const card=state.waste[state.waste.length-1];
+      const el=buildCardEl(card);
+      el.style.left=r.left+'px'; el.style.top=r.top+'px'; el.style.zIndex=60;
+      bindDragAndTap(el,card,'waste',state.waste.length-1);
     }
   }
 
-  state.foundations.forEach((pile, fIdx) => {
+  // Foundations
+  state.foundations.forEach((pile,f)=>{
     if (!pile.length) return;
-    const topCard = pile[pile.length - 1]; const el = buildCardElement(topCard);
-    const r = $('slot-f' + fIdx).getBoundingClientRect();
-    el.style.left = r.left + 'px'; el.style.top = r.top + 'px'; el.style.zIndex = 40;
-    bindDragAndTap(el, topCard, 'foundation', fIdx);
+    const card=pile[pile.length-1];
+    const el=buildCardEl(card);
+    const r=$('slot-f'+f).getBoundingClientRect();
+    el.style.left=r.left+'px'; el.style.top=r.top+'px'; el.style.zIndex=40;
+    bindDragAndTap(el,card,'foundation',f);
   });
 
-  state.tableau.forEach((col, cIdx) => {
-    let curY = TOP_H; const curX = START_X + cIdx * (CW + GAP);
-    col.forEach((card, rIdx) => {
-      const el = buildCardElement(card); el.style.left = curX + 'px'; el.style.top = curY + 'px'; el.style.zIndex = 100 + rIdx;
+  // Tableau
+  state.tableau.forEach((col,c)=>{
+    let y=TOP_H; const x=START_X+c*(CW+GAP);
+    col.forEach((card,r)=>{
+      const el=buildCardEl(card);
+      el.style.left=x+'px'; el.style.top=y+'px'; el.style.zIndex=100+r;
       if (card.faceUp) {
-        bindDragAndTap(el, card, 'tableau', cIdx, rIdx);
-      } else if (rIdx === col.length - 1) {
-        el.style.cursor = 'pointer'; el.addEventListener('pointerdown', e => { e.stopPropagation(); flipTopCard(cIdx); });
+        bindDragAndTap(el,card,'tableau',c,r);
+      } else if (r===col.length-1) {
+        el.style.cursor='pointer';
+        el.addEventListener('pointerdown',e=>{ e.stopPropagation(); flipTopCard(c); });
       }
-      curY += card.faceUp ? STACK_UP : STACK_DN;
+      y+=card.faceUp?STACK_UP:STACK_DN;
     });
   });
-
-  const overlay = $('stock-recycle-overlay');
-  if (state.stock.length === 0 && state.waste.length > 0) {
-    overlay.style.display = 'flex';
-  } else {
-    overlay.style.display = 'none';
-  }
 }
 
-$('slot-stock').onpointerdown = e => { e.stopPropagation(); executeStockDraw(); };
-$('stock-recycle-overlay').onpointerdown = e => { e.stopPropagation(); executeStockDraw(); };
-
+/* ══ STOCK DRAW ══ */
+let stockCooldown=false;
 function executeStockDraw() {
-  if (isAnimating) return;
+  if (isAnimating||stockCooldown) return;
+  stockCooldown=true; setTimeout(()=>stockCooldown=false,500);
   snapState();
-  
-  if (state.stock.length === 0) {
+  if (state.stock.length===0) {
     if (!state.waste.length) return;
-    while (state.waste.length) { const c = state.waste.pop(); c.faceUp = false; state.stock.push(c); }
-    state.stock.reverse(); playSound('click'); render(); return;
+    while (state.waste.length) { const c=state.waste.pop(); c.faceUp=false; state.stock.push(c); }
+    playSound('click'); render(); return;
   }
-
-  isAnimating = true;
-  const drawAmount = niveau === 'expert' ? Math.min(3, state.stock.length) : 1;
-  const processCards = [];
-  for (let i = 0; i < drawAmount; i++) { processCards.push(state.stock.pop()); }
-
-  const stockRect = $('slot-stock').getBoundingClientRect();
-  const wasteRect = $('slot-waste').getBoundingClientRect();
-  const step = Math.round(CW * 0.24);
-
-  processCards.forEach((card, idx) => {
-    card.faceUp = true; state.waste.push(card);
-    const animEl = buildCardElement(card);
-    animEl.className = 'card face-down in-motion';
-    animEl.style.left = stockRect.left + 'px'; animEl.style.top = stockRect.top + 'px';
-    animEl.style.zIndex = 2000 + idx;
-    animEl.getBoundingClientRect();
-
-    setTimeout(() => {
-      animEl.classList.remove('face-down'); animEl.classList.add('face-up');
-      const targetX = niveau === 'expert' ? (wasteRect.left + idx * step) : wasteRect.left;
-      animEl.style.left = targetX + 'px'; animEl.style.top = wasteRect.top + 'px';
-      playSound('flip');
-    }, idx * 50);
-  });
-
-  setTimeout(() => { isAnimating = false; render(); }, 350 + (drawAmount * 50));
+  const n=niveau==='expert'?Math.min(3,state.stock.length):1;
+  for (let i=0;i<n;i++) { const c=state.stock.pop(); c.faceUp=true; state.waste.push(c); }
+  playSound('flip'); render();
 }
 
-let activeDrag = null;
-let lastTapTime = 0;
-let lastTapCard = null;
+/* ══ FLIP ══ */
+function flipTopCard(c) {
+  if (isAnimating) return;
+  const p=state.tableau[c];
+  if (p.length&&!p[p.length-1].faceUp) { p[p.length-1].faceUp=true; playSound('flip'); render(); }
+}
 
-function bindDragAndTap(el, card, location, ...args) {
-  el.addEventListener('pointerdown', e => {
-    if (e.button !== 0 || isAnimating) return;
+/* ══ DRAG & TAP ══ */
+let activeDrag=null;
+
+function bindDragAndTap(el,card,location,...args) {
+  el.addEventListener('pointerdown',e=>{
+    if (e.button!==0||isAnimating) return;
     e.preventDefault(); e.stopPropagation();
 
-    const nu = Date.now();
-    if (nu - lastTapTime < 260 && lastTapCard === card) {
-      lastTapTime = 0; lastTapCard = null;
-      triggerSmartMove(card, location, args);
-      return;
-    }
-    lastTapTime = nu; lastTapCard = card;
-
-    let subStack = [];
-    if (location === 'waste' || location === 'foundation') subStack = [card];
-    else if (location === 'tableau') subStack = state.tableau[args[0]].slice(args[1]);
+    let subStack=[];
+    if (location==='waste'||location==='foundation') subStack=[card];
+    else if (location==='tableau') subStack=state.tableau[args[0]].slice(args[1]);
     if (!subStack.length) return;
 
-    const rect = el.getBoundingClientRect();
-    let dragTriggered = false;
-    const startX = e.clientX, startY = e.clientY;
+    const rect=el.getBoundingClientRect();
+    const startX=e.clientX, startY=e.clientY;
+    let hasMoved=false;
 
-    const clones = subStack.map((c, idx) => {
-      const clone = c.el.cloneNode(true);
-      clone.style.cssText = `position:fixed; width:${CW}px; height:${CH}px; z-index:${10000+idx}; pointer-events:none; left:${rect.left}px; top:${rect.top + idx * STACK_UP}px; box-shadow: 0 25px 45px rgba(0,0,0,0.55); transform: scale(1.04); opacity:0; transition: transform 0.1s;`;
+    const clones=subStack.map((c,idx)=>{
+      const clone=c.el.cloneNode(true);
+      clone.style.cssText=`position:fixed;width:${CW}px;height:${CH}px;z-index:${10000+idx};pointer-events:none;left:${rect.left}px;top:${rect.top+idx*STACK_UP}px;box-shadow:0 25px 45px rgba(0,0,0,0.55);transform:scale(1.04);opacity:0;`;
       document.body.appendChild(clone); return clone;
     });
 
-    activeDrag = { subStack, clones, location, args, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top, sourceEl: el, hasMoved: false };
+    activeDrag={subStack,clones,location,args,ox:e.clientX-rect.left,oy:e.clientY-rect.top,sourceEl:el,hasMoved:false};
 
-    const moveHandler = e2 => {
-      if (!dragTriggered && (Math.abs(e2.clientX - startX) > 6 || Math.abs(e2.clientY - startY) > 6)) {
-        dragTriggered = true; activeDrag.hasMoved = true;
-        el.style.opacity = '0.15'; clones.forEach(c => c.style.opacity = '1');
+    const onMove=e2=>{
+      if (!hasMoved&&(Math.abs(e2.clientX-startX)>6||Math.abs(e2.clientY-startY)>6)) {
+        hasMoved=true; activeDrag.hasMoved=true;
+        el.style.opacity='0.15'; clones.forEach(c=>c.style.opacity='1');
       }
-      if (dragTriggered) {
-        const tx = e2.clientX - activeDrag.offsetX, ty = e2.clientY - activeDrag.offsetY;
-        clones.forEach((clone, idx) => { clone.style.left = tx + 'px'; clone.style.top = (ty + idx * STACK_UP) + 'px'; });
+      if (hasMoved) {
+        const tx=e2.clientX-activeDrag.ox, ty=e2.clientY-activeDrag.oy;
+        clones.forEach((clone,idx)=>{ clone.style.left=tx+'px'; clone.style.top=(ty+idx*STACK_UP)+'px'; });
       }
     };
 
-    const upHandler = e2 => {
-      window.removeEventListener('pointermove', moveHandler); window.removeEventListener('pointerup', upHandler);
+    const onUp=e2=>{
+      window.removeEventListener('pointermove',onMove);
+      window.removeEventListener('pointerup',onUp);
+      el.style.opacity=''; clones.forEach(c=>c.remove());
       if (!activeDrag) return;
-      el.style.opacity = ''; clones.forEach(c => c.remove());
-      
       if (activeDrag.hasMoved) {
-        const dropSuccess = evaluateDropLocation(e2.clientX, e2.clientY, activeDrag);
-        if (!dropSuccess) toast('Ongeldige zet');
-        activeDrag = null; render();
+        const ok=evaluateDrop(e2.clientX,e2.clientY,activeDrag);
+        if (!ok) toast('Ongeldige zet');
+      } else {
+        // Tik = direct naar foundation
+        triggerSmartMove(card,location,args);
       }
+      activeDrag=null; render();
     };
 
-    window.addEventListener('pointermove', moveHandler);
-    window.addEventListener('pointerup', upHandler);
+    window.addEventListener('pointermove',onMove);
+    window.addEventListener('pointerup',onUp);
   });
 }
 
-function triggerSmartMove(card, location, args) {
-  for (let f = 0; f < 4; f++) {
-    if (canMoveToFoundation(card, f)) {
-      snapState(); executeCardRemoval(location, args);
+/* ══ SMART MOVE (tik) ══ */
+function triggerSmartMove(card,location,args) {
+  for (let f=0;f<4;f++) {
+    if (canMoveToFoundation(card,f)) {
+      snapState(); removeFromSource(location,args);
       state.foundations[f].push(card); updateScore(10); playSound('foundation');
-      setTimeout(() => { if (card.el) card.el.classList.add('sparkle'); }, 30);
-      checkWinCondition(); render(); triggerAutoCompleteCheck(); return;
+      checkWin(); triggerAutoComplete(); return;
     }
   }
-  for (let c = 0; c < 7; c++) {
-    if (location === 'tableau' && args[0] === c) continue;
-    if (canMoveToTableau(card, c)) {
+  for (let c=0;c<7;c++) {
+    if (location==='tableau'&&args[0]===c) continue;
+    if (canMoveToTableau(card,c)) {
       snapState();
-      let subStack = (location === 'tableau') ? state.tableau[args[0]].slice(args[1]) : [card];
-      executeCardRemoval(location, args);
-      subStack.forEach(cardItem => state.tableau[c].push(cardItem));
-      updateScore(3); playSound('click');
-      render(); triggerAutoCompleteCheck(); return;
+      const sub=(location==='tableau')?state.tableau[args[0]].slice(args[1]):[card];
+      removeFromSource(location,args);
+      sub.forEach(cardItem=>state.tableau[c].push(cardItem));
+      updateScore(3); playSound('click'); triggerAutoComplete(); return;
     }
   }
-  toast('Geen geldige plek vrij');
 }
 
-function executeCardRemoval(location, args) {
-  if (location === 'waste') state.waste.pop();
-  else if (location === 'foundation') state.foundations[args[0]].pop();
-  else if (location === 'tableau') { state.tableau[args[0]].splice(args[1]); revealTopTableau(args[0]); }
-}
-
-function evaluateDropLocation(cx, cy, drag) {
-  for (let f = 0; f < 4; f++) {
-    const slot = $('slot-f' + f);
-    if ((hitTest(cx, cy, slot) || (state.foundations[f].length && hitTest(cx, cy, state.foundations[f][state.foundations[f].length - 1].el))) && drag.subStack.length === 1) {
-      if (canMoveToFoundation(drag.subStack[0], f)) {
-        snapState(); executeCardRemoval(drag.location, drag.args);
-        state.foundations[f].push(drag.subStack[0]); updateScore(10); playSound('foundation'); checkWinCondition(); triggerAutoCompleteCheck(); return true;
+/* ══ DROP ══ */
+function evaluateDrop(cx,cy,drag) {
+  for (let f=0;f<4;f++) {
+    const slot=$('slot-f'+f);
+    const topCard=state.foundations[f].length?state.foundations[f][state.foundations[f].length-1]:null;
+    if ((hitTest(cx,cy,slot)||(topCard&&hitTest(cx,cy,topCard.el)))&&drag.subStack.length===1) {
+      if (canMoveToFoundation(drag.subStack[0],f)) {
+        snapState(); removeFromSource(drag.location,drag.args);
+        state.foundations[f].push(drag.subStack[0]); updateScore(10); playSound('foundation');
+        checkWin(); triggerAutoComplete(); return true;
       }
     }
   }
-  if (cy >= TOP_H - CH) {
-    let bestCol = -1, minDst = Infinity;
-    for (let c = 0; c < 7; c++) {
-      const colX = START_X + c * (CW + GAP); const d = Math.abs(cx - (colX + CW / 2));
-      if (d < minDst && cx >= colX - GAP / 2 && cx <= colX + CW + GAP / 2) { minDst = d; bestCol = c; }
+  if (cy>=TOP_H-CH) {
+    let best=-1, minD=Infinity;
+    for (let c=0;c<7;c++) {
+      const cx2=START_X+c*(CW+GAP); const d=Math.abs(cx-(cx2+CW/2));
+      if (d<minD&&cx>=cx2-GAP/2&&cx<=cx2+CW+GAP/2) { minD=d; best=c; }
     }
-    if (bestCol >= 0 && canMoveToTableau(drag.subStack[0], bestCol)) {
-      snapState(); executeCardRemoval(drag.location, drag.args);
-      drag.subStack.forEach(c => state.tableau[bestCol].push(c)); updateScore(3); playSound('click'); triggerAutoCompleteCheck(); return true;
+    if (best>=0&&canMoveToTableau(drag.subStack[0],best)) {
+      snapState(); removeFromSource(drag.location,drag.args);
+      drag.subStack.forEach(c=>state.tableau[best].push(c)); updateScore(3); playSound('click');
+      triggerAutoComplete(); return true;
     }
   }
   return false;
 }
 
-function hitTest(cx, cy, el) { if (!el) return false; const r = el.getBoundingClientRect(); return cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom; }
-function canMoveToFoundation(card, f) { const p = state.foundations[f]; if (!p.length) return card.rank === 'A'; return card.suit === p[p.length - 1].suit && RANKS.indexOf(card.rank) === RANKS.indexOf(p[p.length - 1].rank) + 1; }
-function canMoveToTableau(card, c) { const p = state.tableau[c]; if (!p.length) return card.rank === 'K'; return RED.has(card.suit) !== RED.has(p[p.length - 1].suit) && RANKS.indexOf(card.rank) === RANKS.indexOf(p[p.length - 1].rank) - 1; }
-function revealTopTableau(c) { const p = state.tableau[c]; if (p.length && !p[p.length - 1].faceUp) { p[p.length - 1].faceUp = true; playSound('flip'); } }
-function flipTopCard(c) { if (isAnimating) return; const p = state.tableau[c]; if (p.length && !p[p.length - 1].faceUp) { p[p.length - 1].faceUp = true; playSound('flip'); render(); } }
+function hitTest(cx,cy,el) { if (!el) return false; const r=el.getBoundingClientRect(); return cx>=r.left&&cx<=r.right&&cy>=r.top&&cy<=r.bottom; }
 
-function isZetMogelijk() {
-  if (state.stock.length > 0) return true;
-  if (state.waste.length > 0 && [0,1,2,3].some(f => canMoveToFoundation(state.waste[state.waste.length-1], f))) return true;
-  if (state.waste.length > 0 && [0,1,2,3,4,5,6].some(c => canMoveToTableau(state.waste[state.waste.length-1], c))) return true;
-  return state.tableau.some((col, c) => col.length && col[col.length-1].faceUp && ([0,1,2,3].some(f => canMoveToFoundation(col[col.length-1], f)) || [0,1,2,3,4,5,6].some(t => t !== c && canMoveToTableau(col[col.findIndex(card => card.faceUp)], t))));
+function removeFromSource(location,args) {
+  if (location==='waste') state.waste.pop();
+  else if (location==='foundation') state.foundations[args[0]].pop();
+  else if (location==='tableau') { state.tableau[args[0]].splice(args[1]); revealTop(args[0]); }
 }
+function revealTop(c) { const p=state.tableau[c]; if (p.length&&!p[p.length-1].faceUp) { p[p.length-1].faceUp=true; playSound('flip'); } }
 
-function hintZet() {
-  if (!isZetMogelijk()) { toast('🚫 Geen zetten meer beschikbaar.'); return; }
-  if (state.waste.length) {
-    const w = state.waste[state.waste.length - 1];
-    for (let f = 0; f < 4; f++) if (canMoveToFoundation(w, f)) { toast(`💡 Tip: Tik dubbel op ${w.rank}${w.suit}.`); return; }
-    for (let c = 0; c < 7; c++) if (canMoveToTableau(w, c)) { toast(`💡 Tip: Sleep ${w.rank}${w.suit} naar kolom ${c + 1}.`); return; }
-  }
-  toast('💡 Tip: Neem een kaart van de stapel.');
+const rankVal=r=>RANKS.indexOf(r);
+function canMoveToFoundation(card,f) { const p=state.foundations[f]; if (!p.length) return card.rank==='A'; return card.suit===p[p.length-1].suit&&rankVal(card.rank)===rankVal(p[p.length-1].rank)+1; }
+function canMoveToTableau(card,c) { const p=state.tableau[c]; if (!p.length) return card.rank==='K'; const t=p[p.length-1]; if (!t.faceUp) return false; return RED.has(card.suit)!==RED.has(t.suit)&&rankVal(card.rank)===rankVal(t.rank)-1; }
+
+/* ══ AUTO COMPLETE ══ */
+function triggerAutoComplete() {
+  setTimeout(()=>{ if (!state.stock.length&&!state.waste.length&&state.tableau.every(col=>col.every(c=>c.faceUp))) autoComplete(); },250);
 }
-
-function triggerAutoCompleteCheck() { setTimeout(() => { if (!state.stock.length && !state.waste.length && state.tableau.every(col => col.every(c => c.faceUp))) executeAutoComplete(); }, 250); }
-function executeAutoComplete() {
-  for (let c = 0; c < 7; c++) {
-    const col = state.tableau[c]; if (!col.length) continue; const card = col[col.length - 1];
-    for (let f = 0; f < 4; f++) {
-      if (canMoveToFoundation(card, f)) {
+function autoComplete() {
+  for (let c=0;c<7;c++) {
+    const col=state.tableau[c]; if (!col.length) continue;
+    const card=col[col.length-1];
+    for (let f=0;f<4;f++) {
+      if (canMoveToFoundation(card,f)) {
         col.pop(); state.foundations[f].push(card); updateScore(10); playSound('foundation'); render();
-        if (state.foundations.reduce((s, f2) => s + f2.length, 0) === 52) { checkWinCondition(); return; }
-        setTimeout(executeAutoComplete, 80); return;
+        if (state.foundations.reduce((s,f2)=>s+f2.length,0)===52) { checkWin(); return; }
+        setTimeout(autoComplete,80); return;
       }
     }
   }
 }
 
-function checkWinCondition() {
-  if (state.foundations.reduce((s, f) => s + f.length, 0) !== 52) return;
+/* ══ WIN ══ */
+function checkWin() {
+  if (state.foundations.reduce((s,f)=>s+f.length,0)!==52) return;
   stopTimer();
-  setTimeout(() => {
-    $('win-stats-txt').innerHTML = `Score: <b>${score}</b><br>Tijd: <b>${$('stat-tijd').textContent}</b>`;
+  setTimeout(()=>{
+    $('win-stats-txt').innerHTML='Score: <b>'+score+'</b><br>Tijd: <b>'+$('stat-tijd').textContent+'</b>';
     $('win-screen').classList.add('show');
-    for (let i = 0; i < 40; i++) {
-      const c = document.createElement('div'); c.className = 'confetti'; c.style.left = Math.random() * 100 + 'vw';
-      c.style.background = ['#00ffcc','#4364f7','#ff1744','#fbbf24'][i%4];
-      c.style.animationDuration = (1.4 + Math.random() * 1.4) + 's'; c.style.animationDelay = Math.random() * 0.6 + 's';
-      document.body.appendChild(c); setTimeout(() => c.remove(), 3500);
+    for (let i=0;i<50;i++) {
+      const c=document.createElement('div'); c.className='confetti';
+      c.style.left=Math.random()*100+'vw';
+      c.style.background=['#00ffcc','#4364f7','#ff1744','#fbbf24'][i%4];
+      c.style.animationDuration=(1.4+Math.random()*1.4)+'s';
+      c.style.animationDelay=Math.random()*0.6+'s';
+      document.body.appendChild(c); setTimeout(()=>c.remove(),3500);
     }
-  }, 400);
+  },400);
 }
 
-// PREMIUM OPTIE 1: De cinematische Waaier-animatie bij het uitdelen
-function animeerWaaierUitdelen(volgordeLijst) {
-  isAnimating = true;
-  board.querySelectorAll('.card').forEach(e => e.remove());
-
-  const stockRect = $('slot-stock').getBoundingClientRect();
-  
-  volgordeLijst.forEach((item, index) => {
-    const card = item.card;
-    const animEl = buildCardElement(card);
-    animEl.className = 'card face-down in-motion';
-    animEl.style.left = stockRect.left + 'px';
-    animEl.style.top = stockRect.top + 'px';
-    animEl.style.zIndex = 500 + index;
-    animEl.getBoundingClientRect(); // Forceer layout-trigger voor CSS transitie
-
-    setTimeout(() => {
-      animEl.style.left = item.tx + 'px';
-      animEl.style.top = item.ty + 'px';
-      playSound('click');
-    }, index * 25); // Razendsnelle, vloeiende opeenvolging (waaier-effect)
-
-    setTimeout(() => {
-      if (card.faceUp) {
-        animEl.classList.remove('face-down');
-        animEl.classList.add('face-up');
-        playSound('flip');
-      }
-    }, (volgordeLijst.length * 25) + 150);
-  });
-
-  setTimeout(() => {
-    isAnimating = false;
-    render();
-    startTimer();
-  }, (volgordeLijst.length * 25) + 550);
-}
-
-function nieuwSpel() {
-  stopTimer(); score = 0; $('stat-score').textContent = '0'; $('stat-tijd').textContent = '0:00'; history = [];
-  state = { stock: [], waste: [], foundations: [[],[],[],[]], tableau: [[],[],[],[],[],[],[]] };
-  
-  const deck = []; SUITS.forEach(s => RANKS.forEach(r => deck.push(createCard(s, r))));
-  for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
-  
-  updateSizes();
-
-  let idx = 0;
-  const animatieLijst = [];
-
-  // Bereken de posities van de tableau kaarten voor de animatie
-  for (let c = 0; c < 7; c++) {
-    let curY = TOP_H;
-    const curX = START_X + c * (CW + GAP);
-    for (let r = 0; r <= c; r++) {
-      const card = deck[idx++];
-      card.faceUp = (r === c);
-      state.tableau[c].push(card);
-      animatieLijst.push({ card, tx: curX, ty: curY });
-      curY += card.faceUp ? STACK_UP : STACK_DN;
-    }
+/* ══ HINT ══ */
+function hintZet() {
+  if (!state.stock.length&&!state.waste.length&&
+      !state.tableau.some(col=>col.length&&col[col.length-1].faceUp&&
+        ([0,1,2,3].some(f=>canMoveToFoundation(col[col.length-1],f))||
+         [0,1,2,3,4,5,6].some(t=>canMoveToTableau(col[col.length-1],t))))) {
+    toast('🚫 Geen zetten meer mogelijk!'); return;
   }
-  
-  while (idx < deck.length) state.stock.push(deck[idx++]);
+  if (state.waste.length) {
+    const w=state.waste[state.waste.length-1];
+    for (let f=0;f<4;f++) if (canMoveToFoundation(w,f)) { toast('💡 '+w.rank+w.suit+' → foundation'); return; }
+    for (let c=0;c<7;c++) if (canMoveToTableau(w,c)) { toast('💡 '+w.rank+w.suit+' → kolom '+(c+1)); return; }
+  }
+  for (let c=0;c<7;c++) {
+    const p=state.tableau[c]; if (!p.length) continue;
+    const top=p[p.length-1]; if (!top.faceUp) continue;
+    for (let f=0;f<4;f++) if (canMoveToFoundation(top,f)) { toast('💡 '+top.rank+top.suit+' → foundation'); return; }
+    for (let t=0;t<7;t++) if (t!==c&&canMoveToTableau(top,t)) { toast('💡 '+top.rank+top.suit+' → kolom '+(t+1)); return; }
+  }
+  if (state.stock.length) { toast('💡 Klik de stock'); return; }
+  toast('Geen zetten meer mogelijk');
+}
 
-  // Start de premium uitdeel-waaier!
-  animeerWaaierUitdelen(animatieLijst);
+/* ══ DEAL ══ */
+function nieuwSpel() {
+  stopTimer(); score=0; $('stat-score').textContent='0'; $('stat-tijd').textContent='0:00'; history=[];
+  state={stock:[],waste:[],foundations:[[],[],[],[]],tableau:[[],[],[],[],[],[],[]]};
+  updateSizes();
+  const deck=[]; SUITS.forEach(s=>RANKS.forEach(r=>deck.push(createCard(s,r))));
+  for (let i=deck.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
+  let idx=0;
+  for (let c=0;c<7;c++) for (let r=0;r<=c;r++) { const card=deck[idx++]; card.faceUp=(r===c); state.tableau[c].push(card); }
+  while (idx<deck.length) state.stock.push(deck[idx++]);
+  render(); startTimer();
 }
 
 function herInit() { updateSizes(); render(); }
-window.addEventListener('resize', herInit);
-window.addEventListener('orientationchange', () => setTimeout(herInit, 150));
-document.addEventListener('contextmenu', e => e.preventDefault());
+window.addEventListener('resize',herInit);
+window.addEventListener('orientationchange',()=>setTimeout(herInit,150));
+document.addEventListener('contextmenu',e=>e.preventDefault());
 updateSizes();
 </script>
 </body>
