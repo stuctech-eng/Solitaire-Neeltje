@@ -256,7 +256,16 @@ let state = { stock:[], waste:[], foundations:[[],[],[],[]], tableau:[[],[],[],[
 let CW, CH, GAP, STACK_UP, STACK_DN, START_X, TOP_H;
 let score=0, timerSecs=0, timerRef=null, history=[];
 let niveau='klassiek', thema='groen', isAnimating=false, toastTimer;
-let stockCooldown = false;
+let stockCooldown=false;
+let animatingTimer=null;
+
+function setAnimating(val, maxMs=2000) {
+  isAnimating=val;
+  clearTimeout(animatingTimer);
+  if (val) animatingTimer=setTimeout(()=>{ isAnimating=false; render(); }, maxMs);
+}
+
+function forceRender() { isAnimating=false; render(); }
 
 const board = document.getElementById('board');
 const $ = id => document.getElementById(id);
@@ -445,31 +454,33 @@ function executeStockDraw() {
     playSound('click'); render(); return;
   }
 
-  isAnimating=true;
+  setAnimating(true, 800);
   const drawAmount=niveau==='expert'?Math.min(3,state.stock.length):1;
   const drawnCards=[];
   for (let i=0;i<drawAmount;i++) drawnCards.push(state.stock.pop());
 
-  const stockRect=$('slot-stock').getBoundingClientRect();
-  const wasteRect=$('slot-waste').getBoundingClientRect();
-  const step=Math.round(CW*0.24);
+  try {
+    const stockRect=$('slot-stock').getBoundingClientRect();
+    const wasteRect=$('slot-waste').getBoundingClientRect();
+    const step=Math.round(CW*0.24);
 
-  drawnCards.forEach((card,idx)=>{
-    card.faceUp=true; state.waste.push(card);
-    const animEl=buildCardElement(card);
-    animEl.className='card face-down in-motion';
-    animEl.style.left=stockRect.left+'px'; animEl.style.top=stockRect.top+'px';
-    animEl.style.zIndex=2000+idx;
-    animEl.getBoundingClientRect();
-    setTimeout(()=>{
-      animEl.classList.remove('face-down'); animEl.classList.add('face-up');
-      const targetX=niveau==='expert'?(wasteRect.left+(state.waste.length-drawAmount+idx)*step):wasteRect.left;
-      animEl.style.left=targetX+'px'; animEl.style.top=wasteRect.top+'px';
-      playSound('flip');
-    }, idx*60);
-  });
+    drawnCards.forEach((card,idx)=>{
+      card.faceUp=true; state.waste.push(card);
+      const animEl=buildCardElement(card);
+      animEl.className='card face-down in-motion';
+      animEl.style.left=stockRect.left+'px'; animEl.style.top=stockRect.top+'px';
+      animEl.style.zIndex=2000+idx;
+      animEl.getBoundingClientRect();
+      setTimeout(()=>{
+        animEl.classList.remove('face-down'); animEl.classList.add('face-up');
+        const targetX=niveau==='expert'?(wasteRect.left+(state.waste.length-drawAmount+idx)*step):wasteRect.left;
+        animEl.style.left=targetX+'px'; animEl.style.top=wasteRect.top+'px';
+        playSound('flip');
+      }, idx*60);
+    });
 
-  setTimeout(()=>{ isAnimating=false; render(); }, 350+(drawAmount*60));
+    setTimeout(()=>{ setAnimating(false); render(); }, 350+(drawAmount*60));
+  } catch(e) { setAnimating(false); render(); }
 }
 
 /* ══ FLIP ══ */
@@ -518,6 +529,7 @@ function bindDragAndTap(el,card,location,...args) {
     const onUp=e2=>{
       window.removeEventListener('pointermove',onMove);
       window.removeEventListener('pointerup',onUp);
+      window.removeEventListener('pointercancel',onCancel);
       if (!activeDrag) return;
       el.style.opacity=''; clones.forEach(c=>c.remove());
       if (activeDrag.hasMoved) {
@@ -529,8 +541,17 @@ function bindDragAndTap(el,card,location,...args) {
       activeDrag=null; render();
     };
 
+    const onCancel=()=>{
+      window.removeEventListener('pointermove',onMove);
+      window.removeEventListener('pointerup',onUp);
+      window.removeEventListener('pointercancel',onCancel);
+      el.style.opacity=''; clones.forEach(c=>c.remove());
+      activeDrag=null; render();
+    };
+
     window.addEventListener('pointermove',onMove);
     window.addEventListener('pointerup',onUp);
+    window.addEventListener('pointercancel',onCancel);
   });
 }
 
@@ -658,27 +679,29 @@ function hintZet() {
 
 /* ══ DEAL met waaier animatie ══ */
 function animeerWaaierUitdelen(lijst) {
-  isAnimating=true;
+  setAnimating(true, (lijst.length*25)+800);
   board.querySelectorAll('.card').forEach(e=>e.remove());
   const stockRect=$('slot-stock').getBoundingClientRect();
-  lijst.forEach((item,index)=>{
-    const el=buildCardElement(item.card);
-    el.className='card face-down in-motion';
-    el.style.left=stockRect.left+'px'; el.style.top=stockRect.top+'px';
-    el.style.zIndex=500+index;
-    el.getBoundingClientRect();
-    setTimeout(()=>{
-      el.style.left=item.tx+'px'; el.style.top=item.ty+'px';
-      playSound('click');
-    }, index*25);
-    setTimeout(()=>{
-      if (item.card.faceUp) {
-        el.classList.remove('face-down'); el.classList.add('face-up');
-        playSound('flip');
-      }
-    }, (lijst.length*25)+150);
-  });
-  setTimeout(()=>{ isAnimating=false; render(); startTimer(); }, (lijst.length*25)+550);
+  try {
+    lijst.forEach((item,index)=>{
+      const el=buildCardElement(item.card);
+      el.className='card face-down in-motion';
+      el.style.left=stockRect.left+'px'; el.style.top=stockRect.top+'px';
+      el.style.zIndex=500+index;
+      el.getBoundingClientRect();
+      setTimeout(()=>{
+        el.style.left=item.tx+'px'; el.style.top=item.ty+'px';
+        playSound('click');
+      }, index*25);
+      setTimeout(()=>{
+        if (item.card.faceUp) {
+          el.classList.remove('face-down'); el.classList.add('face-up');
+          playSound('flip');
+        }
+      }, (lijst.length*25)+150);
+    });
+    setTimeout(()=>{ setAnimating(false); render(); startTimer(); }, (lijst.length*25)+550);
+  } catch(e) { setAnimating(false); render(); startTimer(); }
 }
 
 function nieuwSpel() {
