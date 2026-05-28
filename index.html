@@ -149,7 +149,8 @@ html, body {
 .bb-stat-val { font-size: 16px; font-weight: 700; color: #fff; display: block; font-variant-numeric: tabular-nums; }
 
 #start-screen, #win-screen {
-  position: fixed; inset: 0; z-index: 800; display: flex; align-items: center; justify-content: center; flex-direction: column;
+  position: fixed; inset: 0; z-index: 800;
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
 }
 #start-screen { background: radial-gradient(circle at 50% 30%, #051c17 0%, #000000 100%); }
 #win-screen { display: none; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 900; }
@@ -161,6 +162,29 @@ html, body {
   border-radius: 28px; padding: 30px; text-align: center; max-width: 320px; width: 88%;
   box-shadow: 0 30px 70px rgba(0,0,0,0.8);
 }
+
+/* Startscherm vullend */
+#start-screen .window-box {
+  width: 100%; max-width: 100%; height: 100dvh;
+  border-radius: 0; border: none;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: transparent;
+  padding: 40px 32px;
+  padding-top: calc(env(safe-area-inset-top, 44px) + 40px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 40px);
+  box-shadow: none;
+}
+#start-screen .start-btn { max-width: 400px; }
+#start-screen .thema-rij { width: 100%; max-width: 400px; justify-content: center; }
+
+/* Pauze scherm */
+#pause-screen {
+  display: none; position: fixed; inset: 0; z-index: 700;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  align-items: center; justify-content: center;
+}
+#pause-screen.show { display: flex; }
 @media (orientation: landscape) {
   .window-box { padding: 16px; max-width: 460px; }
   .thema-rij { margin-bottom: 12px !important; }
@@ -227,11 +251,22 @@ html, body {
 </div>
 
 <div id="bottom-bar">
+  <button class="bb-btn" onclick="togglePauze()">⏸</button>
   <button class="bb-btn" onclick="undoZet()">↩ Undo</button>
   <div class="bb-stat"><span class="bb-stat-lbl">Score</span><span class="bb-stat-val" id="stat-score">0</span></div>
   <div class="bb-stat"><span class="bb-stat-lbl">Tijd</span><span class="bb-stat-val" id="stat-tijd">0:00</span></div>
   <button class="bb-btn" onclick="hintZet()">💡 Hint</button>
   <button class="bb-btn" onclick="naarStartScherm()">🏠 Menu</button>
+</div>
+
+<div id="pause-screen">
+  <div class="window-box" style="text-align:center;">
+    <div style="font-size:40px;margin-bottom:12px;">⏸</div>
+    <h2 style="font-size:22px;font-weight:800;margin-bottom:8px;">Pauze</h2>
+    <p style="color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:24px;">Spel gepauzeerd</p>
+    <button class="start-btn klassiek" style="margin-bottom:10px;" onclick="togglePauze()">▶ Doorgaan</button>
+    <button class="start-btn" style="background:rgba(255,255,255,0.1);margin-bottom:0;" onclick="naarStartScherm()">🏠 Nieuw Spel</button>
+  </div>
 </div>
 
 <div id="win-screen">
@@ -327,7 +362,20 @@ function kiesThema(t,btn) {
 }
 
 function startSpel(m) { niveau=m; $('start-screen').style.display='none'; nieuwSpel(); }
-function naarStartScherm() { stopTimer(); $('win-screen').classList.remove('show'); $('start-screen').style.display='flex'; }
+let isPauzed = false;
+
+function togglePauze() {
+  isPauzed = !isPauzed;
+  if (isPauzed) {
+    stopTimer();
+    $('pause-screen').classList.add('show');
+  } else {
+    $('pause-screen').classList.remove('show');
+    startTimer();
+  }
+}
+
+function naarStartScherm() { stopTimer(); isPauzed=false; $('pause-screen').classList.remove('show'); $('win-screen').classList.remove('show'); $('start-screen').style.display='flex'; }
 
 function updateScore(d) { score=Math.max(0,score+d); $('stat-score').textContent=score; }
 function startTimer() {
